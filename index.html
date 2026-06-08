@@ -1071,28 +1071,26 @@ async function fetchVR() {
 }
 
 async function fetchFlows() {
-  // Per official SF documentation: FlowDefinitionView is the correct object for querying flow metadata.
-  // It provides TriggerObjectOrEventLabel, IsActive, ProcessType, TriggerType directly — no joins needed.
-  // Reference: https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_flowdefinitionview.htm
-  // Also used by: automationchampion.com/2022/04/27/find-all-record-triggered-flows-for-an-object-2/
-  const soql = 'SELECT Id,ApiName,Label,IsActive,ProcessType,TriggerObjectOrEventLabel,TriggerObjectOrEventId,TriggerType,ManageableState FROM FlowDefinitionView ORDER BY Label LIMIT 2000';
+  // READ via FlowDefinitionView (REST API, read-only view) — has all fields in one query
+  // WRITE via FlowDefinition (Tooling API) using DurableId == FlowDefinition.Id
+  // FlowDefinitionView has ActiveVersionId and LatestVersionId directly — no secondary query needed
+  // Reference: developer.salesforce.com/docs/atlas.en-us.object_reference.meta/object_reference/sforce_api_objects_flowdefinitionview.htm
+  const soql = 'SELECT Id,DurableId,ApiName,Label,IsActive,ProcessType,TriggerObjectOrEventLabel,TriggerType,ManageableState,ActiveVersionId,LatestVersionId FROM FlowDefinitionView ORDER BY Label LIMIT 2000';
   const d = await sfGet(`/services/data/${API_VER}/query?q=${encodeURIComponent(soql)}`);
-  // Also need ActiveVersionId for reactivation — get from FlowDefinition for inactive flows
-  const defIds = (d.records||[]).map(r => r.Id);
-  const defMap = {}; // Id -> ActiveVersionId
-  if (defIds.length) {
+
+  // Get VersionNumber for LatestVersionId — needed for Metadata.activeVersionNumber PATCH
+  // FlowVersionView has VersionNumber field
+  const latestIds = [...new Set((d.records||[]).map(r => r.LatestVersionId).filter(Boolean))];
+  const versionNumMap = {}; // LatestVersionId -> VersionNumber
+  if (latestIds.length) {
     const chunks = [];
-    for (let i = 0; i < defIds.length; i += 200) chunks.push(defIds.slice(i, i+200));
+    for (let i = 0; i < latestIds.length; i += 200) chunks.push(latestIds.slice(i, i+200));
     for (const chunk of chunks) {
       try {
-        const fd = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent("SELECT Id,ActiveVersion.Id,ActiveVersion.VersionNumber,LatestVersion.Id,LatestVersion.VersionNumber FROM FlowDefinition WHERE Id IN (" + chunk.map(x=>"'"+x+"'").join(',') + ") LIMIT 500")}`);
-        (fd.records||[]).forEach(r => { defMap[r.Id] = {
-          activeId: r.ActiveVersion?.Id||null,
-          latestId: r.LatestVersion?.Id||null,
-          activeVersionNumber: r.ActiveVersion?.VersionNumber||null,
-          latestVersionNumber: r.LatestVersion?.VersionNumber||null,
-        }; });
-      } catch(e) { /* skip — we'll handle missing version on toggle */ }
+        // FlowVersionView is queryable via REST API, has VersionNumber
+        const vv = await sfGet(`/services/data/${API_VER}/query?q=${encodeURIComponent("SELECT DurableId,VersionNumber FROM FlowVersionView WHERE DurableId IN (" + chunk.map(x=>"'"+x+"'").join(',') + ") LIMIT 500")}`);
+        (vv.records||[]).forEach(r => { versionNumMap[r.DurableId] = r.VersionNumber; });
+      } catch(e) { /* skip — will query on demand during toggle */ }
     }
   }
 
@@ -1126,9 +1124,9 @@ async function fetchFlows() {
     const obj   = (r.TriggerObjectOrEventLabel && r.TriggerObjectOrEventLabel.trim())
                   ? r.TriggerObjectOrEventLabel
                   : (ptMap[r.ProcessType] || r.ProcessType || 'Unclassified');
-    const vers  = defMap[r.Id] || {};
     return {
-      id: r.Id,
+      id: r.DurableId || r.Id,  // DurableId == FlowDefinition.Id — use for Tooling API PATCH
+      viewId: r.Id,             // FlowDefinitionView.Id — use for read queries
       name: r.ApiName || r.Label,
       label: r.Label,
       active: r.IsActive,
@@ -1137,10 +1135,9 @@ async function fetchFlows() {
       description: r.ProcessType + (r.TriggerType ? ' · ' + r.TriggerType : ''),
       apiToggle: 'flow',
       manageable: r.ManageableState,
-      activeVersionId: vers.activeId || null,
-      latestVersionId: vers.latestId || null,
-      activeVersionNumber: vers.activeVersionNumber || null,
-      latestVersionNumber: vers.latestVersionNumber || null,
+      activeVersionId: r.ActiveVersionId || null,
+      latestVersionId: r.LatestVersionId || null,
+      latestVersionNumber: (r.LatestVersionId && versionNumMap[r.LatestVersionId]) || null,
     };
   });
 }
@@ -1187,9 +1184,17 @@ async function doToggle(a, newActive) {
       // Need the VersionNumber (integer) of the latest version, not the 18-char Id
       let versionNum = a.latestVersionNumber;
       if (!versionNum) {
-        // Fetch from FlowDefinition — LatestVersion.VersionNumber
-        const fd = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent("SELECT LatestVersion.VersionNumber,ActiveVersion.VersionNumber FROM FlowDefinition WHERE Id='" + a.id + "' LIMIT 1")}`);
-        versionNum = fd.records?.[0]?.LatestVersion?.VersionNumber || fd.records?.[0]?.ActiveVersion?.VersionNumber;
+        // Fetch VersionNumber from FlowVersionView using LatestVersionId
+        const lvId = a.latestVersionId;
+        if (lvId) {
+          const vv = await sfGet(`/services/data/${API_VER}/query?q=${encodeURIComponent("SELECT VersionNumber FROM FlowVersionView WHERE DurableId='" + lvId + "' LIMIT 1")}`);
+          versionNum = vv.records?.[0]?.VersionNumber;
+        }
+        if (!versionNum) {
+          // Last resort: FlowDefinition Tooling API
+          const fd = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent("SELECT LatestVersion.VersionNumber FROM FlowDefinition WHERE Id='" + a.id + "' LIMIT 1")}`);
+          versionNum = fd.records?.[0]?.LatestVersion?.VersionNumber;
+        }
         if (versionNum) a.latestVersionNumber = versionNum;
       }
       if (!versionNum) throw new Error('No version number found — Flow may be in Draft state with no saved versions');
@@ -1241,8 +1246,8 @@ async function verifyToggle(a, newActive) {
       const check = await sfGet(`/services/data/${API_VER}/tooling/sobjects/ValidationRule/${a.id}?fields=Active`);
       return check.Active === newActive;
     } else if (a.apiToggle === 'flow') {
-      // Use FlowDefinitionView for verification — more reliable than FlowDefinition
-      const check = await sfGet(`/services/data/${API_VER}/query?q=${encodeURIComponent("SELECT IsActive FROM FlowDefinitionView WHERE Id='" + a.id + "' LIMIT 1")}`);
+      // Verify using FlowDefinitionView DurableId (== FlowDefinition.Id stored in a.id)
+      const check = await sfGet(`/services/data/${API_VER}/query?q=${encodeURIComponent("SELECT IsActive FROM FlowDefinitionView WHERE DurableId='" + a.id + "' LIMIT 1")}`);
       const isNowActive = check.records?.[0]?.IsActive === true;
       return isNowActive === newActive;
     } else if (a.apiToggle === 'trigger') {
