@@ -1085,8 +1085,13 @@ async function fetchFlows() {
     for (let i = 0; i < defIds.length; i += 200) chunks.push(defIds.slice(i, i+200));
     for (const chunk of chunks) {
       try {
-        const fd = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent("SELECT Id,ActiveVersion.Id,LatestVersion.Id FROM FlowDefinition WHERE Id IN (" + chunk.map(x=>"'"+x+"'").join(',') + ") LIMIT 500")}`);
-        (fd.records||[]).forEach(r => { defMap[r.Id] = {activeId: r.ActiveVersion?.Id||null, latestId: r.LatestVersion?.Id||null}; });
+        const fd = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent("SELECT Id,ActiveVersion.Id,ActiveVersion.VersionNumber,LatestVersion.Id,LatestVersion.VersionNumber FROM FlowDefinition WHERE Id IN (" + chunk.map(x=>"'"+x+"'").join(',') + ") LIMIT 500")}`);
+        (fd.records||[]).forEach(r => { defMap[r.Id] = {
+          activeId: r.ActiveVersion?.Id||null,
+          latestId: r.LatestVersion?.Id||null,
+          activeVersionNumber: r.ActiveVersion?.VersionNumber||null,
+          latestVersionNumber: r.LatestVersion?.VersionNumber||null,
+        }; });
       } catch(e) { /* skip — we'll handle missing version on toggle */ }
     }
   }
@@ -1134,6 +1139,8 @@ async function fetchFlows() {
       manageable: r.ManageableState,
       activeVersionId: vers.activeId || null,
       latestVersionId: vers.latestId || null,
+      activeVersionNumber: vers.activeVersionNumber || null,
+      latestVersionNumber: vers.latestVersionNumber || null,
     };
   });
 }
@@ -1168,23 +1175,28 @@ async function doToggle(a, newActive) {
     audit(`VR PATCH response: ${JSON.stringify(resp)}`, 'info');
 
   } else if (a.apiToggle === 'flow') {
-    // Per SF Tooling API docs: PATCH FlowDefinition ActiveVersion to activate/deactivate
-    // Managed package flows cannot be modified
+    // Per SF Tooling API docs (v44+): PATCH FlowDefinition with Metadata.activeVersionNumber
+    // To activate: {"Metadata": {"activeVersionNumber": N}} where N is the version number
+    // To deactivate: {"Metadata": {"activeVersionNumber": 0}}
+    // Reference: flosum.com/blog/fix-recordactiondeployment-flow-inactive-error-salesforce
+    //            gearset.com/en/articles/2439855-changes-to-flows-in-v44-of-the-metadata-api
     if (a.manageable === 'installed' || a.manageable === 'installedEditable') {
       throw new Error(`Managed package flow (${a.manageable}) — cannot modify`);
     }
     if (newActive) {
-      // Use stored activeVersionId first, then latestVersionId, then query
-      let versionId = a.activeVersionId || a.latestVersionId;
-      if (!versionId) {
-        const fd = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent("SELECT ActiveVersion.Id,LatestVersion.Id FROM FlowDefinition WHERE Id='" + a.id + "' LIMIT 1")}`);
-        versionId = fd.records?.[0]?.ActiveVersion?.Id || fd.records?.[0]?.LatestVersion?.Id;
-        if (versionId) { a.activeVersionId = versionId; a.latestVersionId = versionId; }
+      // Need the VersionNumber (integer) of the latest version, not the 18-char Id
+      let versionNum = a.latestVersionNumber;
+      if (!versionNum) {
+        // Fetch from FlowDefinition — LatestVersion.VersionNumber
+        const fd = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent("SELECT LatestVersion.VersionNumber,ActiveVersion.VersionNumber FROM FlowDefinition WHERE Id='" + a.id + "' LIMIT 1")}`);
+        versionNum = fd.records?.[0]?.LatestVersion?.VersionNumber || fd.records?.[0]?.ActiveVersion?.VersionNumber;
+        if (versionNum) a.latestVersionNumber = versionNum;
       }
-      if (!versionId) throw new Error('No version found — Flow may be in Draft state with no saved versions');
-      await sfPatch(`/services/data/${API_VER}/tooling/sobjects/FlowDefinition/${a.id}`, {ActiveVersion:{Id:versionId}});
+      if (!versionNum) throw new Error('No version number found — Flow may be in Draft state with no saved versions');
+      await sfPatch(`/services/data/${API_VER}/tooling/sobjects/FlowDefinition/${a.id}`, {Metadata:{activeVersionNumber: versionNum}});
     } else {
-      await sfPatch(`/services/data/${API_VER}/tooling/sobjects/FlowDefinition/${a.id}`, {ActiveVersion:null});
+      // Deactivate: set activeVersionNumber to 0
+      await sfPatch(`/services/data/${API_VER}/tooling/sobjects/FlowDefinition/${a.id}`, {Metadata:{activeVersionNumber: 0}});
     }
 
   } else if (a.apiToggle === 'trigger') {
