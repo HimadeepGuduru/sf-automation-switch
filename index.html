@@ -258,6 +258,12 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
 .mt8{margin-top:8px}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
 
+/* UNDO BAR */
+.undo-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;margin-bottom:16px;background:var(--blue2);border:1px solid rgba(59,130,246,0.25);border-radius:var(--rl);flex-wrap:wrap}
+.undo-bar-left{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--blue)}
+.undo-bar-right{display:flex;gap:8px;flex-wrap:wrap}
+.undo-icon{font-size:16px}
+
 /* PENDING REVERT ALERT */
 .pending-alert{display:flex;align-items:center;gap:16px;padding:20px 24px;background:var(--amber3);border:1px solid rgba(245,158,11,0.35);border-radius:var(--rl);width:100%;max-width:520px;margin-bottom:20px;flex-wrap:wrap}
 .pa-icon{font-size:28px;flex-shrink:0}
@@ -391,6 +397,19 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
     <button class="btn btn-amber" onclick="reconnectSameOrg()">&#128272; Reconnect &amp; Revert</button>
   </div>
 
+  <!-- UNDO BAR -->
+  <div id="undoBar" class="undo-bar hidden">
+    <div class="undo-bar-left">
+      <span class="undo-icon">&#8635;</span>
+      <span id="undoLabel">0 changes this session</span>
+    </div>
+    <div class="undo-bar-right">
+      <button class="btn" style="font-size:11px;padding:5px 12px" onclick="showUndoModal()">&#8617; Undo last change</button>
+      <button class="btn btn-amber" style="font-size:11px;padding:5px 12px" onclick="undoAllSession()">&#8617; Undo all session changes</button>
+      <button class="btn btn-ghost" style="font-size:11px" onclick="clearChangeStack()">&#10005; Dismiss</button>
+    </div>
+  </div>
+
   <!-- KPI TYPE CARDS -->
   <div class="type-cards" id="typeCards"></div>
 
@@ -479,6 +498,20 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
     <div class="modal-actions" id="confirmActions">
       <button class="btn" onclick="closeModal('confirmModal')">Cancel</button>
       <button class="btn btn-amber" id="confirmOkBtn">Proceed</button>
+    </div>
+  </div>
+</div>
+
+<!-- UNDO MODAL -->
+<div class="modal-bg hidden" id="undoModal">
+  <div class="modal" style="max-width:560px">
+    <h3>&#8617; Session change history</h3>
+    <p>Every automation toggled this session. Select changes to undo, or undo all at once.</p>
+    <div id="undoListEl" style="max-height:280px;overflow-y:auto;margin:12px 0"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('undoModal')">Close</button>
+      <button class="btn btn-red" onclick="undoSelectedChanges()">&#8617; Undo selected</button>
+      <button class="btn btn-amber" onclick="undoAllSession();closeModal('undoModal')">&#8617; Undo all</button>
     </div>
   </div>
 </div>
@@ -682,10 +715,11 @@ let S = {
   activeType: 'Validation Rule',
   filter: 'all',
   search: '',
-  snapshot: null,       // current working snapshot {ts, map, name}
-  snapshots: [],        // named snapshots [{ts, map, name, counts}]
+  snapshot: null,
+  snapshots: [],
   migrationMode: false,
-  auditLog: [],         // [{ts, org, name, object, type, from, to, trigger}]
+  auditLog: [],
+  changeStack: [],  // session undo stack [{id, name, object, type, from, to, ts}] — cleared on disconnect
 };
 
 function loadStore() {
@@ -928,7 +962,7 @@ async function showDashboard() {
 function disconnectOrg() {
   if (!confirm('Disconnect from ' + (S.org?.name||'this org') + '? Your audit log and named snapshots will be kept.')) return;
   S.org = null; S.automations = []; S.snapshot = null; S.migrationMode = false;
-  S.filter = 'all'; S.search = '';
+  S.filter = 'all'; S.search = ''; S.changeStack = [];
   clearSessionWatcher();
   const si = document.getElementById('searchInput');
   if (si) si.value = '';
@@ -982,7 +1016,7 @@ async function sfPatch(path, body) {
 async function loadAutomations() {
   document.getElementById('btnRefresh').innerHTML = '<span class="spinner"></span>';
   document.getElementById('objList').innerHTML = skeletons();
-  S.automations = [];
+  S.automations = []; S.changeStack = []; renderUndoBar();
   try {
     const [a,b,c,d] = await Promise.allSettled([fetchVR(), fetchFlows(), fetchTriggers(), fetchWF()]);
     const get = (r,l) => { if (r.status==='fulfilled') return r.value; audit(`⚠ ${l}: ${r.reason?.message}`, 'warn'); return []; };
@@ -1163,6 +1197,9 @@ async function toggleAutomation(id, newActive) {
     saveStore();
     if (verified) {
       audit(`✓ ${a.name} · ${a.object} · ${prev?'ON':'OFF'} → ${newActive?'ON':'OFF'} (verified)`, 'ok', {name:a.name, object:a.object, type:a.type, from:prev, to:newActive, trigger:'manual'});
+      // Push to session undo stack
+      S.changeStack.push({id:a.id, name:a.name, object:a.object, type:a.type, from:prev, to:newActive, ts:Date.now()});
+      renderUndoBar();
       toast(`${a.name}: ${newActive?'enabled':'disabled'} ✓`, 'ok', 1800);
     } else {
       audit(`⚠ ${a.name}: API accepted but SF state unchanged — check permissions`, 'warn');
@@ -1356,6 +1393,106 @@ async function loadNamedSnapshot(i) {
   S.snapshot = snap;
   closeModal('snapshotsModal');
   showRevertModal();
+}
+
+// ═══════════════ UNDO / SESSION ROLLBACK ═══════════════
+function renderUndoBar() {
+  const bar = document.getElementById('undoBar');
+  const label = document.getElementById('undoLabel');
+  if (!bar) return;
+  if (!S.changeStack.length) { bar.classList.add('hidden'); return; }
+  bar.classList.remove('hidden');
+  const n = S.changeStack.length;
+  label.textContent = `${n} change${n!==1?'s':''} this session`;
+}
+
+function clearChangeStack() {
+  S.changeStack = [];
+  renderUndoBar();
+}
+
+function showUndoModal() {
+  renderUndoList();
+  showModal('undoModal');
+}
+
+function renderUndoList() {
+  const el = document.getElementById('undoListEl');
+  if (!S.changeStack.length) { el.innerHTML = '<p style="font-size:13px;color:var(--tx3)">No session changes to undo.</p>'; return; }
+  // Show newest first
+  el.innerHTML = [...S.changeStack].reverse().map((c, ri) => {
+    const i = S.changeStack.length - 1 - ri; // real index in stack
+    const ts = new Date(c.ts).toLocaleTimeString();
+    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--b1);font-size:12px">
+      <input type="checkbox" class="undo-chk" data-idx="${i}" style="width:14px;height:14px;cursor:pointer" checked>
+      <div style="flex:1">
+        <div style="font-weight:500">${esc(c.name)}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--tx3)">${esc(c.object)} · ${c.type} · ${ts}</div>
+      </div>
+      <span style="font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:6px;background:${c.from?'var(--green3)':'var(--red3)'};color:${c.from?'var(--green)':'var(--red)'}">
+        ${c.from?'ON':'OFF'} → ${c.to?'ON':'OFF'}
+      </span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--amber)">undo: ${c.to?'ON':'OFF'}→${c.from?'ON':'OFF'}</span>
+    </div>`;
+  }).join('');
+}
+
+async function undoSelectedChanges() {
+  const checked = [...document.querySelectorAll('.undo-chk:checked')];
+  if (!checked.length) { toast('No changes selected', 'warn'); return; }
+  const indices = checked.map(c => parseInt(c.dataset.idx));
+  const items = indices.map(i => S.changeStack[i]).filter(Boolean);
+  closeModal('undoModal');
+  await undoChanges(items, indices);
+}
+
+async function undoAllSession() {
+  if (!S.changeStack.length) { toast('No session changes to undo', 'warn'); return; }
+  const items = [...S.changeStack];
+  const indices = items.map((_, i) => i);
+  await undoChanges(items, indices);
+}
+
+async function undoChanges(items, indices) {
+  // Undo in reverse order (last change first)
+  const toUndo = items.map(c => ({...c, _undoTo: c.from}));
+  toUndo.reverse();
+
+  document.getElementById('confirmModal').classList.remove('hidden');
+  document.getElementById('confirmActions').classList.add('hidden');
+  document.getElementById('diffWrap').classList.add('hidden');
+  document.getElementById('progressWrap').classList.remove('hidden');
+  document.getElementById('confirmTitle').textContent = 'Rolling back…';
+  document.getElementById('confirmMsg').textContent = `Undoing ${toUndo.length} change${toUndo.length!==1?'s':''}.`;
+
+  let done = 0; const errors = [];
+  for (const c of toUndo) {
+    document.getElementById('progressFill').style.width = `${Math.round(done/toUndo.length*100)}%`;
+    document.getElementById('progressLabel').textContent = `${done}/${toUndo.length} — ${c.name}`;
+    const a = S.automations.find(x => x.id === c.id);
+    if (a) {
+      try {
+        await doToggle(a, c._undoTo);
+        a.active = c._undoTo;
+        updateRowState(a.id, c._undoTo);
+        audit(`↩ undone: ${c.name} → ${c._undoTo?'ON':'OFF'}`, 'ok', {name:c.name, object:c.object, type:c.type, from:c.to, to:c._undoTo, trigger:'undo'});
+      } catch(err) {
+        errors.push(c.name);
+        audit(`✗ undo failed: ${c.name}: ${err.message.slice(0,50)}`, 'err');
+      }
+    }
+    done++; await sleep(120);
+  }
+
+  // Remove undone items from stack (by original indices, highest first to avoid shift issues)
+  [...indices].sort((a,b)=>b-a).forEach(i => S.changeStack.splice(i,1));
+
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressLabel').textContent = `Done — ${done-errors.length}/${toUndo.length} rolled back`;
+  saveStore(); renderTypeCards(); renderUndoBar();
+  if (errors.length) toast(`Rollback done with ${errors.length} error(s)`, 'warn');
+  else toast(`Rolled back ${toUndo.length} change${toUndo.length!==1?'s':''}!`, 'ok');
+  setTimeout(() => closeModal('confirmModal'), 1400);
 }
 
 // ═══════════════ CONFIRM HELPER ═══════════════
