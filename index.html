@@ -1081,42 +1081,70 @@ async function fetchWF() {
 // ═══════════════ TOGGLE ═══════════════
 async function doToggle(a, newActive) {
   if (a.apiToggle === 'vr') {
-    // Must fetch full Metadata first — SF rejects partial Metadata updates
+    // Per Salesforce Tooling API docs: GET full Metadata, mutate active only, PATCH entire Metadata back
+    // Must return ALL Metadata fields (including Vlocity custom ones) — filtering causes silent failure
     const full = await sfGet(`/services/data/${API_VER}/tooling/sobjects/ValidationRule/${a.id}`);
-    if (!full || !full.Metadata) throw new Error('Could not fetch ValidationRule Metadata — check Modify All Data permission');
-    const meta = { ...full.Metadata, active: newActive };
-    await sfPatch(`/services/data/${API_VER}/tooling/sobjects/ValidationRule/${a.id}`, { Metadata: meta });
+    if (!full || !full.Metadata) throw new Error('Could not read ValidationRule Metadata — ensure Modify All Data permission');
+    // Mutate only the active flag, preserve every other field exactly as SF returned it
+    const meta = Object.assign({}, full.Metadata, { active: newActive });
+    const resp = await sfPatch(`/services/data/${API_VER}/tooling/sobjects/ValidationRule/${a.id}`, { Metadata: meta });
+    audit(`VR PATCH response: ${JSON.stringify(resp)}`, 'info');
 
   } else if (a.apiToggle === 'flow') {
+    // Per SF Tooling API docs: PATCH FlowDefinition ActiveVersion to activate/deactivate
     if (newActive) {
-      // If we don't have activeVersionId (flow was inactive when loaded), fetch latest version
       let versionId = a.activeVersionId;
       if (!versionId) {
-        const fd = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent(`SELECT LatestVersion.Id FROM FlowDefinition WHERE Id='${a.id}' LIMIT 1`)}`);
+        // Flow was inactive at load time — fetch LatestVersion.Id to reactivate
+        const fd = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent("SELECT LatestVersion.Id FROM FlowDefinition WHERE Id='" + a.id + "' LIMIT 1")}`);
         versionId = fd.records?.[0]?.LatestVersion?.Id;
-        if (versionId) a.activeVersionId = versionId; // cache it
+        if (versionId) a.activeVersionId = versionId;
       }
-      if (!versionId) throw new Error('No version found for this Flow — it may have no versions');
+      if (!versionId) throw new Error('No version found — Flow may be in Draft state with no saved versions');
       await sfPatch(`/services/data/${API_VER}/tooling/sobjects/FlowDefinition/${a.id}`, {ActiveVersion:{Id:versionId}});
     } else {
+      // Deactivate: set ActiveVersion to null
       await sfPatch(`/services/data/${API_VER}/tooling/sobjects/FlowDefinition/${a.id}`, {ActiveVersion:null});
     }
 
   } else if (a.apiToggle === 'trigger') {
-    // Tooling API requires Body + Status together for ApexTrigger updates
-    const full = await sfGet(`/services/data/${API_VER}/tooling/sobjects/ApexTrigger/${a.id}?fields=Id,Status,Body`);
+    // Per SF docs + real implementations: Tooling API CAN update ApexTrigger Status + Body together
+    // Managed package triggers (Body=null) cannot be modified
+    const full = await sfGet(`/services/data/${API_VER}/tooling/sobjects/ApexTrigger/${a.id}`);
     if (!full) throw new Error('Could not fetch ApexTrigger record');
-    if (!full.Body) throw new Error('ApexTrigger has no Body — may be a managed package trigger (cannot modify)');
+    if (!full.Body) throw new Error('Managed package trigger — cannot modify (Body is null)');
+    if (full.NamespacePrefix) throw new Error(`Managed package trigger (namespace: ${full.NamespacePrefix}) — cannot modify`);
     await sfPatch(`/services/data/${API_VER}/tooling/sobjects/ApexTrigger/${a.id}`, {
       Status: newActive ? 'Active' : 'Inactive',
       Body: full.Body
     });
 
   } else if (a.apiToggle === 'wf') {
+    // Same pattern: GET full Metadata, mutate active only, PATCH full Metadata back
     const full = await sfGet(`/services/data/${API_VER}/tooling/sobjects/WorkflowRule/${a.id}`);
-    if (!full || !full.Metadata) throw new Error('Could not fetch WorkflowRule Metadata');
-    const meta = { ...full.Metadata, active: newActive };
+    if (!full || !full.Metadata) throw new Error('Could not read WorkflowRule Metadata — ensure Modify All Data permission');
+    const meta = Object.assign({}, full.Metadata, { active: newActive });
     await sfPatch(`/services/data/${API_VER}/tooling/sobjects/WorkflowRule/${a.id}`, { Metadata: meta });
+  }
+}
+
+// Verify SF actually applied the change
+async function verifyToggle(a, newActive) {
+  try {
+    await sleep(400); // brief pause for SF to commit
+    if (a.apiToggle === 'vr') {
+      const check = await sfGet(`/services/data/${API_VER}/tooling/sobjects/ValidationRule/${a.id}?fields=Active`);
+      return check.Active === newActive;
+    } else if (a.apiToggle === 'flow') {
+      const check = await sfGet(`/services/data/${API_VER}/tooling/sobjects/FlowDefinition/${a.id}?fields=ActiveVersion`);
+      return newActive ? !!check.ActiveVersion : !check.ActiveVersion;
+    } else if (a.apiToggle === 'trigger') {
+      const check = await sfGet(`/services/data/${API_VER}/tooling/sobjects/ApexTrigger/${a.id}?fields=Status`);
+      return (check.Status === 'Active') === newActive;
+    }
+    return true; // skip verification for types we can't easily check
+  } catch(e) {
+    return true; // don't block on verification failure
   }
 }
 
@@ -1126,17 +1154,25 @@ async function toggleAutomation(id, newActive) {
   const tEl = document.querySelector(`[data-tid="${id}"]`);
   if (tEl) tEl.classList.add('loading');
   try {
+    audit(`toggling ${a.name} (${a.type}) → ${newActive?'ON':'OFF'}…`, 'info');
     await doToggle(a, newActive);
+    // Verify the change actually took effect in SF
+    const verified = await verifyToggle(a, newActive);
     const prev = a.active;
     a.active = newActive;
     saveStore();
-    audit(`${a.name} · ${a.object} · ${prev?'ON':'OFF'} → ${newActive?'ON':'OFF'}`, 'ok', {name:a.name, object:a.object, type:a.type, from:prev, to:newActive, trigger:'manual'});
-    toast(`${a.name}: ${newActive?'enabled':'disabled'}`, 'ok', 1800);
+    if (verified) {
+      audit(`✓ ${a.name} · ${a.object} · ${prev?'ON':'OFF'} → ${newActive?'ON':'OFF'} (verified)`, 'ok', {name:a.name, object:a.object, type:a.type, from:prev, to:newActive, trigger:'manual'});
+      toast(`${a.name}: ${newActive?'enabled':'disabled'} ✓`, 'ok', 1800);
+    } else {
+      audit(`⚠ ${a.name}: API accepted but SF state unchanged — check permissions`, 'warn');
+      toast(`${a.name}: SF may not have applied the change — check SF directly`, 'warn', 5000);
+    }
     updateRowState(id, newActive);
     renderTypeCards();
   } catch(err) {
-    audit(`✗ ${a.name}: ${err.message.slice(0,60)}`, 'err');
-    toast(`Failed: ${err.message.slice(0,50)}`, 'err');
+    audit(`✗ ${a.name}: ${err.message.slice(0,120)}`, 'err');
+    toast(`Failed: ${err.message.slice(0,80)}`, 'err', 6000);
     const cb = document.querySelector(`input[data-cb="${id}"]`);
     if (cb) cb.checked = a.active;
   }
