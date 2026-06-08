@@ -173,6 +173,7 @@ body{font-family:var(--body);background:var(--bg);color:var(--tx);min-height:100
 input:checked~.tslider{background:var(--green3);border-color:rgba(16,185,129,0.4)}
 input:checked~.tslider::before{transform:translateX(18px);background:var(--green)}
 .toggle.loading .tslider::before{animation:spin 0.5s linear infinite;background:var(--amber)}
+.toggle.disabled{opacity:0.4;cursor:not-allowed;pointer-events:none}
 @keyframes spin{to{transform:translateX(0) rotate(360deg)}}
 
 /* STATUS PILLS */
@@ -1070,63 +1071,70 @@ async function fetchVR() {
 }
 
 async function fetchFlows() {
-  const d = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent('SELECT Id,DeveloperName,ActiveVersion.Id,ActiveVersion.ProcessType,LatestVersion.Id,LatestVersion.ProcessType FROM FlowDefinition ORDER BY DeveloperName LIMIT 2000')}`);
-  const records = d.records || [];
-  // Resolve trigger objects via FlowVersion in chunks
-  const versionIds = [...new Set(records.map(r => r.LatestVersion?.Id || r.ActiveVersion?.Id).filter(Boolean))];
-  const triggerMap = {};
-  if (versionIds.length) {
+  // Per official SF documentation: FlowDefinitionView is the correct object for querying flow metadata.
+  // It provides TriggerObjectOrEventLabel, IsActive, ProcessType, TriggerType directly — no joins needed.
+  // Reference: https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_flowdefinitionview.htm
+  // Also used by: automationchampion.com/2022/04/27/find-all-record-triggered-flows-for-an-object-2/
+  const soql = 'SELECT Id,ApiName,Label,IsActive,ProcessType,TriggerObjectOrEventLabel,TriggerObjectOrEventId,TriggerType,ManageableState FROM FlowDefinitionView ORDER BY Label LIMIT 2000';
+  const d = await sfGet(`/services/data/${API_VER}/query?q=${encodeURIComponent(soql)}`);
+  // Also need ActiveVersionId for reactivation — get from FlowDefinition for inactive flows
+  const defIds = (d.records||[]).map(r => r.Id);
+  const defMap = {}; // Id -> ActiveVersionId
+  if (defIds.length) {
     const chunks = [];
-    for (let i = 0; i < versionIds.length; i += 100) chunks.push(versionIds.slice(i, i+100));
+    for (let i = 0; i < defIds.length; i += 200) chunks.push(defIds.slice(i, i+200));
     for (const chunk of chunks) {
       try {
-        const vd = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent(`SELECT Id,TriggerObjectOrEventLabel,TriggerType,ProcessType FROM FlowVersion WHERE Id IN (${chunk.map(x=>`'${x}'`).join(',')}) LIMIT 500`)}`);
-        (vd.records||[]).forEach(v => {
-          // Best label: TriggerObjectOrEventLabel → TriggerType → ProcessType → 'No object'
-          triggerMap[v.Id] = v.TriggerObjectOrEventLabel || v.TriggerType || v.ProcessType || 'No object';
-        });
-      } catch(e) { /* skip */ }
+        const fd = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent("SELECT Id,ActiveVersion.Id,LatestVersion.Id FROM FlowDefinition WHERE Id IN (" + chunk.map(x=>"'"+x+"'").join(',') + ") LIMIT 500")}`);
+        (fd.records||[]).forEach(r => { defMap[r.Id] = {activeId: r.ActiveVersion?.Id||null, latestId: r.LatestVersion?.Id||null}; });
+      } catch(e) { /* skip — we'll handle missing version on toggle */ }
     }
   }
-  return records.map(r => {
-    const pt  = r.ActiveVersion?.ProcessType || r.LatestVersion?.ProcessType || '';
-    const vid = r.LatestVersion?.Id || r.ActiveVersion?.Id;
-    const rawObj = (vid && triggerMap[vid]) || '';
-    const isPB = pt === 'Workflow';
 
-    // Map ProcessType to a meaningful object/category label
-    // rawObj from TriggerObjectOrEventLabel is the best — use it when available
-    let obj;
-    if (rawObj && rawObj !== 'No object') {
-      obj = rawObj;
-    } else {
-      // Derive from ProcessType
-      const ptMap = {
-        'AutoLaunchedFlow':        'Auto-launched',
-        'Flow':                    'Screen Flow',
-        'Workflow':                'Process Builder',
-        'InvocableProcess':        'Invocable Process',
-        'CustomEvent':             'Platform Event',
-        'CheckoutFlow':            'Checkout Flow',
-        'ContactRequestFlow':      'Contact Request',
-        'ActionPlan':              'Action Plan',
-        'FieldServiceWeb':         'Field Service',
-        'FieldServiceMobile':      'Field Service Mobile',
-        'Survey':                  'Survey',
-        'SurveyEnrich':            'Survey Enrich',
-        'Orchestrator':            'Orchestrator',
-        'EvaluationFlow':          'Evaluation Flow',
-        'ManagedContentFlow':      'CMS Flow',
-        'TransactionSecurityFlow': 'Transaction Security',
-        'UserProvisioningFlow':    'User Provisioning',
-        'RoutingFlow':             'Routing Flow',
-      };
-      obj = ptMap[pt] || (pt ? pt : 'Unclassified');
-    }
+  const ptMap = {
+    'AutoLaunchedFlow':        'Auto-launched',
+    'Flow':                    'Screen Flow',
+    'Workflow':                'Process Builder',
+    'InvocableProcess':        'Invocable Process',
+    'CustomEvent':             'Platform Event',
+    'CheckoutFlow':            'Checkout Flow',
+    'ContactRequestFlow':      'Contact Request',
+    'ActionPlan':              'Action Plan',
+    'FieldServiceWeb':         'Field Service',
+    'FieldServiceMobile':      'Field Service Mobile',
+    'Survey':                  'Survey',
+    'SurveyEnrich':            'Survey Enrich',
+    'Orchestrator':            'Orchestrator',
+    'EvaluationFlow':          'Evaluation Flow',
+    'ManagedContentFlow':      'CMS Flow',
+    'TransactionSecurityFlow': 'Transaction Security',
+    'UserProvisioningFlow':    'User Provisioning',
+    'RoutingFlow':             'Routing Flow',
+    'ScheduledPath':           'Scheduled',
+  };
 
-    return {id:r.Id, name:r.DeveloperName, active:!!r.ActiveVersion, object:obj,
-      type:isPB?'Process Builder':'Flow', description:pt, apiToggle:'flow',
-      activeVersionId:r.ActiveVersion?.Id||null};
+  return (d.records||[]).map(r => {
+    const isPB  = r.ProcessType === 'Workflow';
+    const type  = isPB ? 'Process Builder' : 'Flow';
+    // Object grouping: use TriggerObjectOrEventLabel when available (record-triggered flows)
+    // Otherwise fall back to ProcessType label for non-object flows (auto-launched, screen, etc.)
+    const obj   = (r.TriggerObjectOrEventLabel && r.TriggerObjectOrEventLabel.trim())
+                  ? r.TriggerObjectOrEventLabel
+                  : (ptMap[r.ProcessType] || r.ProcessType || 'Unclassified');
+    const vers  = defMap[r.Id] || {};
+    return {
+      id: r.Id,
+      name: r.ApiName || r.Label,
+      label: r.Label,
+      active: r.IsActive,
+      object: obj,
+      type,
+      description: r.ProcessType + (r.TriggerType ? ' · ' + r.TriggerType : ''),
+      apiToggle: 'flow',
+      manageable: r.ManageableState,
+      activeVersionId: vers.activeId || null,
+      latestVersionId: vers.latestId || null,
+    };
   });
 }
 
@@ -1161,32 +1169,48 @@ async function doToggle(a, newActive) {
 
   } else if (a.apiToggle === 'flow') {
     // Per SF Tooling API docs: PATCH FlowDefinition ActiveVersion to activate/deactivate
+    // Managed package flows cannot be modified
+    if (a.manageable === 'installed' || a.manageable === 'installedEditable') {
+      throw new Error(`Managed package flow (${a.manageable}) — cannot modify`);
+    }
     if (newActive) {
-      let versionId = a.activeVersionId;
+      // Use stored activeVersionId first, then latestVersionId, then query
+      let versionId = a.activeVersionId || a.latestVersionId;
       if (!versionId) {
-        // Flow was inactive at load time — fetch LatestVersion.Id to reactivate
-        const fd = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent("SELECT LatestVersion.Id FROM FlowDefinition WHERE Id='" + a.id + "' LIMIT 1")}`);
-        versionId = fd.records?.[0]?.LatestVersion?.Id;
-        if (versionId) a.activeVersionId = versionId;
+        const fd = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent("SELECT ActiveVersion.Id,LatestVersion.Id FROM FlowDefinition WHERE Id='" + a.id + "' LIMIT 1")}`);
+        versionId = fd.records?.[0]?.ActiveVersion?.Id || fd.records?.[0]?.LatestVersion?.Id;
+        if (versionId) { a.activeVersionId = versionId; a.latestVersionId = versionId; }
       }
       if (!versionId) throw new Error('No version found — Flow may be in Draft state with no saved versions');
       await sfPatch(`/services/data/${API_VER}/tooling/sobjects/FlowDefinition/${a.id}`, {ActiveVersion:{Id:versionId}});
     } else {
-      // Deactivate: set ActiveVersion to null
       await sfPatch(`/services/data/${API_VER}/tooling/sobjects/FlowDefinition/${a.id}`, {ActiveVersion:null});
     }
 
   } else if (a.apiToggle === 'trigger') {
-    // Per SF docs + real implementations: Tooling API CAN update ApexTrigger Status + Body together
-    // Managed package triggers (Body=null) cannot be modified
+    // Tooling API can update ApexTrigger Status + Body together.
+    // Requirements: "Author Apex" permission OR "Modify All Data" permission in user profile.
+    // INSUFFICIENT_ACCESS_ON_CROSS_REFERENCE_ENTITY = missing "Author Apex" permission.
+    // Managed package triggers (NamespacePrefix set) cannot be modified via API.
     const full = await sfGet(`/services/data/${API_VER}/tooling/sobjects/ApexTrigger/${a.id}`);
     if (!full) throw new Error('Could not fetch ApexTrigger record');
-    if (!full.Body) throw new Error('Managed package trigger — cannot modify (Body is null)');
-    if (full.NamespacePrefix) throw new Error(`Managed package trigger (namespace: ${full.NamespacePrefix}) — cannot modify`);
-    await sfPatch(`/services/data/${API_VER}/tooling/sobjects/ApexTrigger/${a.id}`, {
-      Status: newActive ? 'Active' : 'Inactive',
-      Body: full.Body
-    });
+    if (full.NamespacePrefix) {
+      throw new Error(`Managed package trigger (${full.NamespacePrefix}) — cannot modify. Managed package automations must be disabled via the package settings.`);
+    }
+    if (!full.Body) {
+      throw new Error('Trigger body is empty — may be a managed package trigger. Cannot modify.');
+    }
+    try {
+      await sfPatch(`/services/data/${API_VER}/tooling/sobjects/ApexTrigger/${a.id}`, {
+        Status: newActive ? 'Active' : 'Inactive',
+        Body: full.Body
+      });
+    } catch(patchErr) {
+      if (patchErr.message.includes('INSUFFICIENT_ACCESS')) {
+        throw new Error('Requires "Author Apex" permission in your Salesforce profile. Ask your SF Admin to enable it.');
+      }
+      throw patchErr;
+    }
 
   } else if (a.apiToggle === 'wf') {
     // Same pattern: GET full Metadata, mutate active only, PATCH full Metadata back
@@ -1205,8 +1229,10 @@ async function verifyToggle(a, newActive) {
       const check = await sfGet(`/services/data/${API_VER}/tooling/sobjects/ValidationRule/${a.id}?fields=Active`);
       return check.Active === newActive;
     } else if (a.apiToggle === 'flow') {
-      const check = await sfGet(`/services/data/${API_VER}/tooling/sobjects/FlowDefinition/${a.id}?fields=ActiveVersion`);
-      return newActive ? !!check.ActiveVersion : !check.ActiveVersion;
+      // Use FlowDefinitionView for verification — more reliable than FlowDefinition
+      const check = await sfGet(`/services/data/${API_VER}/query?q=${encodeURIComponent("SELECT IsActive FROM FlowDefinitionView WHERE Id='" + a.id + "' LIMIT 1")}`);
+      const isNowActive = check.records?.[0]?.IsActive === true;
+      return isNowActive === newActive;
     } else if (a.apiToggle === 'trigger') {
       const check = await sfGet(`/services/data/${API_VER}/tooling/sobjects/ApexTrigger/${a.id}?fields=Status`);
       return (check.Status === 'Active') === newActive;
@@ -1676,16 +1702,21 @@ function renderAutoRow(a) {
   const snapBadge = snap !== undefined
     ? `<span class="snap-was ${snap?'snap-was-on':'snap-was-off'}">${snap?'● was on':'○ was off'}</span>`
     : '';
+  const isManaged = a.manageable === 'installed' || (a.apiToggle === 'trigger' && a.namespacePfx);
+  const managedBadge = isManaged
+    ? `<span style="font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:5px;background:var(--s3);color:var(--tx3);flex-shrink:0" title="Managed package — cannot toggle">pkg</span>`
+    : '';
   return `
     <div class="auto-row ${a.active?'active':'inactive'}" id="row-${a.id}">
       <div class="auto-status-dot"></div>
       <div style="flex:1;min-width:0">
-        <div class="auto-name">${esc(a.name)}</div>
+        <div class="auto-name">${esc(a.label||a.name)}</div>
         ${a.description ? `<div class="auto-meta">${esc(a.description)}</div>` : ''}
       </div>
       ${snapBadge}
-      <label class="toggle" data-tid="${a.id}" aria-label="Toggle ${esc(a.name)}">
-        <input type="checkbox" data-cb="${a.id}" ${a.active?'checked':''} onchange="toggleAutomation('${a.id}',this.checked)">
+      ${managedBadge}
+      <label class="toggle ${isManaged?'disabled':''}" data-tid="${a.id}" aria-label="Toggle ${esc(a.name)}" ${isManaged?'title="Managed package — cannot be toggled via API"':''}>
+        <input type="checkbox" data-cb="${a.id}" ${a.active?'checked':''} ${isManaged?'disabled':''} onchange="toggleAutomation('${a.id}',this.checked)">
         <span class="tslider"></span>
       </label>
     </div>`;
