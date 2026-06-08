@@ -257,6 +257,27 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
 .hidden{display:none!important}
 .mt8{margin-top:8px}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+
+/* PENDING REVERT ALERT */
+.pending-alert{display:flex;align-items:center;gap:16px;padding:20px 24px;background:var(--amber3);border:1px solid rgba(245,158,11,0.35);border-radius:var(--rl);width:100%;max-width:520px;margin-bottom:20px;flex-wrap:wrap}
+.pa-icon{font-size:28px;flex-shrink:0}
+.pa-content{flex:1;min-width:0}
+.pa-title{font-family:var(--display);font-size:15px;font-weight:600;color:var(--amber);margin-bottom:4px}
+.pa-org{font-size:13px;color:var(--tx);font-weight:500}
+.pa-detail{font-family:var(--mono);font-size:11px;color:var(--tx3);margin-top:3px}
+.pa-dismiss{font-size:11px;margin-top:4px;color:var(--tx3);cursor:pointer;text-decoration:underline;display:block}
+
+/* SESSION HEALTH */
+.session-health{display:flex;align-items:center;gap:8px;padding:5px 12px;border-radius:var(--r);border:1px solid var(--b2);background:var(--s2);font-family:var(--mono);font-size:11px;cursor:default}
+.session-health.good{border-color:rgba(16,185,129,0.3);background:var(--green3);color:var(--green)}
+.session-health.warn{border-color:rgba(245,158,11,0.3);background:var(--amber3);color:var(--amber)}
+.session-health.danger{border-color:rgba(244,63,94,0.3);background:var(--red3);color:var(--red);animation:pulse-border 1s ease-in-out infinite}
+.session-health.refreshing{border-color:rgba(59,130,246,0.3);background:var(--blue2);color:var(--blue)}
+.sh-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.sh-dot.spin{animation:spin 1s linear infinite}
+/* RECONNECT BANNER */
+.reconnect-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 18px;margin-bottom:20px;background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.3);border-radius:var(--rl);flex-wrap:wrap}
+.reconnect-banner p{font-size:13px;color:var(--red);flex:1}
 </style>
 </head>
 <body>
@@ -268,6 +289,11 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
     <span class="logo-ver">v3.0</span>
   </div>
   <div class="topbar-right" id="topbarRight">
+    <div id="sessionHealth" class="session-health hidden">
+      <span class="sh-dot" id="shDot"></span>
+      <span id="shLabel">session</span>
+      <button class="btn btn-ghost" style="padding:2px 8px;font-size:10px;margin-left:4px;font-family:var(--mono)" id="shRefreshBtn" onclick="manualRefreshToken()" title="Refresh session">↻</button>
+    </div>
     <button class="btn btn-ghost" onclick="showModal('howModal')">ℹ️ How it works</button>
   </div>
 </nav>
@@ -276,6 +302,20 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
 <div id="landing" class="landing hidden">
   <div class="landing-title">Automation<br>Control Center</div>
   <p class="landing-sub">Connect any Salesforce org. Read, toggle, snapshot and revert every automation — grouped by type and object. Built for migrations.</p>
+  <!-- PENDING REVERT ALERT -->
+  <div id="pendingRevertAlert" class="pending-alert hidden">
+    <div class="pa-icon">&#128248;</div>
+    <div class="pa-content">
+      <div class="pa-title">You have a pending revert</div>
+      <div class="pa-org" id="paOrgName"></div>
+      <div class="pa-detail" id="paDetail"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0">
+      <button class="btn btn-amber" onclick="quickReconnect()">&#128272; Reconnect &amp; Revert</button>
+      <span class="pa-dismiss" onclick="dismissPendingAlert()">dismiss</span>
+    </div>
+  </div>
+
   <div class="connect-box">
     <h3>Connect to Salesforce</h3>
     <p>Pick your environment and connect. You'll log in via Salesforce — your token never leaves your browser.</p>
@@ -340,6 +380,15 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
       <button class="btn btn-amber" onclick="showRevertModal()" id="btnRevert2">↩ Revert</button>
       <button class="btn btn-ghost" style="font-size:11px" onclick="clearSnap()">✕</button>
     </div>
+  </div>
+
+  <!-- RECONNECT BANNER -->
+  <div id="reconnectBanner" class="reconnect-banner hidden">
+    <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+      <p>&#9888; <strong>Session expired.</strong> Your snapshot is safe &#8212; all changes can still be reverted.</p>
+      <span id="reconnectSnapDetail" style="font-family:var(--mono);font-size:11px;color:var(--red);opacity:0.8"></span>
+    </div>
+    <button class="btn btn-amber" onclick="reconnectSameOrg()">&#128272; Reconnect &amp; Revert</button>
   </div>
 
   <!-- KPI TYPE CARDS -->
@@ -454,8 +503,169 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
 
 <script>
 // ═══════════════ CONFIG ═══════════════
-const CLIENT_ID = '3MVG9GCMQoQ6rpzTViwky6e4Z5H5nh_DA.l0ehIFzS0Ocakc_DGmq9dOc35ob2ADS0FcSxpLDwobPftNSB_Yz';
-const STORE_KEY = 'sfas_v3';
+const CLIENT_ID  = '3MVG9GCMQoQ6rpzTViwky6e4Z5H5nh_DA.l0ehIFzS0Ocakc_DGmq9dOc35ob2ADS0FcSxpLDwobPftNSB_Yz';
+const STORE_KEY  = 'sfas_v3';
+const PKCE_KEY   = 'sfas_pkce_v';  // stores verifier during PKCE handshake
+const API_FALLBACK = 'v62.0';
+let API_VER = API_FALLBACK;
+
+// ═══════════════ PKCE HELPERS ═══════════════
+function pkceRandom(len=64) {
+  const arr = new Uint8Array(len);
+  crypto.getRandomValues(arr);
+  return btoa(String.fromCharCode(...arr)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+async function pkceChallenge(verifier) {
+  const enc = new TextEncoder().encode(verifier);
+  const hash = await crypto.subtle.digest('SHA-256', enc);
+  return btoa(String.fromCharCode(...new Uint8Array(hash))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+
+// ═══════════════ SESSION HEALTH ═══════════════
+let _sessionTimer = null;
+let _tokenExpiry  = null;  // epoch ms
+
+function startSessionWatcher(expiresIn = 7200) {
+  clearSessionWatcher();
+  _tokenExpiry = Date.now() + expiresIn * 1000;
+  updateSessionHealth();
+  // Tick every 30 seconds
+  _sessionTimer = setInterval(updateSessionHealth, 30000);
+}
+
+function clearSessionWatcher() {
+  if (_sessionTimer) { clearInterval(_sessionTimer); _sessionTimer = null; }
+  _tokenExpiry = null;
+  const el = document.getElementById('sessionHealth');
+  if (el) el.classList.add('hidden');
+}
+
+function updateSessionHealth() {
+  const el = document.getElementById('sessionHealth');
+  const dot = document.getElementById('shDot');
+  const label = document.getElementById('shLabel');
+  if (!el || !_tokenExpiry) return;
+  el.classList.remove('hidden');
+  const remaining = Math.max(0, Math.floor((_tokenExpiry - Date.now()) / 1000));
+  const mins = Math.floor(remaining / 60);
+  const secs = remaining % 60;
+  const display = mins > 0 ? `${mins}m` : `${secs}s`;
+
+  if (remaining <= 0) {
+    el.className = 'session-health danger';
+    dot.className = 'sh-dot';
+    label.textContent = 'expired';
+    clearSessionWatcher();
+    handleSessionExpiry();
+  } else if (remaining <= 300) {
+    // Under 5 min — warn + auto-attempt refresh
+    el.className = 'session-health danger';
+    dot.className = 'sh-dot';
+    label.textContent = `${display} left`;
+    if (remaining <= 270) silentRefreshToken(); // try at 4.5 min mark
+  } else if (remaining <= 1800) {
+    // Under 30 min — amber warning
+    el.className = 'session-health warn';
+    dot.className = 'sh-dot';
+    label.textContent = `${display} left`;
+  } else {
+    el.className = 'session-health good';
+    dot.className = 'sh-dot';
+    label.textContent = `${display} left`;
+  }
+}
+
+let _refreshing = false;
+async function silentRefreshToken() {
+  if (_refreshing || !S.org?.refreshToken) return;
+  _refreshing = true;
+  const el = document.getElementById('sessionHealth');
+  const label = document.getElementById('shLabel');
+  const dot = document.getElementById('shDot');
+  if (el) { el.className = 'session-health refreshing'; dot.className = 'sh-dot spin'; }
+  if (label) label.textContent = 'refreshing…';
+  try {
+    const loginBase = S.org.instanceUrl.includes('sandbox') || S.org.loginBase?.includes('test')
+      ? 'https://test.salesforce.com' : 'https://login.salesforce.com';
+    const params = new URLSearchParams({
+      grant_type: 'refresh_token',
+      client_id: CLIENT_ID,
+      refresh_token: S.org.refreshToken,
+    });
+    const r = await fetch(`${loginBase}/services/oauth2/token`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: params.toString()
+    });
+    if (!r.ok) throw new Error(`refresh failed: ${r.status}`);
+    const data = await r.json();
+    if (data.access_token) {
+      S.org.accessToken = data.access_token;
+      saveStore();
+      const expiry = parseInt(data.expires_in || '7200');
+      _tokenExpiry = Date.now() + expiry * 1000;
+      audit('✓ token silently refreshed', 'ok');
+      updateSessionHealth();
+    }
+  } catch(err) {
+    audit(`⚠ token refresh failed: ${err.message}`, 'warn');
+    updateSessionHealth();
+  }
+  _refreshing = false;
+}
+
+async function manualRefreshToken() {
+  _refreshing = false; // reset lock
+  if (S.org?.refreshToken) {
+    await silentRefreshToken();
+    toast('Session refreshed', 'ok');
+  } else {
+    // No refresh token (implicit flow) — redirect to re-auth
+    toast('No refresh token — reconnecting…', 'warn');
+    setTimeout(() => reconnectSameOrg(), 1000);
+  }
+}
+
+function reconnectSameOrg() {
+  if (!S.org) return;
+  if (S.snapshot && Object.keys(S.snapshot.map||{}).length) S._autoRevert = true;
+  const env = S.org.loginBase || (S.org.instanceUrl.includes('sandbox') ? 'https://test.salesforce.com' : 'https://login.salesforce.com');
+  startPKCE(env, S.org.name);
+}
+
+function checkPendingRevert() {
+  const alert = document.getElementById('pendingRevertAlert');
+  if (!alert) return;
+  if (!S.org || !S.snapshot || !Object.keys(S.snapshot.map||{}).length) {
+    alert.classList.add('hidden'); return;
+  }
+  const snapTotal = Object.keys(S.snapshot.map).length;
+  const ts = new Date(S.snapshot.ts).toLocaleString();
+  const snapName = S.snapshot.name || 'pre-migration snapshot';
+  document.getElementById('paOrgName').textContent = S.org.name + ' — ' + S.org.instanceUrl;
+  document.getElementById('paDetail').textContent = '"' + snapName + '" · ' + snapTotal + ' automations · saved ' + ts;
+  alert.classList.remove('hidden');
+}
+
+function quickReconnect() {
+  S._autoRevert = true;
+  reconnectSameOrg();
+}
+
+function dismissPendingAlert() {
+  document.getElementById('pendingRevertAlert')?.classList.add('hidden');
+}
+
+async function detectApiVersion() {
+  try {
+    const r = await fetch(`${S.org.instanceUrl}/services/data/`, {headers:{'Authorization':`Bearer ${S.org.accessToken}`}});
+    if (r.ok) {
+      const versions = await r.json();
+      const latest = versions.sort((a,b) => parseFloat(b.version)-parseFloat(a.version))[0];
+      if (latest?.version) { API_VER = `v${latest.version}`; audit(`API version: ${API_VER}`, 'info'); }
+    }
+  } catch(e) { API_VER = API_FALLBACK; }
+}
 const TYPE_ORDER = ['Validation Rule','Flow','Process Builder','Apex Trigger','Workflow Rule'];
 const TYPE_CFG = {
   'Validation Rule': {cls:'vr', label:'Validation Rules',   icon:'🛡️'},
@@ -520,12 +730,19 @@ function toggleAudit() {
   document.getElementById('auditBody').classList.toggle('open', auditOpen);
 }
 function exportAudit() {
-  const rows = [['Timestamp','Org','Message','Type']];
-  S.auditLog.forEach(e => rows.push([e.ts, e.org||'', e.msg||'', e.type||'']));
+  if (!S.auditLog.length) { toast('No audit events to export', 'warn'); return; }
+  const rows = [['Timestamp','Org','Automation','Object','Type','From','To','Trigger','Message']];
+  S.auditLog.forEach(e => rows.push([
+    e.ts, e.org||'', e.name||'', e.object||'', e.type||'',
+    e.from!==undefined?(e.from?'ON':'OFF'):'',
+    e.to!==undefined?(e.to?'ON':'OFF'):'',
+    e.trigger||'', e.msg||''
+  ]));
   const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
   const a = document.createElement('a');
   a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  a.download = `sf-automation-audit-${new Date().toISOString().slice(0,10)}.csv`;
+  // Safe filename — no colons (Windows-safe)
+  a.download = `sf-audit-${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
   toast('Audit log exported', 'ok');
 }
@@ -549,74 +766,172 @@ function showModal(id) { document.getElementById(id).classList.remove('hidden');
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 document.querySelectorAll('.modal-bg').forEach(b => b.addEventListener('click', e => { if(e.target===b) b.classList.add('hidden'); }));
 
-// ═══════════════ OAUTH ═══════════════
+// ═══════════════ OAUTH — PKCE FLOW ═══════════════
 let selEnv = 'https://login.salesforce.com';
 function setEnv(type, btn) {
   selEnv = type === 'sandbox' ? 'https://test.salesforce.com' : 'https://login.salesforce.com';
   document.querySelectorAll('.env-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
 }
-function startOAuth() {
+
+async function startOAuth() {
   const nick = document.getElementById('orgNick').value.trim();
-  const cb = encodeURIComponent(window.location.href.split('?')[0].split('#')[0]);
-  const state = encodeURIComponent(JSON.stringify({nick: nick || (selEnv.includes('test') ? 'Sandbox' : 'Production')}));
-  const url = `${selEnv}/services/oauth2/authorize?response_type=token&client_id=${CLIENT_ID}&redirect_uri=${cb}&state=${state}&prompt=login`;
-  audit('opening OAuth…', 'info');
+  await startPKCE(selEnv, nick || (selEnv.includes('test') ? 'Sandbox' : 'Production'));
+}
+
+async function startPKCE(loginBase, nick) {
+  const verifier   = pkceRandom(64);
+  const challenge  = await pkceChallenge(verifier);
+  const cb         = window.location.href.split('?')[0].split('#')[0];
+  const stateData  = JSON.stringify({nick, loginBase});
+
+  // Store verifier — survives popup round-trip
+  sessionStorage.setItem(PKCE_KEY, JSON.stringify({verifier, nick, loginBase}));
+
+  const params = new URLSearchParams({
+    response_type: 'code',
+    client_id: CLIENT_ID,
+    redirect_uri: cb,
+    code_challenge: challenge,
+    code_challenge_method: 'S256',
+    state: btoa(stateData),
+    prompt: 'login',
+  });
+  const url = `${loginBase}/services/oauth2/authorize?${params}`;
+  audit('opening PKCE OAuth…', 'info');
+
   const popup = window.open(url, 'sfauth', 'width=640,height=720,resizable=yes');
   if (!popup) { toast('Popup blocked — use manual token', 'warn'); showModal('manualModal'); return; }
+
   const poll = setInterval(() => {
     try {
       if (!popup || popup.closed) { clearInterval(poll); return; }
       const h = popup.location.href;
-      if (h && h.includes('access_token')) { clearInterval(poll); popup.close(); handleOAuthResponse(h); }
-    } catch(ex){}
+      if (h && (h.includes('code=') || h.includes('error='))) {
+        clearInterval(poll);
+        const u = new URL(h);
+        popup.close();
+        if (u.searchParams.get('error')) {
+          toast(`Auth error: ${u.searchParams.get('error_description') || u.searchParams.get('error')}`, 'err');
+          return;
+        }
+        handlePKCECallback(u.searchParams.get('code'), cb);
+      }
+    } catch(ex) { /* cross-origin, keep polling */ }
   }, 400);
 }
-function handleOAuthResponse(url) {
-  const hash = (url.includes('#') ? url.split('#')[1] : url.split('?')[1]) || '';
-  const p = Object.fromEntries(hash.split('&').map(x => { const [k,...v]=x.split('='); return [k, decodeURIComponent(v.join('='))]; }));
-  if (!p.access_token || !p.instance_url) { toast('OAuth failed', 'err'); return; }
-  let nick = 'My Org';
-  try { nick = JSON.parse(p.state).nick; } catch(e){}
-  S.org = {accessToken: p.access_token, instanceUrl: p.instance_url.replace(/\/$/,''), name: nick};
-  saveStore();
-  audit(`connected: ${S.org.name}`, 'ok');
-  toast('Connected!', 'ok');
-  showDashboard();
+
+async function handlePKCECallback(code, redirectUri) {
+  const stored = sessionStorage.getItem(PKCE_KEY);
+  if (!stored) { toast('PKCE state lost — please try again', 'err'); return; }
+  const {verifier, nick, loginBase} = JSON.parse(stored);
+  sessionStorage.removeItem(PKCE_KEY);
+
+  try {
+    const params = new URLSearchParams({
+      grant_type: 'authorization_code',
+      client_id: CLIENT_ID,
+      redirect_uri: redirectUri,
+      code,
+      code_verifier: verifier,
+    });
+    const r = await fetch(`${loginBase}/services/oauth2/token`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: params.toString()
+    });
+    if (!r.ok) {
+      const e = await r.json().catch(() => ({}));
+      throw new Error(e.error_description || e.error || `HTTP ${r.status}`);
+    }
+    const data = await r.json();
+    // Preserve existing snapshot/snapshots if reconnecting same org
+    const prevSnap     = S.org?.instanceUrl === data.instance_url?.replace(/\/$/,'') ? S.snapshot : null;
+    const prevSnapshots = S.org?.instanceUrl === data.instance_url?.replace(/\/$/,'') ? S.snapshots : S.snapshots;
+    S.org = {
+      accessToken:  data.access_token,
+      refreshToken: data.refresh_token || null,
+      instanceUrl:  (data.instance_url || '').replace(/\/$/,''),
+      name: nick,
+      loginBase,
+      connectedAt: Date.now(),
+    };
+    if (prevSnap) S.snapshot = prevSnap;
+    saveStore();
+    audit(`✓ PKCE connected: ${S.org.name} (refresh_token: ${data.refresh_token ? 'yes' : 'no'})`, 'ok');
+    toast('Connected!', 'ok');
+    const expiry = parseInt(data.expires_in || '7200');
+    startSessionWatcher(expiry);
+    showDashboard();
+  } catch(err) {
+    audit(`✗ PKCE token exchange failed: ${err.message}`, 'err');
+    toast(`Connection failed: ${err.message}`, 'err');
+  }
 }
+
+// Handle PKCE code callback when SF redirects back to this page
+(function() {
+  const u = new URL(window.location.href);
+  const code = u.searchParams.get('code');
+  if (code) {
+    const cb = window.location.href.split('?')[0];
+    history.replaceState(null, '', window.location.pathname);
+    handlePKCECallback(code, cb);
+    return;
+  }
+  // Legacy implicit flow fallback (in case someone bookmarked with hash)
+  if (window.location.hash && window.location.hash.includes('access_token')) {
+    const hash = window.location.hash.slice(1);
+    const p = Object.fromEntries(hash.split('&').map(x => { const [k,...v]=x.split('='); return [k, decodeURIComponent(v.join('='))]; }));
+    if (p.access_token && p.instance_url) {
+      S.org = {accessToken: p.access_token, instanceUrl: p.instance_url.replace(/\/$/,''), name: 'My Org', connectedAt: Date.now()};
+      saveStore();
+      startSessionWatcher(7200);
+      showDashboard();
+    }
+    history.replaceState(null, '', window.location.pathname);
+  }
+})();
+
 function connectManual() {
   const inst = document.getElementById('manualInst').value.trim().replace(/\/$/,'');
   const tok  = document.getElementById('manualTok').value.trim();
   const nick = document.getElementById('manualNick').value.trim();
   if (!inst || !tok) { toast('Instance URL and token required', 'err'); return; }
-  S.org = {instanceUrl: inst, accessToken: tok, name: nick || inst};
+  if (!inst.startsWith('https://')) { toast('Instance URL must start with https://', 'err'); return; }
+  S.org = {instanceUrl: inst, accessToken: tok, name: nick || inst, connectedAt: Date.now()};
   saveStore();
   closeModal('manualModal');
   audit(`manually connected: ${S.org.name}`, 'ok');
-  toast('Connected!', 'ok');
+  toast('Connected (manual — no auto-refresh)', 'warn');
+  startSessionWatcher(7200); // assume 2hr for manual tokens
   showDashboard();
 }
 
-// Handle hash redirect
-(function() {
-  if (window.location.hash && window.location.hash.includes('access_token')) {
-    handleOAuthResponse(window.location.href);
-    history.replaceState(null,'',window.location.pathname);
-  }
-})();
-
 // ═══════════════ VIEWS ═══════════════
-function showDashboard() {
+async function showDashboard() {
   document.getElementById('landing').classList.add('hidden');
   document.getElementById('dashboard').classList.remove('hidden');
+  document.getElementById('reconnectBanner')?.classList.add('hidden');
   document.getElementById('orgNameEl').textContent = S.org.name;
   document.getElementById('orgUrlEl').textContent  = S.org.instanceUrl;
+  // Restore org dot to green
+  const dot = document.querySelector('.org-dot');
+  if (dot) { dot.style.background = ''; dot.style.boxShadow = ''; }
   renderSnapBanner();
   renderMigrationBanner();
+  await detectApiVersion();
+  // If reconnecting (connectedAt recent), start fresh watcher
+  if (!_tokenExpiry) startSessionWatcher(7200);
   loadAutomations();
 }
 function disconnectOrg() {
+  if (!confirm('Disconnect from ' + (S.org?.name||'this org') + '? Your audit log and named snapshots will be kept.')) return;
   S.org = null; S.automations = []; S.snapshot = null; S.migrationMode = false;
+  S.filter = 'all'; S.search = '';
+  clearSessionWatcher();
+  const si = document.getElementById('searchInput');
+  if (si) si.value = '';
   saveStore();
   document.getElementById('dashboard').classList.add('hidden');
   document.getElementById('landing').classList.remove('hidden');
@@ -626,13 +941,41 @@ function disconnectOrg() {
 // ═══════════════ SF API ═══════════════
 async function sfGet(path) {
   const r = await fetch(`${S.org.instanceUrl}${path}`, {headers:{'Authorization':`Bearer ${S.org.accessToken}`,'Content-Type':'application/json'}});
-  if (!r.ok) { const t = await r.text(); throw new Error(`${r.status}: ${t.slice(0,120)}`); }
+  if (r.status === 401) { handleSessionExpiry(); throw new Error('Session expired — please reconnect'); }
+  if (!r.ok) { const t = await r.text(); throw new Error(`${r.status}: ${t.slice(0,200)}`); }
   return r.json();
 }
+function handleSessionExpiry() {
+  toast('Session expired — snapshot is safe, click Reconnect', 'err', 0); // 0 = stays until dismissed
+  audit('⚠ Session expired — snapshot preserved, reconnect to revert', 'err');
+  // Show reconnect banner, keep snapshot intact
+  const rb = document.getElementById('reconnectBanner');
+  if (rb) {
+    rb.classList.remove('hidden');
+    const snapDetail = document.getElementById('reconnectSnapDetail');
+    if (snapDetail && S.snapshot) {
+      const snapTotal = Object.keys(S.snapshot.map||{}).length;
+      const ts = new Date(S.snapshot.ts).toLocaleString();
+      snapDetail.textContent = '\u00ab' + (S.snapshot.name||'snapshot') + '\u00bb \u00b7 ' + snapTotal + ' automations \u00b7 saved ' + ts;
+    }
+  }
+  // Turn org dot red
+  const dot = document.querySelector('.org-dot');
+  if (dot) { dot.style.background = 'var(--red)'; dot.style.boxShadow = '0 0 8px var(--red)'; }
+}
 async function sfPatch(path, body) {
-  const r = await fetch(`${S.org.instanceUrl}${path}`, {method:'PATCH',headers:{'Authorization':`Bearer ${S.org.accessToken}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const r = await fetch(`${S.org.instanceUrl}${path}`, {
+    method:'PATCH',
+    headers:{'Authorization':`Bearer ${S.org.accessToken}`,'Content-Type':'application/json'},
+    body:JSON.stringify(body)
+  });
   if (r.status === 204) return true;
-  const t = await r.text(); try { return JSON.parse(t); } catch(e) { return t; }
+  const t = await r.text();
+  let parsed; try { parsed = JSON.parse(t); } catch(e) { parsed = t; }
+  if (Array.isArray(parsed) && parsed[0]?.errorCode) throw new Error(`${parsed[0].errorCode}: ${parsed[0].message}`);
+  if (parsed?.errorCode) throw new Error(`${parsed.errorCode}: ${parsed.message}`);
+  if (!r.ok) throw new Error(`HTTP ${r.status}: ${String(t).slice(0,120)}`);
+  return parsed;
 }
 
 // ═══════════════ LOAD ═══════════════
@@ -648,6 +991,11 @@ async function loadAutomations() {
     toast(`${S.automations.length} automations loaded`, 'ok');
     renderTypeCards();
     renderObjList();
+    // Auto-open revert modal if user came via Reconnect & Revert
+    if (S._autoRevert && S.snapshot) {
+      S._autoRevert = false;
+      setTimeout(() => { toast('Snapshot detected — opening revert…', 'warn', 2000); setTimeout(showRevertModal, 1800); }, 600);
+    }
   } catch(err) {
     audit(`load error: ${err.message}`, 'err');
     toast('Failed to load', 'err');
@@ -657,7 +1005,7 @@ async function loadAutomations() {
 }
 
 async function fetchVR() {
-  const d = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent('SELECT Id,ValidationName,Active,EntityDefinitionId,Description FROM ValidationRule ORDER BY EntityDefinitionId,ValidationName LIMIT 2000')}`);
+  const d = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent('SELECT Id,ValidationName,Active,EntityDefinitionId,Description FROM ValidationRule ORDER BY EntityDefinitionId,ValidationName LIMIT 2000')}`);
   const records = d.records || [];
   // Resolve EntityDefinitionId → QualifiedApiName via DurableId (EntityDefinitionId matches DurableId not Id)
   const ids = [...new Set(records.map(r => r.EntityDefinitionId).filter(Boolean))];
@@ -668,7 +1016,7 @@ async function fetchVR() {
     for (let i = 0; i < ids.length; i += 100) chunks.push(ids.slice(i, i+100));
     for (const chunk of chunks) {
       try {
-        const ed = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent(`SELECT DurableId,QualifiedApiName FROM EntityDefinition WHERE DurableId IN (${chunk.map(x=>`'${x}'`).join(',')}) LIMIT 500`)}`);
+        const ed = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent(`SELECT DurableId,QualifiedApiName FROM EntityDefinition WHERE DurableId IN (${chunk.map(x=>`'${x}'`).join(',')}) LIMIT 500`)}`);
         (ed.records||[]).forEach(r => { objMap[r.DurableId] = r.QualifiedApiName; });
       } catch(e) {
         // fallback: try KeyPrefix-based resolution
@@ -684,7 +1032,7 @@ async function fetchVR() {
 }
 
 async function fetchFlows() {
-  const d = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent('SELECT Id,DeveloperName,ActiveVersion.Id,ActiveVersion.ProcessType,LatestVersion.Id,LatestVersion.ProcessType FROM FlowDefinition ORDER BY DeveloperName LIMIT 2000')}`);
+  const d = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent('SELECT Id,DeveloperName,ActiveVersion.Id,ActiveVersion.ProcessType,LatestVersion.Id,LatestVersion.ProcessType FROM FlowDefinition ORDER BY DeveloperName LIMIT 2000')}`);
   const records = d.records || [];
   // Resolve trigger objects via FlowVersion in chunks
   const versionIds = [...new Set(records.map(r => r.LatestVersion?.Id || r.ActiveVersion?.Id).filter(Boolean))];
@@ -694,7 +1042,7 @@ async function fetchFlows() {
     for (let i = 0; i < versionIds.length; i += 100) chunks.push(versionIds.slice(i, i+100));
     for (const chunk of chunks) {
       try {
-        const vd = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent(`SELECT Id,TriggerObjectOrEventLabel,TriggerType,ProcessType FROM FlowVersion WHERE Id IN (${chunk.map(x=>`'${x}'`).join(',')}) LIMIT 500`)}`);
+        const vd = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent(`SELECT Id,TriggerObjectOrEventLabel,TriggerType,ProcessType FROM FlowVersion WHERE Id IN (${chunk.map(x=>`'${x}'`).join(',')}) LIMIT 500`)}`);
         (vd.records||[]).forEach(v => {
           // Best label: TriggerObjectOrEventLabel → TriggerType → ProcessType → 'No object'
           triggerMap[v.Id] = v.TriggerObjectOrEventLabel || v.TriggerType || v.ProcessType || 'No object';
@@ -714,14 +1062,14 @@ async function fetchFlows() {
 }
 
 async function fetchTriggers() {
-  const d = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent('SELECT Id,Name,Status,TableEnumOrId FROM ApexTrigger ORDER BY TableEnumOrId,Name LIMIT 2000')}`);
+  const d = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent('SELECT Id,Name,Status,TableEnumOrId FROM ApexTrigger ORDER BY TableEnumOrId,Name LIMIT 2000')}`);
   return (d.records||[]).map(r => ({id:r.Id, name:r.Name, active:r.Status==='Active', object:r.TableEnumOrId||'Unknown', type:'Apex Trigger', description:`Status: ${r.Status}`, apiToggle:'trigger'}));
 }
 
 async function fetchWF() {
   // WorkflowRule not available in Tooling API on some orgs — use REST API Metadata query instead
   try {
-    const d = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent('SELECT Id,Name,Active,TableEnumOrId FROM WorkflowRule ORDER BY TableEnumOrId,Name LIMIT 2000')}`);
+    const d = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent('SELECT Id,Name,Active,TableEnumOrId FROM WorkflowRule ORDER BY TableEnumOrId,Name LIMIT 2000')}`);
     return (d.records||[]).map(r => ({id:r.Id, name:r.Name, active:r.Active, object:r.TableEnumOrId||'Unknown', type:'Workflow Rule', description:'', apiToggle:'wf'}));
   } catch(e) {
     // Fallback: query via standard REST describe — WorkflowRule may not be in Tooling API on this org
@@ -733,14 +1081,42 @@ async function fetchWF() {
 // ═══════════════ TOGGLE ═══════════════
 async function doToggle(a, newActive) {
   if (a.apiToggle === 'vr') {
-    await sfPatch(`/services/data/v59.0/tooling/sobjects/ValidationRule/${a.id}`, {Active:newActive, Metadata:{active:newActive}});
+    // Must fetch full Metadata first — SF rejects partial Metadata updates
+    const full = await sfGet(`/services/data/${API_VER}/tooling/sobjects/ValidationRule/${a.id}`);
+    if (!full || !full.Metadata) throw new Error('Could not fetch ValidationRule Metadata — check Modify All Data permission');
+    const meta = { ...full.Metadata, active: newActive };
+    await sfPatch(`/services/data/${API_VER}/tooling/sobjects/ValidationRule/${a.id}`, { Metadata: meta });
+
   } else if (a.apiToggle === 'flow') {
-    await sfPatch(`/services/data/v59.0/tooling/sobjects/FlowDefinition/${a.id}`, {ActiveVersion: newActive && a.activeVersionId ? {Id:a.activeVersionId} : null});
+    if (newActive) {
+      // If we don't have activeVersionId (flow was inactive when loaded), fetch latest version
+      let versionId = a.activeVersionId;
+      if (!versionId) {
+        const fd = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent(`SELECT LatestVersion.Id FROM FlowDefinition WHERE Id='${a.id}' LIMIT 1`)}`);
+        versionId = fd.records?.[0]?.LatestVersion?.Id;
+        if (versionId) a.activeVersionId = versionId; // cache it
+      }
+      if (!versionId) throw new Error('No version found for this Flow — it may have no versions');
+      await sfPatch(`/services/data/${API_VER}/tooling/sobjects/FlowDefinition/${a.id}`, {ActiveVersion:{Id:versionId}});
+    } else {
+      await sfPatch(`/services/data/${API_VER}/tooling/sobjects/FlowDefinition/${a.id}`, {ActiveVersion:null});
+    }
+
   } else if (a.apiToggle === 'trigger') {
-    const q = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent(`SELECT Id,Status,Body FROM ApexTrigger WHERE Id='${a.id}' LIMIT 1`)}`);
-    if (q.records?.length) await sfPatch(`/services/data/v59.0/tooling/sobjects/ApexTrigger/${q.records[0].Id}`, {Status:newActive?'Active':'Inactive', Body:q.records[0].Body});
+    // Tooling API requires Body + Status together for ApexTrigger updates
+    const full = await sfGet(`/services/data/${API_VER}/tooling/sobjects/ApexTrigger/${a.id}?fields=Id,Status,Body`);
+    if (!full) throw new Error('Could not fetch ApexTrigger record');
+    if (!full.Body) throw new Error('ApexTrigger has no Body — may be a managed package trigger (cannot modify)');
+    await sfPatch(`/services/data/${API_VER}/tooling/sobjects/ApexTrigger/${a.id}`, {
+      Status: newActive ? 'Active' : 'Inactive',
+      Body: full.Body
+    });
+
   } else if (a.apiToggle === 'wf') {
-    await sfPatch(`/services/data/v59.0/tooling/sobjects/WorkflowRule/${a.id}`, {Active:newActive, Metadata:{active:newActive}});
+    const full = await sfGet(`/services/data/${API_VER}/tooling/sobjects/WorkflowRule/${a.id}`);
+    if (!full || !full.Metadata) throw new Error('Could not fetch WorkflowRule Metadata');
+    const meta = { ...full.Metadata, active: newActive };
+    await sfPatch(`/services/data/${API_VER}/tooling/sobjects/WorkflowRule/${a.id}`, { Metadata: meta });
   }
 }
 
@@ -813,8 +1189,13 @@ function bulkToggleType(type, newActive, e) {
   if (!items.length) { toast(`All ${type}s already ${newActive?'active':'inactive'}`, 'warn'); return; }
   confirmAction(`${newActive?'Enable':'Disable'} all ${type}s`, `This will ${newActive?'activate':'deactivate'} ${items.length} ${type}s.`, null, () => bulkToggle(items, newActive, `${newActive?'Enabling':'Disabling'} ${type}s`));
 }
-function bulkToggleObj(obj, type, newActive, e) {
-  if (e) e.stopPropagation();
+function bulkToggleObj(btn, newActive) {
+  if (btn && btn.stopPropagation) btn.stopPropagation();
+  // Walk up to find the obj-header data
+  const header = btn?.closest?.('.obj-group')?.querySelector?.('.obj-header');
+  const obj = header?.querySelector?.('.obj-title')?.textContent || '';
+  const type = S.activeType;
+  if (!obj) { toast('Could not identify object', 'err'); return; }
   const items = S.automations.filter(a => a.object === obj && a.type === type && a.active !== newActive);
   if (!items.length) { toast('Already up to date', 'warn'); return; }
   bulkToggle(items, newActive, `${newActive?'Enabling':'Disabling'} ${type}s on ${obj}`);
@@ -822,6 +1203,7 @@ function bulkToggleObj(obj, type, newActive, e) {
 
 // ═══════════════ MIGRATION MODE ═══════════════
 async function enterMigrationMode() {
+  if (S.migrationMode) { toast('Migration mode already active', 'warn'); return; }
   const active = S.automations.filter(a => a.active);
   if (!active.length) { toast('All automations already inactive', 'warn'); return; }
   confirmAction('🔴 Enter Migration Mode',
@@ -834,9 +1216,10 @@ async function enterMigrationMode() {
         saveStore();
         audit('📸 auto-snapshot taken before migration mode', 'warn');
       }
+      // Set migrationMode AFTER bulk completes so banner only shows on full success
+      await bulkToggle(S.automations.filter(a => a.active), false, 'Disabling all', 'migration-mode');
       S.migrationMode = true;
       saveStore();
-      await bulkToggle(S.automations.filter(a => a.active), false, 'Disabling all', 'migration-mode');
       renderMigrationBanner();
       renderSnapBanner();
     }
@@ -856,9 +1239,11 @@ function showRevertModal() {
   document.getElementById('confirmMsg').textContent = `Taken ${new Date(S.snapshot.ts).toLocaleString()}. ${toChange.length} automation(s) will change.`;
   document.getElementById('confirmActions').classList.remove('hidden');
   document.getElementById('confirmOkBtn').onclick = async () => {
-    if (!toChange.length) { clearSnap(); closeModal('confirmModal'); return; }
+    // Recompute at click time to catch any manual toggles since modal opened
+    const currentToChange = S.automations.filter(a => S.snapshot.map[a.id] !== undefined && S.snapshot.map[a.id] !== a.active);
+    if (!currentToChange.length) { clearSnap(); closeModal('confirmModal'); toast('Already matches snapshot', 'ok'); return; }
     document.getElementById('diffWrap').classList.add('hidden');
-    const items = toChange.map(a => ({...a, _target: S.snapshot.map[a.id]}));
+    const items = currentToChange.map(a => ({...a, _target: S.snapshot.map[a.id]}));
     closeModal('confirmModal');
     document.getElementById('confirmModal').classList.remove('hidden');
     document.getElementById('confirmActions').classList.add('hidden');
@@ -912,6 +1297,7 @@ function renderSnapList() {
 function saveNamedSnapshot() {
   const name = document.getElementById('snapNameInput').value.trim();
   if (!name) { toast('Enter a name', 'warn'); return; }
+  if (!S.automations.length) { toast('Load automations first before saving a snapshot', 'warn'); return; }
   if (S.snapshots.length >= 5) S.snapshots.pop();
   const map = {};
   S.automations.forEach(a => map[a.id] = a.active);
@@ -984,8 +1370,8 @@ function renderTypeCards() {
         <div class="tc-label">${cfg.label}</div>
         <div class="tc-pill ${pillCls}">${active}/${all.length} active</div>
         <div class="tc-bulks">
-          <button class="tc-bulk" onclick="bulkToggleType('${type}',true,event)">all on</button>
-          <button class="tc-bulk" onclick="bulkToggleType('${type}',false,event)">all off</button>
+          <button class="tc-bulk" onclick="event.stopPropagation();bulkToggleType('${type}',true,event)">all on</button>
+          <button class="tc-bulk" onclick="event.stopPropagation();bulkToggleType('${type}',false,event)">all off</button>
         </div>
       </div>`;
   }).join('');
@@ -1025,8 +1411,8 @@ function renderObjList() {
           <span class="obj-count">${items.length}</span>
           <span class="pill ${pillCls}">${activeN}/${items.length} active</span>
           <div class="obj-bulks">
-            <button class="obj-bulk" onclick="bulkToggleObj('${esc(obj)}','${esc(S.activeType)}',true,event)">all on</button>
-            <button class="obj-bulk" onclick="bulkToggleObj('${esc(obj)}','${esc(S.activeType)}',false,event)">all off</button>
+            <button class="obj-bulk" onclick="bulkToggleObj(this,true)">all on</button>
+            <button class="obj-bulk" onclick="bulkToggleObj(this,false)">all off</button>
           </div>
         </div>
         <div class="obj-body">${rows}</div>
@@ -1098,8 +1484,22 @@ function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'
 // ═══════════════ INIT ═══════════════
 if (S.org?.accessToken) {
   showDashboard();
+  // If we have connectedAt, estimate remaining time (assume 2hr tokens)
+  if (S.org.connectedAt) {
+    const elapsed = Math.floor((Date.now() - S.org.connectedAt) / 1000);
+    const remaining = Math.max(0, 7200 - elapsed);
+    if (remaining > 0) {
+      startSessionWatcher(remaining);
+    } else {
+      // Token likely expired — show reconnect immediately
+      handleSessionExpiry();
+    }
+  } else {
+    startSessionWatcher(7200);
+  }
 } else {
   document.getElementById('landing').classList.remove('hidden');
+  checkPendingRevert();
 }
 </script>
 </body>
