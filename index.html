@@ -148,6 +148,13 @@ body::before {
 .field-hint { font-size: 11px; color: var(--text3); line-height: 1.5; }
 .field-hint a { color: var(--amber); text-decoration: none; }
 .field-hint a:hover { text-decoration: underline; }
+.env-btn {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: var(--radius); padding: 14px 10px; cursor: pointer;
+  color: var(--text); text-align: center; transition: all 0.15s; font-family: var(--body);
+}
+.env-btn:hover { border-color: var(--border2); background: var(--surface3); }
+.env-btn.active { border-color: var(--amber); background: var(--amber3); }
 
 /* ── BUTTONS ── */
 .btn {
@@ -440,7 +447,7 @@ input:checked ~ .tslider::before { transform: translateX(19px); background: var(
     <span class="logo-ver">v2.0</span>
   </div>
   <div class="topbar-right" id="topbarRight">
-    <button class="btn btn-ghost" onclick="showSetupModal()" id="btnSetup">📋 Setup guide</button>
+    <button class="btn btn-ghost" onclick="showSetupModal()" id="btnSetup">ℹ️ How it works</button>
   </div>
 </nav>
 
@@ -450,29 +457,31 @@ input:checked ~ .tslider::before { transform: translateX(19px); background: var(
   <p class="landing-sub">Connect your Salesforce org to read, toggle, and snapshot every automation — grouped by object. Built for data migrations.</p>
 
   <div class="connect-box">
-    <h3>Connect via OAuth</h3>
-    <p>You'll be redirected to Salesforce to log in. Your token stays in your browser only — nothing is sent to any server.</p>
-
-    <div class="field">
-      <div class="field-label">Connected App Client ID</div>
-      <input class="field-input" id="clientId" placeholder="3MVG9xOCSsuQDlO…" />
-      <div class="field-hint">From Setup → App Manager → your Connected App. <a href="#" onclick="showSetupModal();return false;">Need help? See setup guide →</a></div>
-    </div>
+    <h3>Connect to Salesforce</h3>
+    <p>Pick your environment, give the org a nickname, then click Connect. You'll be redirected to Salesforce to log in — your token stays in your browser only.</p>
 
     <div class="field">
       <div class="field-label">Environment</div>
-      <select class="field-select" id="loginEnv">
-        <option value="https://login.salesforce.com">Production / Developer org</option>
-        <option value="https://test.salesforce.com">Sandbox</option>
-      </select>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="env-btn active" id="envProd" onclick="setEnv('prod',this)">
+          <div style="font-size:18px;margin-bottom:4px">🏢</div>
+          <div style="font-size:13px;font-weight:600">Production</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">login.salesforce.com</div>
+        </button>
+        <button class="env-btn" id="envSandbox" onclick="setEnv('sandbox',this)">
+          <div style="font-size:18px;margin-bottom:4px">🧪</div>
+          <div style="font-size:13px;font-weight:600">Sandbox</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">test.salesforce.com</div>
+        </button>
+      </div>
     </div>
 
     <div class="field">
       <div class="field-label">Org nickname (optional)</div>
-      <input class="field-input" id="orgNick" placeholder="e.g. CAIS Sandbox" />
+      <input class="field-input" id="orgNick" placeholder="e.g. CAIS Production, Client A Sandbox…" />
     </div>
 
-    <button class="btn btn-amber btn-full mt8" onclick="startOAuth()">
+    <button class="btn btn-amber btn-full mt8" onclick="startOAuth()" style="font-size:14px;padding:13px">
       🔐 Connect to Salesforce
     </button>
 
@@ -556,28 +565,28 @@ input:checked ~ .tslider::before { transform: translateX(19px); background: var(
 <!-- ═══ SETUP MODAL ═══ -->
 <div class="modal-backdrop hidden" id="setupModal">
   <div class="modal" style="max-width:520px">
-    <h3>⚡ One-time Setup</h3>
-    <p>You need a Connected App in each Salesforce org. This is a one-time step per org.</p>
+    <h3>⚡ How it works</h3>
+    <p>This tool uses a pre-registered Salesforce Connected App — no setup required for users. Just pick your environment and connect.</p>
     <div class="steps">
       <div class="step">
         <div class="step-num">1</div>
-        <div class="step-content">In Salesforce: <strong>Setup → App Manager → New Connected App</strong></div>
+        <div class="step-content">Pick <strong>Production</strong> or <strong>Sandbox</strong> on the connect screen</div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
-        <div class="step-content">Enable OAuth. Set callback URL to: <br><code id="callbackUrlDisplay" style="word-break:break-all"></code></div>
+        <div class="step-content">Click <strong>Connect to Salesforce</strong> — a Salesforce login window opens</div>
       </div>
       <div class="step">
         <div class="step-num">3</div>
-        <div class="step-content">Add OAuth scopes: <code>api</code>, <code>refresh_token</code>, <code>full</code></div>
+        <div class="step-content">Log in with your credentials → click <strong>Allow</strong> when prompted for permissions</div>
       </div>
       <div class="step">
         <div class="step-num">4</div>
-        <div class="step-content">Save, wait ~2 min for SF to propagate, then copy the <strong>Consumer Key</strong> (= Client ID) and paste it above.</div>
+        <div class="step-content">You're redirected back here — all automations load automatically, grouped by object</div>
       </div>
       <div class="step">
         <div class="step-num">5</div>
-        <div class="step-content">For <strong>Apex Triggers</strong> & <strong>Assignment Rules</strong> toggling, your profile needs <code>ModifyAllData</code> or <code>ManageMetadata</code> permission.</div>
+        <div class="step-content">Your profile needs <code>ModifyAllData</code> or <code>ManageMetadata</code> permission to toggle automations</div>
       </div>
     </div>
     <div class="modal-actions">
@@ -699,16 +708,22 @@ function confirm2(title, msg, onOk) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// OAUTH
+// OAUTH — hardcoded Connected App (no setup needed for users)
 // ═══════════════════════════════════════════════════════════════
+const BAKED_CLIENT_ID = '3MVG9GCMQoQ6rpzTViwky6e4Z5H5nh_DA.l0ehIFzS0Ocakc_DGmq9dOc35ob2ADS0FcSxpLDwobPftNSB_Yz';
+let selectedEnv = 'https://login.salesforce.com';
+
+function setEnv(type, btn) {
+  selectedEnv = type === 'sandbox' ? 'https://test.salesforce.com' : 'https://login.salesforce.com';
+  document.querySelectorAll('.env-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
 function startOAuth() {
-  const clientId = document.getElementById('clientId').value.trim();
-  const env      = document.getElementById('loginEnv').value;
-  const nick     = document.getElementById('orgNick').value.trim();
-  if (!clientId) { toast('Please enter your Connected App Client ID', 'err'); return; }
-  const cb = encodeURIComponent(window.location.href.split('?')[0].split('#')[0]);
-  const state = encodeURIComponent(JSON.stringify({ nick: nick || 'My Org', clientId }));
-  const url = `${env}/services/oauth2/authorize?response_type=token&client_id=${clientId}&redirect_uri=${cb}&state=${state}&prompt=login`;
+  const nick = document.getElementById('orgNick').value.trim();
+  const cb   = encodeURIComponent(window.location.href.split('?')[0].split('#')[0]);
+  const state = encodeURIComponent(JSON.stringify({ nick: nick || (selectedEnv.includes('test') ? 'Sandbox Org' : 'Production Org') }));
+  const url = `${selectedEnv}/services/oauth2/authorize?response_type=token&client_id=${BAKED_CLIENT_ID}&redirect_uri=${cb}&state=${state}&prompt=login`;
   log('opening Salesforce OAuth…', 'info');
   const popup = window.open(url, 'sfauth', 'width=640,height=720,resizable=yes');
   if (!popup) {
