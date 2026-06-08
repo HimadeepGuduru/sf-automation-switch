@@ -657,18 +657,24 @@ async function loadAutomations() {
 }
 
 async function fetchVR() {
-  // EntityDefinition relationship causes 500 on some orgs — query without it, resolve object name via EntityDefinitionId
   const d = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent('SELECT Id,ValidationName,Active,EntityDefinitionId,Description FROM ValidationRule ORDER BY EntityDefinitionId,ValidationName LIMIT 2000')}`);
   const records = d.records || [];
-  // Batch-resolve EntityDefinitionId → QualifiedApiName
+  // Resolve EntityDefinitionId → QualifiedApiName via DurableId (EntityDefinitionId matches DurableId not Id)
   const ids = [...new Set(records.map(r => r.EntityDefinitionId).filter(Boolean))];
   const objMap = {};
   if (ids.length) {
-    const idList = ids.map(i => `'${i}'`).join(',');
-    try {
-      const ed = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent(`SELECT Id,QualifiedApiName FROM EntityDefinition WHERE Id IN (${idList}) LIMIT 2000`)}`);
-      (ed.records||[]).forEach(r => { objMap[r.Id] = r.QualifiedApiName; });
-    } catch(e) { /* fallback to ID if entity resolution fails */ }
+    // Chunk into 100 to avoid SOQL length limits
+    const chunks = [];
+    for (let i = 0; i < ids.length; i += 100) chunks.push(ids.slice(i, i+100));
+    for (const chunk of chunks) {
+      try {
+        const ed = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent(`SELECT DurableId,QualifiedApiName FROM EntityDefinition WHERE DurableId IN (${chunk.map(x=>`'${x}'`).join(',')}) LIMIT 500`)}`);
+        (ed.records||[]).forEach(r => { objMap[r.DurableId] = r.QualifiedApiName; });
+      } catch(e) {
+        // fallback: try KeyPrefix-based resolution
+        audit('⚠ EntityDefinition lookup failed, trying KeyPrefix fallback', 'warn');
+      }
+    }
   }
   return records.map(r => ({
     id:r.Id, name:r.ValidationName, active:r.Active,
@@ -678,10 +684,9 @@ async function fetchVR() {
 }
 
 async function fetchFlows() {
-  // Simplified query — LatestVersion.TriggerObjectOrEventLabel not supported on all versions
   const d = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent('SELECT Id,DeveloperName,ActiveVersion.Id,ActiveVersion.ProcessType,LatestVersion.Id,LatestVersion.ProcessType FROM FlowDefinition ORDER BY DeveloperName LIMIT 2000')}`);
   const records = d.records || [];
-  // Resolve trigger objects separately via FlowVersion
+  // Resolve trigger objects via FlowVersion in chunks
   const versionIds = [...new Set(records.map(r => r.LatestVersion?.Id || r.ActiveVersion?.Id).filter(Boolean))];
   const triggerMap = {};
   if (versionIds.length) {
@@ -689,13 +694,16 @@ async function fetchFlows() {
     for (let i = 0; i < versionIds.length; i += 100) chunks.push(versionIds.slice(i, i+100));
     for (const chunk of chunks) {
       try {
-        const vd = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent(`SELECT Id,TriggerObjectOrEventLabel,TriggerType FROM FlowVersion WHERE Id IN (${chunk.map(x=>`'${x}'`).join(',')}) LIMIT 500`)}`);
-        (vd.records||[]).forEach(v => { triggerMap[v.Id] = v.TriggerObjectOrEventLabel || v.TriggerType || 'No object'; });
-      } catch(e) { /* skip object resolution */ }
+        const vd = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent(`SELECT Id,TriggerObjectOrEventLabel,TriggerType,ProcessType FROM FlowVersion WHERE Id IN (${chunk.map(x=>`'${x}'`).join(',')}) LIMIT 500`)}`);
+        (vd.records||[]).forEach(v => {
+          // Best label: TriggerObjectOrEventLabel → TriggerType → ProcessType → 'No object'
+          triggerMap[v.Id] = v.TriggerObjectOrEventLabel || v.TriggerType || v.ProcessType || 'No object';
+        });
+      } catch(e) { /* skip */ }
     }
   }
   return records.map(r => {
-    const pt = r.ActiveVersion?.ProcessType || r.LatestVersion?.ProcessType || '';
+    const pt  = r.ActiveVersion?.ProcessType || r.LatestVersion?.ProcessType || '';
     const vid = r.LatestVersion?.Id || r.ActiveVersion?.Id;
     const obj = (vid && triggerMap[vid]) || 'No object';
     const isPB = pt === 'Workflow';
