@@ -4,614 +4,408 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SF Automation Switch</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-/* ═══════════════════════════════════════════════════════════════
-   DESIGN SYSTEM — dark industrial / control-room aesthetic
-   Primary: slate-900 bg, amber accent, monospace data labels
-═══════════════════════════════════════════════════════════════ */
 :root {
-  --bg:       #0a0c0f;
-  --surface:  #111418;
-  --surface2: #181d24;
-  --surface3: #1e252f;
-  --border:   rgba(255,255,255,0.06);
-  --border2:  rgba(255,255,255,0.11);
-  --text:     #d4d8de;
-  --text2:    #8b95a1;
-  --text3:    #515c68;
-  --amber:    #f59e0b;
-  --amber2:   rgba(245,158,11,0.15);
-  --amber3:   rgba(245,158,11,0.08);
-  --green:    #10b981;
-  --green2:   rgba(16,185,129,0.12);
-  --red:      #f43f5e;
-  --red2:     rgba(244,63,94,0.12);
-  --blue:     #3b82f6;
-  --blue2:    rgba(59,130,246,0.12);
-  --mono:     'JetBrains Mono', monospace;
-  --display:  'Syne', sans-serif;
-  --body:     'Geist', sans-serif;
-  --radius:   10px;
-  --radius-lg:16px;
+  --bg:#0a0c0f; --s1:#111418; --s2:#181d24; --s3:#1e252f; --s4:#252e3a;
+  --b1:rgba(255,255,255,0.06); --b2:rgba(255,255,255,0.11); --b3:rgba(255,255,255,0.18);
+  --tx:#d4d8de; --tx2:#8b95a1; --tx3:#515c68;
+  --amber:#f59e0b; --amber2:rgba(245,158,11,0.15); --amber3:rgba(245,158,11,0.08);
+  --green:#10b981; --green2:rgba(16,185,129,0.15); --green3:rgba(16,185,129,0.08);
+  --red:#f43f5e; --red2:rgba(244,63,94,0.15); --red3:rgba(244,63,94,0.08);
+  --blue:#3b82f6; --blue2:rgba(59,130,246,0.15);
+  --vr:#8b5cf6; --vr2:rgba(139,92,246,0.15); --vr3:rgba(139,92,246,0.08);
+  --fl:#3b82f6; --fl2:rgba(59,130,246,0.15); --fl3:rgba(59,130,246,0.08);
+  --pb:#f43f5e; --pb2:rgba(244,63,94,0.15); --pb3:rgba(244,63,94,0.08);
+  --tr:#f59e0b; --tr2:rgba(245,158,11,0.15); --tr3:rgba(245,158,11,0.08);
+  --wf:#10b981; --wf2:rgba(16,185,129,0.15); --wf3:rgba(16,185,129,0.08);
+  --mono:'JetBrains Mono',monospace; --display:'Syne',sans-serif; --body:'Geist',sans-serif;
+  --r:10px; --rl:16px;
 }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--body);background:var(--bg);color:var(--tx);min-height:100vh;-webkit-font-smoothing:antialiased}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:200;background:rgba(10,12,15,0.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--b1);padding:0 24px;height:54px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:30px;height:30px;background:var(--amber);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 0 16px rgba(245,158,11,0.3);flex-shrink:0}
+.logo-name{font-family:var(--display);font-size:14px;font-weight:600;letter-spacing:-0.3px}
+.logo-ver{font-family:var(--mono);font-size:10px;color:var(--tx3);margin-left:2px}
+.topbar-right{display:flex;align-items:center;gap:8px}
 
-body {
-  font-family: var(--body);
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r);border:1px solid var(--b2);background:var(--s2);color:var(--tx);font-size:12px;font-weight:500;font-family:var(--body);cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.btn:hover{background:var(--s3);border-color:var(--b3)}
+.btn:active{transform:scale(0.97)}
+.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+.btn-amber{background:var(--amber);border-color:var(--amber);color:#0a0c0f;font-weight:600;box-shadow:0 0 14px rgba(245,158,11,0.2)}
+.btn-amber:hover{background:#fbbf24;border-color:#fbbf24}
+.btn-green{background:var(--green3);border-color:rgba(16,185,129,0.25);color:var(--green)}
+.btn-green:hover{background:var(--green2)}
+.btn-red{background:var(--red3);border-color:rgba(244,63,94,0.25);color:var(--red)}
+.btn-red:hover{background:var(--red2)}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--tx2)}
+.btn-ghost:hover{background:var(--s2);color:var(--tx)}
+.btn-full{width:100%;justify-content:center;padding:11px}
 
-/* ── NOISE OVERLAY ── */
-body::before {
-  content: '';
-  position: fixed; inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none; z-index: 0; opacity: 0.4;
-}
+/* LANDING */
+.landing{min-height:calc(100vh - 54px);display:flex;align-items:center;justify-content:center;flex-direction:column;padding:40px 24px;text-align:center}
+.landing-title{font-family:var(--display);font-size:clamp(32px,5vw,52px);font-weight:700;letter-spacing:-1.5px;line-height:1.05;margin-bottom:14px;background:linear-gradient(135deg,var(--tx) 40%,var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.landing-sub{font-size:15px;color:var(--tx2);max-width:460px;line-height:1.7;margin-bottom:48px}
+.connect-box{background:var(--s1);border:1px solid var(--b2);border-radius:var(--rl);padding:32px;width:100%;max-width:420px;text-align:left}
+.connect-box h3{font-family:var(--display);font-size:16px;font-weight:600;margin-bottom:6px}
+.connect-box p{font-size:13px;color:var(--tx2);margin-bottom:24px;line-height:1.6}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field-label{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--tx3)}
+.field-input{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);padding:9px 12px;color:var(--tx);font-size:13px;font-family:var(--body);outline:none;width:100%;transition:border-color 0.15s}
+.field-input:focus{border-color:var(--amber)}
+.field-input::placeholder{color:var(--tx3)}
+.env-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.env-btn{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);padding:14px 10px;cursor:pointer;color:var(--tx);text-align:center;transition:all 0.15s;font-family:var(--body)}
+.env-btn:hover{background:var(--s3)}
+.env-btn.active{border-color:var(--amber);background:var(--amber3)}
+.env-btn-icon{font-size:20px;margin-bottom:5px}
+.env-btn-label{font-size:13px;font-weight:500}
+.env-btn-sub{font-size:11px;color:var(--tx3);margin-top:2px}
 
-/* ── TOPBAR ── */
-.topbar {
-  position: sticky; top: 0; z-index: 200;
-  background: rgba(10,12,15,0.92);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-  padding: 0 28px;
-  height: 56px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.logo {
-  display: flex; align-items: center; gap: 12px;
-  font-family: var(--display);
-}
-.logo-mark {
-  width: 32px; height: 32px;
-  background: var(--amber);
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
-  box-shadow: 0 0 20px rgba(245,158,11,0.3);
-}
-.logo-name { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
-.logo-ver  { font-size: 10px; font-family: var(--mono); color: var(--text3); margin-left: 4px; }
+/* DASHBOARD */
+.dash{padding:20px 24px 100px;max-width:1200px;margin:0 auto}
 
-.topbar-right { display: flex; align-items: center; gap: 8px; }
+/* ORG STRIP */
+.org-strip{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);margin-bottom:20px;flex-wrap:wrap}
+.org-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);flex-shrink:0}
+.org-info{flex:1;min-width:0}
+.org-name{font-family:var(--display);font-size:14px;font-weight:600}
+.org-url{font-family:var(--mono);font-size:11px;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.org-actions{display:flex;gap:8px;flex-wrap:wrap}
 
-/* ── LAYOUT ── */
-.app { position: relative; z-index: 1; }
+/* MIGRATION MODE BANNER */
+.migration-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 18px;margin-bottom:20px;background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.25);border-radius:var(--rl);flex-wrap:wrap;animation:pulse-border 2s ease-in-out infinite}
+@keyframes pulse-border{0%,100%{border-color:rgba(244,63,94,0.25)}50%{border-color:rgba(244,63,94,0.5)}}
+.migration-banner-left{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--red)}
+.migration-live{width:8px;height:8px;border-radius:50%;background:var(--red);animation:blink 1s ease-in-out infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
 
-/* ── LANDING (connect screen) ── */
-.landing {
-  min-height: calc(100vh - 56px);
-  display: flex; align-items: center; justify-content: center;
-  flex-direction: column;
-  padding: 40px 24px;
-  text-align: center;
-}
-.landing-title {
-  font-family: var(--display);
-  font-size: clamp(28px, 5vw, 48px);
-  font-weight: 700;
-  letter-spacing: -1px;
-  line-height: 1.1;
-  margin-bottom: 16px;
-  background: linear-gradient(135deg, var(--text) 40%, var(--amber) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.landing-sub {
-  font-size: 15px; color: var(--text2); max-width: 480px;
-  line-height: 1.7; margin-bottom: 48px;
-}
-.connect-box {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius-lg);
-  padding: 32px;
-  width: 100%; max-width: 440px;
-  text-align: left;
-}
-.connect-box h3 {
-  font-family: var(--display); font-size: 16px; font-weight: 600;
-  margin-bottom: 6px;
-}
-.connect-box p { font-size: 13px; color: var(--text2); margin-bottom: 24px; line-height: 1.6; }
+/* SNAPSHOT BANNER */
+.snap-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;margin-bottom:20px;background:var(--amber3);border:1px solid rgba(245,158,11,0.2);border-radius:var(--rl);font-size:12px;color:var(--amber);flex-wrap:wrap}
+.snap-banner-left{display:flex;align-items:center;gap:8px}
+.snap-ts{font-family:var(--mono);font-size:11px;opacity:0.7}
 
-.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-.field-label {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
-  text-transform: uppercase; color: var(--text3);
-}
-.field-input, .field-select {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  padding: 10px 14px;
-  color: var(--text);
-  font-size: 13px; font-family: var(--body);
-  outline: none; width: 100%;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-.field-input:focus, .field-select:focus {
-  border-color: var(--amber);
-  box-shadow: 0 0 0 3px rgba(245,158,11,0.12);
-}
-.field-input::placeholder { color: var(--text3); }
-.field-select { appearance: none; cursor: pointer; }
-.field-hint { font-size: 11px; color: var(--text3); line-height: 1.5; }
-.field-hint a { color: var(--amber); text-decoration: none; }
-.field-hint a:hover { text-decoration: underline; }
-.env-btn {
-  background: var(--surface2); border: 1px solid var(--border2);
-  border-radius: var(--radius); padding: 14px 10px; cursor: pointer;
-  color: var(--text); text-align: center; transition: all 0.15s; font-family: var(--body);
-}
-.env-btn:hover { border-color: var(--border2); background: var(--surface3); }
-.env-btn.active { border-color: var(--amber); background: var(--amber3); }
+/* KPI TYPE CARDS */
+.type-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}
+.type-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);padding:16px 14px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+.type-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--rl) var(--rl) 0 0;transition:height 0.2s}
+.type-card.vr::before{background:var(--vr)}
+.type-card.fl::before{background:var(--fl)}
+.type-card.pb::before{background:var(--pb)}
+.type-card.tr::before{background:var(--tr)}
+.type-card.wf::before{background:var(--wf)}
+.type-card:hover{background:var(--s2);border-color:var(--b2)}
+.type-card.active{border-color:var(--b3);background:var(--s2)}
+.type-card.active::before{height:4px}
+.type-card.vr.active{border-color:rgba(139,92,246,0.4);background:var(--vr3)}
+.type-card.fl.active{border-color:rgba(59,130,246,0.4);background:var(--fl3)}
+.type-card.pb.active{border-color:rgba(244,63,94,0.4);background:var(--pb3)}
+.type-card.tr.active{border-color:rgba(245,158,11,0.4);background:var(--tr3)}
+.type-card.wf.active{border-color:rgba(16,185,129,0.4);background:var(--wf3)}
+.tc-num{font-family:var(--display);font-size:30px;font-weight:700;line-height:1;margin-top:4px}
+.type-card.vr .tc-num{color:var(--vr)}
+.type-card.fl .tc-num{color:var(--fl)}
+.type-card.pb .tc-num{color:var(--pb)}
+.type-card.tr .tc-num{color:var(--tr)}
+.type-card.wf .tc-num{color:var(--wf)}
+.tc-label{font-size:12px;color:var(--tx2);margin-top:6px;font-weight:500}
+.tc-pill{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:20px;margin-top:8px}
+.pill-all{background:var(--green3);color:var(--green)}
+.pill-mix{background:var(--amber3);color:var(--amber)}
+.pill-none{background:var(--red3);color:var(--red)}
+.tc-bulks{display:flex;gap:4px;margin-top:8px}
+.tc-bulk{font-size:10px;font-family:var(--mono);padding:3px 8px;border-radius:6px;border:1px solid var(--b2);background:transparent;color:var(--tx3);cursor:pointer;transition:all 0.15s}
+.tc-bulk:hover{border-color:var(--b3);color:var(--tx)}
 
-/* ── BUTTONS ── */
-.btn {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 9px 16px; border-radius: var(--radius);
-  border: 1px solid var(--border2);
-  background: var(--surface2);
-  color: var(--text);
-  font-size: 12px; font-weight: 500; font-family: var(--body);
-  cursor: pointer; transition: all 0.15s; white-space: nowrap;
-}
-.btn:hover  { border-color: var(--border2); background: var(--surface3); }
-.btn:active { transform: scale(0.97); }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-.btn-amber {
-  background: var(--amber); border-color: var(--amber);
-  color: #0a0c0f; font-weight: 600;
-  box-shadow: 0 0 16px rgba(245,158,11,0.25);
-}
-.btn-amber:hover { background: #fbbf24; border-color: #fbbf24; box-shadow: 0 0 24px rgba(245,158,11,0.4); }
-.btn-green  { background: var(--green2); border-color: rgba(16,185,129,0.3); color: var(--green); }
-.btn-green:hover { background: rgba(16,185,129,0.2); }
-.btn-red    { background: var(--red2);   border-color: rgba(244,63,94,0.3);   color: var(--red); }
-.btn-red:hover   { background: rgba(244,63,94,0.2); }
-.btn-ghost  { background: transparent; border-color: transparent; color: var(--text2); }
-.btn-ghost:hover { background: var(--surface2); color: var(--text); }
-.btn-full { width: 100%; justify-content: center; padding: 11px 16px; }
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.search-wrap{position:relative;flex:1;min-width:200px}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--tx3);font-size:13px;pointer-events:none}
+.search-input{background:var(--s1);border:1px solid var(--b2);border-radius:var(--r);padding:8px 12px 8px 32px;color:var(--tx);font-size:12px;font-family:var(--body);outline:none;width:100%;transition:border-color 0.15s}
+.search-input:focus{border-color:var(--amber)}
+.filter-btn{font-family:var(--mono);font-size:11px;padding:7px 12px}
+.filter-btn.active{background:var(--amber2);border-color:rgba(245,158,11,0.3);color:var(--amber)}
+.toolbar-right{display:flex;gap:6px;margin-left:auto}
 
-/* ── MAIN DASHBOARD ── */
-.dashboard { padding: 24px 28px; max-width: 1200px; margin: 0 auto; }
+/* OBJECT LIST */
+.obj-list{display:flex;flex-direction:column;gap:6px}
+.obj-group{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);overflow:hidden}
+.obj-header{display:flex;align-items:center;gap:12px;padding:13px 18px;cursor:pointer;transition:background 0.12s;user-select:none}
+.obj-header:hover{background:var(--s2)}
+.obj-chevron{font-size:10px;color:var(--tx3);transition:transform 0.2s;flex-shrink:0}
+.obj-chevron.open{transform:rotate(0deg)}
+.obj-chevron.closed{transform:rotate(-90deg)}
+.obj-title{font-family:var(--display);font-size:13px;font-weight:600;flex:1}
+.obj-count{font-family:var(--mono);font-size:10px;color:var(--tx3);background:var(--s3);padding:2px 8px;border-radius:8px}
+.obj-bulks{display:flex;gap:4px}
+.obj-bulk{font-size:10px;font-family:var(--mono);padding:3px 8px;border-radius:6px;border:1px solid var(--b2);background:transparent;color:var(--tx3);cursor:pointer;transition:all 0.15s}
+.obj-bulk:hover{border-color:var(--b3);color:var(--tx)}
+.obj-body{border-top:1px solid var(--b1)}
 
-/* ── ORG STRIP ── */
-.org-strip {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 18px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius-lg); margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-.org-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); flex-shrink: 0; }
-.org-name { font-family: var(--display); font-size: 14px; font-weight: 600; }
-.org-url  { font-family: var(--mono); font-size: 11px; color: var(--text3); }
-.org-sep  { flex: 1; }
-.status-pill {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500;
-  font-family: var(--mono);
-}
-.pill-green { background: var(--green2); color: var(--green); }
-.pill-red   { background: var(--red2);   color: var(--red); }
-.pill-amber { background: var(--amber2); color: var(--amber); }
-.pill-grey  { background: var(--surface3); color: var(--text3); }
+/* AUTOMATION ROW */
+.auto-row{display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--b1);transition:background 0.1s;position:relative}
+.auto-row:last-child{border-bottom:none}
+.auto-row:hover{background:var(--s2)}
+.auto-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;border-radius:0}
+.auto-row.active::before{background:var(--green)}
+.auto-row.inactive::before{background:var(--red)}
+.auto-status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.auto-row.active .auto-status-dot{background:var(--green)}
+.auto-row.inactive .auto-status-dot{background:var(--red)}
+.auto-name{font-size:13px;font-weight:500;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.auto-meta{font-family:var(--mono);font-size:10px;color:var(--tx3);margin-top:2px}
+.snap-was{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:5px;flex-shrink:0}
+.snap-was-on{background:var(--green3);color:var(--green)}
+.snap-was-off{background:var(--red3);color:var(--red)}
 
-/* ── STATS ROW ── */
-.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
-.stat-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: 16px 20px;
-}
-.stat-val { font-family: var(--display); font-size: 28px; font-weight: 700; line-height: 1; }
-.stat-label { font-family: var(--mono); font-size: 10px; letter-spacing: 1px; color: var(--text3); text-transform: uppercase; margin-top: 6px; }
-.stat-card.amber .stat-val { color: var(--amber); }
-.stat-card.green .stat-val { color: var(--green); }
-.stat-card.red   .stat-val { color: var(--red); }
+/* TOGGLE */
+.toggle{position:relative;width:40px;height:22px;flex-shrink:0;cursor:pointer}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.tslider{position:absolute;inset:0;background:var(--s3);border:1px solid var(--b2);border-radius:22px;transition:all 0.2s}
+.tslider::before{content:'';position:absolute;height:14px;width:14px;left:3px;bottom:3px;background:var(--tx3);border-radius:50%;transition:all 0.2s}
+input:checked~.tslider{background:var(--green3);border-color:rgba(16,185,129,0.4)}
+input:checked~.tslider::before{transform:translateX(18px);background:var(--green)}
+.toggle.loading .tslider::before{animation:spin 0.5s linear infinite;background:var(--amber)}
+@keyframes spin{to{transform:translateX(0) rotate(360deg)}}
 
-/* ── TOOLBAR ── */
-.toolbar {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
-}
-.toolbar-left  { display: flex; gap: 8px; flex-wrap: wrap; }
-.toolbar-right { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+/* STATUS PILLS */
+.pill{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:20px}
+.pill-green{background:var(--green3);color:var(--green)}
+.pill-amber{background:var(--amber3);color:var(--amber)}
+.pill-red{background:var(--red3);color:var(--red)}
+.pill-grey{background:var(--s3);color:var(--tx3)}
 
-.search-wrap { position: relative; }
-.search-input {
-  background: var(--surface); border: 1px solid var(--border2);
-  border-radius: var(--radius); padding: 8px 12px 8px 34px;
-  color: var(--text); font-size: 12px; font-family: var(--body); outline: none;
-  width: 220px; transition: border-color 0.15s;
-}
-.search-input:focus { border-color: var(--amber); }
-.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--text3); pointer-events: none; }
+/* SNAPSHOTS PANEL */
+.snapshots-panel{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);margin-bottom:20px;overflow:hidden}
+.snapshots-header{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--b1)}
+.snapshots-title{font-family:var(--display);font-size:13px;font-weight:600;flex:1}
+.snap-list{padding:8px 0}
+.snap-item{display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--b1);font-size:12px;transition:background 0.1s}
+.snap-item:last-child{border-bottom:none}
+.snap-item:hover{background:var(--s2)}
+.snap-item-name{font-weight:500;flex:1}
+.snap-item-ts{font-family:var(--mono);font-size:10px;color:var(--tx3)}
+.snap-item-counts{font-family:var(--mono);font-size:10px;color:var(--tx2)}
 
-.filter-btn { font-family: var(--mono); font-size: 11px; padding: 7px 12px; }
-.filter-btn.active { background: var(--amber2); border-color: rgba(245,158,11,0.3); color: var(--amber); }
+/* AUDIT LOG */
+.audit-panel{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(10,12,15,0.97);backdrop-filter:blur(16px);border-top:1px solid var(--b2)}
+.audit-toggle{display:flex;align-items:center;gap:10px;padding:8px 20px;cursor:pointer;border:none;background:transparent;width:100%;text-align:left}
+.audit-live{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.5s ease-in-out infinite}
+.audit-label{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--tx3);text-transform:uppercase}
+.audit-count{font-family:var(--mono);font-size:10px;color:var(--tx3);margin-left:auto}
+.audit-body{max-height:0;overflow:hidden;transition:max-height 0.2s}
+.audit-body.open{max-height:160px;overflow-y:auto}
+.audit-inner{padding:6px 20px 12px}
+.audit-row{display:flex;gap:12px;font-family:var(--mono);font-size:11px;line-height:1.8;align-items:baseline}
+.audit-ts{color:var(--tx3);flex-shrink:0;min-width:64px}
+.audit-type{padding:1px 6px;border-radius:4px;font-size:10px;flex-shrink:0}
+.audit-msg-ok{color:var(--green)}
+.audit-msg-err{color:var(--red)}
+.audit-msg-warn{color:var(--amber)}
+.audit-msg-info{color:var(--tx2)}
+.audit-export{font-size:11px;padding:4px 10px;margin-left:auto}
 
-/* ── SNAPSHOT BANNER ── */
-.snap-banner {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 12px 18px; margin-bottom: 20px;
-  background: var(--amber3); border: 1px solid rgba(245,158,11,0.2);
-  border-radius: var(--radius-lg); font-size: 12px; color: var(--amber);
-  flex-wrap: wrap;
-}
-.snap-banner-left { display: flex; align-items: center; gap: 10px; }
-.snap-ts { font-family: var(--mono); font-size: 11px; opacity: 0.7; }
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:500;padding:20px;animation:fadein 0.15s}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.modal{background:var(--s1);border:1px solid var(--b2);border-radius:var(--rl);padding:28px;width:100%;max-width:460px;animation:slideup 0.2s}
+@keyframes slideup{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal h3{font-family:var(--display);font-size:18px;font-weight:600;margin-bottom:8px}
+.modal p{font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:16px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+.progress-bar{height:2px;background:var(--b2);border-radius:2px;overflow:hidden;margin:10px 0}
+.progress-fill{height:100%;background:var(--amber);border-radius:2px;transition:width 0.3s}
 
-/* ── OBJECT GROUP ── */
-.object-group { margin-bottom: 24px; }
-.group-header {
-  display: flex; align-items: center; gap: 12px;
-  margin-bottom: 12px; cursor: pointer; user-select: none;
-}
-.group-chevron { color: var(--text3); font-size: 12px; transition: transform 0.2s; }
-.group-header.collapsed .group-chevron { transform: rotate(-90deg); }
-.group-title { font-family: var(--display); font-size: 13px; font-weight: 600; }
-.group-obj   { font-family: var(--mono); font-size: 11px; color: var(--text3); }
-.group-count { font-family: var(--mono); font-size: 10px; color: var(--text3); background: var(--surface2); padding: 2px 8px; border-radius: 10px; }
-.group-line  { flex: 1; height: 1px; background: var(--border); }
-.group-bulk  { display: flex; gap: 6px; }
+/* DIFF TABLE */
+.diff-table{width:100%;font-size:12px;border-collapse:collapse;margin:12px 0}
+.diff-table th{font-family:var(--mono);font-size:10px;color:var(--tx3);text-align:left;padding:4px 8px;border-bottom:1px solid var(--b2)}
+.diff-table td{padding:5px 8px;border-bottom:1px solid var(--b1)}
+.diff-on{color:var(--green);font-family:var(--mono);font-size:10px}
+.diff-off{color:var(--red);font-family:var(--mono);font-size:10px}
 
-.group-body { display: flex; flex-direction: column; gap: 1px; }
+/* STEPS */
+.steps{display:flex;flex-direction:column;gap:12px;margin:12px 0}
+.step{display:flex;gap:12px}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--amber);color:#0a0c0f;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-content{font-size:13px;color:var(--tx2);line-height:1.6}
+.step-content code{font-family:var(--mono);font-size:11px;background:var(--s3);padding:1px 5px;border-radius:4px;color:var(--tx)}
 
-/* ── AUTOMATION ROW ── */
-.auto-row {
-  display: flex; align-items: center; gap: 14px;
-  padding: 12px 18px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  transition: background 0.12s, border-color 0.12s;
-  position: relative; overflow: hidden;
-}
-.auto-row::before {
-  content: '';
-  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
-  border-radius: 3px 0 0 3px;
-  transition: background 0.2s;
-}
-.auto-row.active::before   { background: var(--green); }
-.auto-row.inactive::before { background: var(--red); }
-.auto-row:hover { background: var(--surface2); border-color: var(--border2); }
+/* TOAST */
+.toast-wrap{position:fixed;top:66px;right:20px;z-index:999;display:flex;flex-direction:column;gap:6px}
+.toast{background:var(--s1);border:1px solid var(--b2);border-radius:var(--r);padding:9px 14px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,0.4);animation:toast-in 0.2s;min-width:200px}
+.toast.ok{border-left:3px solid var(--green)}
+.toast.err{border-left:3px solid var(--red)}
+.toast.warn{border-left:3px solid var(--amber)}
+@keyframes toast-in{from{transform:translateX(16px);opacity:0}to{transform:translateX(0);opacity:1}}
 
-.auto-type-badge {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.5px;
-  padding: 3px 8px; border-radius: 6px; flex-shrink: 0;
-  font-weight: 500;
-}
-.badge-vr  { background: rgba(139,92,246,0.15); color: #a78bfa; }
-.badge-fl  { background: rgba(59,130,246,0.15);  color: #60a5fa; }
-.badge-tr  { background: rgba(245,158,11,0.15);  color: #fbbf24; }
-.badge-wf  { background: rgba(20,184,166,0.15);  color: #2dd4bf; }
-.badge-pb  { background: rgba(244,63,94,0.15);   color: #fb7185; }
-.badge-ar  { background: rgba(16,185,129,0.15);  color: #34d399; }
+/* SPINNER/SKELETON */
+.spinner{width:13px;height:13px;border:2px solid rgba(255,255,255,0.1);border-top-color:var(--amber);border-radius:50%;animation:spin 0.6s linear infinite;display:inline-block;flex-shrink:0}
+.skeleton{background:linear-gradient(90deg,var(--s2) 25%,var(--s3) 50%,var(--s2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;height:13px}
+@keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
 
-.auto-name { font-size: 13px; font-weight: 500; flex: 1; min-width: 0; }
-.auto-name-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.auto-meta { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 2px; }
-
-.auto-api-tag {
-  font-family: var(--mono); font-size: 10px; color: var(--text3);
-  background: var(--surface3); padding: 2px 7px; border-radius: 5px; flex-shrink: 0;
-}
-.snap-indicator {
-  font-family: var(--mono); font-size: 10px; padding: 2px 7px;
-  border-radius: 5px; flex-shrink: 0;
-}
-.snap-was-on  { background: var(--green2); color: var(--green); }
-.snap-was-off { background: var(--red2);   color: var(--red); }
-
-/* ── TOGGLE ── */
-.toggle { position: relative; width: 42px; height: 23px; flex-shrink: 0; cursor: pointer; }
-.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
-.tslider {
-  position: absolute; inset: 0;
-  background: var(--surface3); border: 1px solid var(--border2);
-  border-radius: 23px; transition: background 0.2s, border-color 0.2s;
-}
-.tslider::before {
-  content: ''; position: absolute;
-  height: 15px; width: 15px; left: 3px; bottom: 3px;
-  background: var(--text3); border-radius: 50%; transition: all 0.2s;
-}
-input:checked ~ .tslider { background: var(--green2); border-color: rgba(16,185,129,0.4); }
-input:checked ~ .tslider::before { transform: translateX(19px); background: var(--green); }
-.toggle.loading .tslider::before { animation: pulse-dot 0.6s ease-in-out infinite alternate; }
-@keyframes pulse-dot { from { opacity: 0.4; } to { opacity: 1; } }
-
-/* ── LOADING STATES ── */
-.spinner {
-  width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.15);
-  border-top-color: var(--amber); border-radius: 50%;
-  animation: spin 0.7s linear infinite; display: inline-block; flex-shrink: 0;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.skeleton {
-  background: linear-gradient(90deg, var(--surface2) 25%, var(--surface3) 50%, var(--surface2) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
-  border-radius: 6px; height: 14px;
-}
-@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
-
-/* ── LOG PANEL ── */
-.log-panel {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(10,12,15,0.96); backdrop-filter: blur(12px);
-  border-top: 1px solid var(--border); padding: 0;
-  transition: height 0.2s ease;
-}
-.log-toggle {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 20px; cursor: pointer;
-  border: none; background: transparent; width: 100%; text-align: left;
-}
-.log-toggle-label { font-family: var(--mono); font-size: 10px; letter-spacing: 1px; color: var(--text3); text-transform: uppercase; }
-.log-live { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 1.5s ease-in-out infinite; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-.log-body {
-  max-height: 0; overflow: hidden; transition: max-height 0.2s ease;
-  padding: 0 20px;
-}
-.log-body.open { max-height: 140px; overflow-y: auto; padding: 8px 20px 12px; }
-.log-entry { display: flex; gap: 12px; font-family: var(--mono); font-size: 11px; line-height: 1.8; }
-.log-ts    { color: var(--text3); flex-shrink: 0; }
-.log-ok    { color: var(--green); }
-.log-err   { color: var(--red); }
-.log-info  { color: var(--text2); }
-.log-warn  { color: var(--amber); }
-
-/* ── MODAL ── */
-.modal-backdrop {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.75);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 500; padding: 20px;
-  animation: fade-in 0.15s ease;
-}
-@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-.modal {
-  background: var(--surface); border: 1px solid var(--border2);
-  border-radius: var(--radius-lg); padding: 28px;
-  width: 100%; max-width: 460px;
-  animation: slide-up 0.2s ease;
-}
-@keyframes slide-up { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-.modal h3 { font-family: var(--display); font-size: 18px; font-weight: 600; margin-bottom: 8px; }
-.modal p  { font-size: 13px; color: var(--text2); line-height: 1.7; margin-bottom: 24px; }
-.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; }
-
-/* ── SETUP STEPS ── */
-.steps { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
-.step { display: flex; gap: 12px; }
-.step-num {
-  width: 24px; height: 24px; border-radius: 50%; background: var(--amber);
-  color: #0a0c0f; font-size: 11px; font-weight: 700; font-family: var(--display);
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
-}
-.step-content { font-size: 13px; color: var(--text2); line-height: 1.6; }
-.step-content code { font-family: var(--mono); font-size: 11px; background: var(--surface3); padding: 1px 5px; border-radius: 4px; color: var(--text); }
-.step-content a { color: var(--amber); }
-
-/* ── EMPTY / ERROR ── */
-.empty-state { padding: 60px 24px; text-align: center; color: var(--text2); }
-.empty-state .icon { font-size: 36px; margin-bottom: 12px; opacity: 0.4; }
-.empty-state h4 { font-family: var(--display); font-size: 15px; color: var(--text); margin-bottom: 6px; }
-.empty-state p  { font-size: 13px; max-width: 340px; margin: 0 auto; line-height: 1.6; }
-
-/* ── TOAST ── */
-.toast-container { position: fixed; top: 70px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
-.toast {
-  background: var(--surface); border: 1px solid var(--border2);
-  border-radius: var(--radius); padding: 10px 16px;
-  font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 8px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  animation: toast-in 0.2s ease; min-width: 220px;
-}
-.toast.ok   { border-left: 3px solid var(--green); }
-.toast.err  { border-left: 3px solid var(--red); }
-.toast.warn { border-left: 3px solid var(--amber); }
-@keyframes toast-in { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
-/* ── PROGRESS BAR ── */
-.progress-bar { height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; margin: 8px 0; }
-.progress-fill { height: 100%; background: var(--amber); border-radius: 2px; transition: width 0.3s ease; }
-
-/* ── UTIL ── */
-.hidden { display: none !important; }
-.mt8 { margin-top: 8px; }
-.page-pad { padding-bottom: 80px; }
+.empty{padding:48px 24px;text-align:center;color:var(--tx2)}
+.empty-icon{font-size:32px;margin-bottom:12px;opacity:0.3}
+.empty h4{font-family:var(--display);font-size:15px;color:var(--tx);margin-bottom:6px}
+.empty p{font-size:13px;max-width:320px;margin:0 auto;line-height:1.6}
+.hidden{display:none!important}
+.mt8{margin-top:8px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
 </style>
 </head>
 <body>
-<div class="app">
 
-<!-- ═══ TOPBAR ═══ -->
 <nav class="topbar">
   <div class="logo">
     <div class="logo-mark">⚡</div>
     <span class="logo-name">SF Automation Switch</span>
-    <span class="logo-ver">v2.0</span>
+    <span class="logo-ver">v3.0</span>
   </div>
   <div class="topbar-right" id="topbarRight">
-    <button class="btn btn-ghost" onclick="showSetupModal()" id="btnSetup">ℹ️ How it works</button>
+    <button class="btn btn-ghost" onclick="showModal('howModal')">ℹ️ How it works</button>
   </div>
 </nav>
 
-<!-- ═══ LANDING ═══ -->
-<div id="landing" class="landing">
+<!-- LANDING -->
+<div id="landing" class="landing hidden">
   <div class="landing-title">Automation<br>Control Center</div>
-  <p class="landing-sub">Connect your Salesforce org to read, toggle, and snapshot every automation — grouped by object. Built for data migrations.</p>
-
+  <p class="landing-sub">Connect any Salesforce org. Read, toggle, snapshot and revert every automation — grouped by type and object. Built for migrations.</p>
   <div class="connect-box">
     <h3>Connect to Salesforce</h3>
-    <p>Pick your environment, give the org a nickname, then click Connect. You'll be redirected to Salesforce to log in — your token stays in your browser only.</p>
-
+    <p>Pick your environment and connect. You'll log in via Salesforce — your token never leaves your browser.</p>
     <div class="field">
       <div class="field-label">Environment</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="env-grid">
         <button class="env-btn active" id="envProd" onclick="setEnv('prod',this)">
-          <div style="font-size:18px;margin-bottom:4px">🏢</div>
-          <div style="font-size:13px;font-weight:600">Production</div>
-          <div style="font-size:11px;color:var(--text3);margin-top:2px">login.salesforce.com</div>
+          <div class="env-btn-icon">🏢</div>
+          <div class="env-btn-label">Production</div>
+          <div class="env-btn-sub">login.salesforce.com</div>
         </button>
-        <button class="env-btn" id="envSandbox" onclick="setEnv('sandbox',this)">
-          <div style="font-size:18px;margin-bottom:4px">🧪</div>
-          <div style="font-size:13px;font-weight:600">Sandbox</div>
-          <div style="font-size:11px;color:var(--text3);margin-top:2px">test.salesforce.com</div>
+        <button class="env-btn" id="envSb" onclick="setEnv('sandbox',this)">
+          <div class="env-btn-icon">🧪</div>
+          <div class="env-btn-label">Sandbox</div>
+          <div class="env-btn-sub">test.salesforce.com</div>
         </button>
       </div>
     </div>
-
     <div class="field">
       <div class="field-label">Org nickname (optional)</div>
-      <input class="field-input" id="orgNick" placeholder="e.g. CAIS Production, Client A Sandbox…" />
+      <input class="field-input" id="orgNick" placeholder="e.g. CAIS Production, Client A Dev…">
     </div>
-
-    <button class="btn btn-amber btn-full mt8" onclick="startOAuth()" style="font-size:14px;padding:13px">
-      🔐 Connect to Salesforce
-    </button>
-
-    <div style="margin-top:16px;text-align:center;font-size:12px;color:var(--text3)">
-      or <a href="#" style="color:var(--amber)" onclick="showManualModal();return false;">paste access token manually</a>
-    </div>
+    <button class="btn btn-amber btn-full mt8" style="font-size:14px;padding:13px" onclick="startOAuth()">🔐 Connect to Salesforce</button>
+    <div style="margin-top:14px;text-align:center;font-size:12px;color:var(--tx3)">or <a href="#" style="color:var(--amber)" onclick="showModal('manualModal');return false">paste access token manually</a></div>
   </div>
 </div>
 
-<!-- ═══ DASHBOARD ═══ -->
-<div id="dashboard" class="dashboard page-pad hidden">
+<!-- DASHBOARD -->
+<div id="dashboard" class="dash hidden">
 
   <!-- ORG STRIP -->
   <div class="org-strip">
     <div class="org-dot"></div>
-    <div>
-      <div class="org-name" id="orgNameDisplay">—</div>
-      <div class="org-url"  id="orgUrlDisplay">—</div>
+    <div class="org-info">
+      <div class="org-name" id="orgNameEl">—</div>
+      <div class="org-url" id="orgUrlEl">—</div>
     </div>
-    <div class="org-sep"></div>
-    <div id="orgStatusPill" class="status-pill pill-green">● connected</div>
-    <button class="btn btn-ghost" onclick="disconnectOrg()" style="font-size:11px">✕ Disconnect</button>
+    <div class="org-actions">
+      <button class="btn btn-ghost" style="font-size:11px" onclick="disconnectOrg()">✕ Disconnect</button>
+    </div>
   </div>
 
-  <!-- STATS -->
-  <div class="stats-row" id="statsRow">
-    <div class="stat-card amber"><div class="stat-val" id="statTotal">—</div><div class="stat-label">total automations</div></div>
-    <div class="stat-card green"><div class="stat-val" id="statActive">—</div><div class="stat-label">active</div></div>
-    <div class="stat-card red">  <div class="stat-val" id="statInactive">—</div><div class="stat-label">inactive</div></div>
-    <div class="stat-card">      <div class="stat-val" id="statObjects" style="color:var(--blue)">—</div><div class="stat-label">objects</div></div>
+  <!-- MIGRATION BANNER -->
+  <div id="migrationBanner" class="migration-banner hidden">
+    <div class="migration-banner-left">
+      <div class="migration-live"></div>
+      <strong>Migration mode active</strong> — all automations disabled. Snapshot saved.
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-amber" onclick="showRevertModal()" id="btnRevert">↩ Revert to snapshot</button>
+    </div>
   </div>
 
   <!-- SNAPSHOT BANNER -->
   <div id="snapBanner" class="snap-banner hidden">
     <div class="snap-banner-left">
       <span>📸</span>
-      <span>Snapshot saved — <strong>Revert</strong> will restore the exact pre-migration state of each automation.</span>
+      <span>Snapshot saved — revert restores exact pre-migration state</span>
       <span class="snap-ts" id="snapTs"></span>
     </div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-amber" onclick="revertSnapshot()" id="btnRevert">↩ Revert to snapshot</button>
-      <button class="btn btn-ghost" onclick="clearSnapshot()" style="font-size:11px">✕</button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn btn-amber" onclick="showRevertModal()" id="btnRevert2">↩ Revert</button>
+      <button class="btn btn-ghost" style="font-size:11px" onclick="clearSnap()">✕</button>
     </div>
   </div>
+
+  <!-- KPI TYPE CARDS -->
+  <div class="type-cards" id="typeCards"></div>
 
   <!-- TOOLBAR -->
   <div class="toolbar">
-    <div class="toolbar-left">
-      <div class="search-wrap">
-        <span class="search-icon">🔍</span>
-        <input class="search-input" id="searchInput" placeholder="Search automations…" oninput="applyFilters()">
-      </div>
-      <button class="btn filter-btn active" data-filter="all"    onclick="setFilter('all',this)">All</button>
-      <button class="btn filter-btn"        data-filter="active"   onclick="setFilter('active',this)">Active</button>
-      <button class="btn filter-btn"        data-filter="inactive" onclick="setFilter('inactive',this)">Inactive</button>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="searchInput" placeholder="Search automations or objects…" oninput="applyFilters()">
     </div>
+    <button class="btn filter-btn active" onclick="setFilter('all',this)">All</button>
+    <button class="btn filter-btn" onclick="setFilter('active',this)">Active</button>
+    <button class="btn filter-btn" onclick="setFilter('inactive',this)">Inactive</button>
     <div class="toolbar-right">
       <button class="btn" onclick="loadAutomations()" id="btnRefresh">↻ Refresh</button>
-      <button class="btn btn-red"   onclick="disableAll()" id="btnDisableAll">🔴 Disable all</button>
-      <button class="btn btn-green" onclick="enableAll()"  id="btnEnableAll">🟢 Enable all</button>
+      <button class="btn" onclick="showSnapshotsModal()">📸 Snapshots</button>
+      <button class="btn btn-red" onclick="enterMigrationMode()" id="btnMigrate">🔴 Migration mode</button>
     </div>
   </div>
 
-  <!-- AUTOMATION GROUPS -->
-  <div id="groupsContainer"></div>
+  <!-- OBJECT LIST -->
+  <div id="objList" class="obj-list"></div>
+
 </div>
 
-<!-- ═══ LOG PANEL ═══ -->
-<div class="log-panel">
-  <button class="log-toggle" onclick="toggleLog()">
-    <div class="log-live"></div>
-    <span class="log-toggle-label">Activity log</span>
-    <span id="logCount" style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-left:auto">0 events</span>
+<!-- AUDIT LOG -->
+<div class="audit-panel">
+  <button class="audit-toggle" onclick="toggleAudit()">
+    <div class="audit-live"></div>
+    <span class="audit-label">Audit log</span>
+    <span id="auditCount" class="audit-count">0 events</span>
+    <button class="btn btn-ghost audit-export" onclick="event.stopPropagation();exportAudit()" title="Export CSV">⬇ CSV</button>
   </button>
-  <div class="log-body" id="logBody"></div>
-</div>
-
-<!-- ═══ TOAST CONTAINER ═══ -->
-<div class="toast-container" id="toastContainer"></div>
-
-<!-- ═══ SETUP MODAL ═══ -->
-<div class="modal-backdrop hidden" id="setupModal">
-  <div class="modal" style="max-width:520px">
-    <h3>⚡ How it works</h3>
-    <p>This tool uses a pre-registered Salesforce Connected App — no setup required for users. Just pick your environment and connect.</p>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-content">Pick <strong>Production</strong> or <strong>Sandbox</strong> on the connect screen</div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-content">Click <strong>Connect to Salesforce</strong> — a Salesforce login window opens</div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-content">Log in with your credentials → click <strong>Allow</strong> when prompted for permissions</div>
-      </div>
-      <div class="step">
-        <div class="step-num">4</div>
-        <div class="step-content">You're redirected back here — all automations load automatically, grouped by object</div>
-      </div>
-      <div class="step">
-        <div class="step-num">5</div>
-        <div class="step-content">Your profile needs <code>ModifyAllData</code> or <code>ManageMetadata</code> permission to toggle automations</div>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-amber" onclick="closeModal('setupModal')">Got it</button>
-    </div>
+  <div class="audit-body" id="auditBody">
+    <div class="audit-inner" id="auditInner"></div>
   </div>
 </div>
 
-<!-- ═══ MANUAL TOKEN MODAL ═══ -->
-<div class="modal-backdrop hidden" id="manualModal">
+<!-- TOASTS -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- HOW IT WORKS MODAL -->
+<div class="modal-bg hidden" id="howModal">
+  <div class="modal">
+    <h3>⚡ How it works</h3>
+    <p>No setup needed. This tool uses a pre-registered Connected App. Just connect and go.</p>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-content">Pick <strong>Production</strong> or <strong>Sandbox</strong> → click Connect</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-content">Log in with your Salesforce credentials → click <strong>Allow</strong></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-content">All automations load grouped by <strong>type</strong> → expand to see objects</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-content"><strong>Migration mode</strong> — auto-snapshots then disables everything. Revert restores exact prior state</div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-content">Every change is logged in the <strong>Audit log</strong> with export to CSV</div></div>
+    </div>
+    <div class="modal-actions"><button class="btn btn-amber" onclick="closeModal('howModal')">Got it</button></div>
+  </div>
+</div>
+
+<!-- MANUAL TOKEN MODAL -->
+<div class="modal-bg hidden" id="manualModal">
   <div class="modal">
     <h3>Paste Access Token</h3>
-    <p>OAuth popup was blocked or you prefer to connect manually. Get your token from Workbench or <code style="font-family:var(--mono);font-size:11px;background:var(--surface3);padding:1px 5px;border-radius:4px">sfdx org display</code>.</p>
-    <div class="field">
-      <div class="field-label">Instance URL</div>
-      <input class="field-input" id="manualInstance" placeholder="https://yourorg.my.salesforce.com" />
-    </div>
-    <div class="field">
-      <div class="field-label">Access Token</div>
-      <input class="field-input" id="manualToken" placeholder="00D…" />
-    </div>
-    <div class="field">
-      <div class="field-label">Org nickname (optional)</div>
-      <input class="field-input" id="manualNick" placeholder="e.g. CAIS Production" />
-    </div>
+    <p>Get your token from Workbench or <code style="font-family:var(--mono);font-size:11px;background:var(--s3);padding:1px 5px;border-radius:4px">sf org display</code> via SFDX.</p>
+    <div class="field"><div class="field-label">Instance URL</div><input class="field-input" id="manualInst" placeholder="https://yourorg.my.salesforce.com"></div>
+    <div class="field"><div class="field-label">Access Token</div><input class="field-input" id="manualTok" placeholder="00D…"></div>
+    <div class="field"><div class="field-label">Org nickname</div><input class="field-input" id="manualNick" placeholder="e.g. CAIS Production"></div>
     <div class="modal-actions">
       <button class="btn" onclick="closeModal('manualModal')">Cancel</button>
       <button class="btn btn-amber" onclick="connectManual()">Connect</button>
@@ -619,14 +413,19 @@ input:checked ~ .tslider::before { transform: translateX(19px); background: var(
   </div>
 </div>
 
-<!-- ═══ CONFIRM MODAL ═══ -->
-<div class="modal-backdrop hidden" id="confirmModal">
+<!-- CONFIRM / PROGRESS MODAL -->
+<div class="modal-bg hidden" id="confirmModal">
   <div class="modal">
-    <h3 id="confirmTitle">Are you sure?</h3>
+    <h3 id="confirmTitle">Confirm</h3>
     <p id="confirmMsg"></p>
-    <div id="confirmProgress" class="hidden">
+    <div id="diffWrap" class="hidden">
+      <div style="max-height:180px;overflow-y:auto">
+        <table class="diff-table"><thead><tr><th>Automation</th><th>Object</th><th>Type</th><th>Change</th></tr></thead><tbody id="diffBody"></tbody></table>
+      </div>
+    </div>
+    <div id="progressWrap" class="hidden">
       <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-      <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:4px" id="progressLabel"></div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);margin-top:4px" id="progressLabel"></div>
     </div>
     <div class="modal-actions" id="confirmActions">
       <button class="btn" onclick="closeModal('confirmModal')">Cancel</button>
@@ -635,578 +434,578 @@ input:checked ~ .tslider::before { transform: translateX(19px); background: var(
   </div>
 </div>
 
+<!-- SNAPSHOTS MODAL -->
+<div class="modal-bg hidden" id="snapshotsModal">
+  <div class="modal" style="max-width:500px">
+    <h3>📸 Snapshots</h3>
+    <p>Up to 5 named snapshots are saved. Each captures the exact active/inactive state of every automation.</p>
+    <div id="snapListEl"></div>
+    <div style="margin-top:16px">
+      <div class="field"><div class="field-label">Save current state as new snapshot</div>
+        <div style="display:flex;gap:8px">
+          <input class="field-input" id="snapNameInput" placeholder="e.g. Before Q2 migration" style="flex:1">
+          <button class="btn btn-amber" onclick="saveNamedSnapshot()">Save</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions"><button class="btn" onclick="closeModal('snapshotsModal')">Close</button></div>
+  </div>
+</div>
+
 <script>
-// ═══════════════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════════════
-const STORE_KEY = 'sfas_v2';
+// ═══════════════ CONFIG ═══════════════
+const CLIENT_ID = '3MVG9GCMQoQ6rpzTViwky6e4Z5H5nh_DA.l0ehIFzS0Ocakc_DGmq9dOc35ob2ADS0FcSxpLDwobPftNSB_Yz';
+const STORE_KEY = 'sfas_v3';
+const TYPE_ORDER = ['Validation Rule','Flow','Process Builder','Apex Trigger','Workflow Rule'];
+const TYPE_CFG = {
+  'Validation Rule': {cls:'vr', label:'Validation Rules',   icon:'🛡️'},
+  'Flow':            {cls:'fl', label:'Flows',               icon:'🔀'},
+  'Process Builder': {cls:'pb', label:'Process Builder',     icon:'🏗️'},
+  'Apex Trigger':    {cls:'tr', label:'Apex Triggers',       icon:'⚡'},
+  'Workflow Rule':   {cls:'wf', label:'Workflow Rules',      icon:'↔️'},
+};
+
+// ═══════════════ STATE ═══════════════
 let S = {
-  org: null,       // { instanceUrl, accessToken, name }
-  automations: [], // full list from API
-  snapshot: null,  // { ts, map: {id: active} }
+  org: null,
+  automations: [],
+  activeType: 'Validation Rule',
   filter: 'all',
   search: '',
+  snapshot: null,       // current working snapshot {ts, map, name}
+  snapshots: [],        // named snapshots [{ts, map, name, counts}]
+  migrationMode: false,
+  auditLog: [],         // [{ts, org, name, object, type, from, to, trigger}]
 };
 
 function loadStore() {
-  try { const d = localStorage.getItem(STORE_KEY); if(d) { const p = JSON.parse(d); S.org = p.org||null; S.snapshot = p.snapshot||null; } } catch(e){}
+  try {
+    const d = localStorage.getItem(STORE_KEY);
+    if (d) {
+      const p = JSON.parse(d);
+      S.org = p.org || null;
+      S.snapshot = p.snapshot || null;
+      S.snapshots = p.snapshots || [];
+      S.auditLog = p.auditLog || [];
+      S.migrationMode = p.migrationMode || false;
+    }
+  } catch(e){}
 }
 function saveStore() {
-  try { localStorage.setItem(STORE_KEY, JSON.stringify({ org: S.org, snapshot: S.snapshot })); } catch(e){}
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({org:S.org, snapshot:S.snapshot, snapshots:S.snapshots, auditLog:S.auditLog.slice(0,500), migrationMode:S.migrationMode})); } catch(e){}
 }
 loadStore();
 
-// ═══════════════════════════════════════════════════════════════
-// LOG
-// ═══════════════════════════════════════════════════════════════
-let logOpen = false, logCount = 0;
-function log(msg, type='info') {
-  logCount++;
-  document.getElementById('logCount').textContent = logCount + ' event' + (logCount!==1?'s':'');
-  const body = document.getElementById('logBody');
-  const ts = new Date().toTimeString().slice(0,8);
-  const el = document.createElement('div');
-  el.className = 'log-entry';
-  el.innerHTML = `<span class="log-ts">${ts}</span><span class="log-${type}">${msg}</span>`;
-  body.insertBefore(el, body.firstChild);
-  if (body.children.length > 100) body.removeChild(body.lastChild);
+// ═══════════════ AUDIT ═══════════════
+let auditOpen = false;
+function audit(msg, type='info', meta={}) {
+  const ts = new Date().toISOString();
+  S.auditLog.unshift({ts, msg, type, org: S.org?.name || '—', ...meta});
+  if (S.auditLog.length > 500) S.auditLog.pop();
+  saveStore();
+  renderAuditRow({ts, msg, type});
+  document.getElementById('auditCount').textContent = S.auditLog.length + ' event' + (S.auditLog.length !== 1 ? 's' : '');
 }
-function toggleLog() {
-  logOpen = !logOpen;
-  document.getElementById('logBody').classList.toggle('open', logOpen);
+function renderAuditRow(e) {
+  const inner = document.getElementById('auditInner');
+  const el = document.createElement('div');
+  el.className = 'audit-row';
+  const t = new Date(e.ts).toTimeString().slice(0,8);
+  el.innerHTML = `<span class="audit-ts">${t}</span><span class="audit-msg-${e.type}">${e.msg}</span>`;
+  inner.insertBefore(el, inner.firstChild);
+  if (inner.children.length > 100) inner.removeChild(inner.lastChild);
+}
+function toggleAudit() {
+  auditOpen = !auditOpen;
+  document.getElementById('auditBody').classList.toggle('open', auditOpen);
+}
+function exportAudit() {
+  const rows = [['Timestamp','Org','Message','Type']];
+  S.auditLog.forEach(e => rows.push([e.ts, e.org||'', e.msg||'', e.type||'']));
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = `sf-automation-audit-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  toast('Audit log exported', 'ok');
 }
 
-// ═══════════════════════════════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════════════════════════════
-function toast(msg, type='ok', duration=3000) {
-  const c = document.getElementById('toastContainer');
+// Init audit from stored log
+S.auditLog.slice(0,50).reverse().forEach(e => renderAuditRow(e));
+document.getElementById('auditCount').textContent = S.auditLog.length + ' events';
+
+// ═══════════════ TOAST ═══════════════
+function toast(msg, type='ok', dur=3000) {
+  const wrap = document.getElementById('toastWrap');
   const el = document.createElement('div');
   el.className = `toast ${type}`;
-  const icon = type==='ok'?'✓':type==='err'?'✕':'⚠';
-  el.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
-  c.appendChild(el);
-  setTimeout(() => { el.style.opacity='0'; el.style.transform='translateX(20px)'; el.style.transition='all 0.3s'; setTimeout(()=>el.remove(),300); }, duration);
+  el.innerHTML = `<span>${type==='ok'?'✓':type==='err'?'✕':'⚠'}</span><span>${msg}</span>`;
+  wrap.appendChild(el);
+  setTimeout(() => { el.style.opacity='0'; el.style.transform='translateX(16px)'; el.style.transition='all 0.3s'; setTimeout(()=>el.remove(),300); }, dur);
 }
 
-// ═══════════════════════════════════════════════════════════════
-// MODAL
-// ═══════════════════════════════════════════════════════════════
-function showSetupModal()  { document.getElementById('callbackUrlDisplay').textContent = window.location.href.split('?')[0].split('#')[0]; document.getElementById('setupModal').classList.remove('hidden'); }
-function showManualModal() { document.getElementById('manualModal').classList.remove('hidden'); }
-function closeModal(id)    { document.getElementById(id).classList.add('hidden'); }
-document.querySelectorAll('.modal-backdrop').forEach(b => b.addEventListener('click', e => { if(e.target===b) b.classList.add('hidden'); }));
+// ═══════════════ MODAL ═══════════════
+function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+document.querySelectorAll('.modal-bg').forEach(b => b.addEventListener('click', e => { if(e.target===b) b.classList.add('hidden'); }));
 
-function confirm2(title, msg, onOk) {
-  document.getElementById('confirmTitle').textContent = title;
-  document.getElementById('confirmMsg').textContent = msg;
-  document.getElementById('confirmProgress').classList.add('hidden');
-  document.getElementById('confirmActions').classList.remove('hidden');
-  const btn = document.getElementById('confirmOkBtn');
-  btn.onclick = () => { onOk(); };
-  document.getElementById('confirmModal').classList.remove('hidden');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// OAUTH — hardcoded Connected App (no setup needed for users)
-// ═══════════════════════════════════════════════════════════════
-const BAKED_CLIENT_ID = '3MVG9GCMQoQ6rpzTViwky6e4Z5H5nh_DA.l0ehIFzS0Ocakc_DGmq9dOc35ob2ADS0FcSxpLDwobPftNSB_Yz';
-let selectedEnv = 'https://login.salesforce.com';
-
+// ═══════════════ OAUTH ═══════════════
+let selEnv = 'https://login.salesforce.com';
 function setEnv(type, btn) {
-  selectedEnv = type === 'sandbox' ? 'https://test.salesforce.com' : 'https://login.salesforce.com';
+  selEnv = type === 'sandbox' ? 'https://test.salesforce.com' : 'https://login.salesforce.com';
   document.querySelectorAll('.env-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
 }
-
 function startOAuth() {
   const nick = document.getElementById('orgNick').value.trim();
-  const cb   = encodeURIComponent(window.location.href.split('?')[0].split('#')[0]);
-  const state = encodeURIComponent(JSON.stringify({ nick: nick || (selectedEnv.includes('test') ? 'Sandbox Org' : 'Production Org') }));
-  const url = `${selectedEnv}/services/oauth2/authorize?response_type=token&client_id=${BAKED_CLIENT_ID}&redirect_uri=${cb}&state=${state}&prompt=login`;
-  log('opening Salesforce OAuth…', 'info');
+  const cb = encodeURIComponent(window.location.href.split('?')[0].split('#')[0]);
+  const state = encodeURIComponent(JSON.stringify({nick: nick || (selEnv.includes('test') ? 'Sandbox' : 'Production')}));
+  const url = `${selEnv}/services/oauth2/authorize?response_type=token&client_id=${CLIENT_ID}&redirect_uri=${cb}&state=${state}&prompt=login`;
+  audit('opening OAuth…', 'info');
   const popup = window.open(url, 'sfauth', 'width=640,height=720,resizable=yes');
-  if (!popup) {
-    toast('Popup blocked — please use "paste access token" instead', 'warn');
-    showManualModal();
-    return;
-  }
+  if (!popup) { toast('Popup blocked — use manual token', 'warn'); showModal('manualModal'); return; }
   const poll = setInterval(() => {
     try {
       if (!popup || popup.closed) { clearInterval(poll); return; }
       const h = popup.location.href;
-      if (h && h.includes('access_token')) {
-        clearInterval(poll); popup.close();
-        handleOAuthResponse(h);
-      }
-    } catch(ex) { /* cross-origin */ }
+      if (h && h.includes('access_token')) { clearInterval(poll); popup.close(); handleOAuthResponse(h); }
+    } catch(ex){}
   }, 400);
 }
-
 function handleOAuthResponse(url) {
   const hash = (url.includes('#') ? url.split('#')[1] : url.split('?')[1]) || '';
-  const p = Object.fromEntries(hash.split('&').map(x => x.split('=')));
-  const token       = decodeURIComponent(p.access_token || '');
-  const instanceUrl = decodeURIComponent(p.instance_url || '');
-  let stateObj = {};
-  try { stateObj = JSON.parse(decodeURIComponent(p.state||'{}')); } catch(e){}
-  if (!token || !instanceUrl) { toast('OAuth failed — missing token', 'err'); return; }
-  S.org = { accessToken: token, instanceUrl, name: stateObj.nick || instanceUrl };
+  const p = Object.fromEntries(hash.split('&').map(x => { const [k,...v]=x.split('='); return [k, decodeURIComponent(v.join('='))]; }));
+  if (!p.access_token || !p.instance_url) { toast('OAuth failed', 'err'); return; }
+  let nick = 'My Org';
+  try { nick = JSON.parse(p.state).nick; } catch(e){}
+  S.org = {accessToken: p.access_token, instanceUrl: p.instance_url.replace(/\/$/,''), name: nick};
   saveStore();
-  log(`✓ connected: ${instanceUrl}`, 'ok');
+  audit(`connected: ${S.org.name}`, 'ok');
   toast('Connected!', 'ok');
   showDashboard();
 }
-
 function connectManual() {
-  const instanceUrl = document.getElementById('manualInstance').value.trim().replace(/\/$/,'');
-  const accessToken = document.getElementById('manualToken').value.trim();
-  const nick        = document.getElementById('manualNick').value.trim();
-  if (!instanceUrl || !accessToken) { toast('Instance URL and token are required', 'err'); return; }
-  S.org = { instanceUrl, accessToken, name: nick || instanceUrl };
+  const inst = document.getElementById('manualInst').value.trim().replace(/\/$/,'');
+  const tok  = document.getElementById('manualTok').value.trim();
+  const nick = document.getElementById('manualNick').value.trim();
+  if (!inst || !tok) { toast('Instance URL and token required', 'err'); return; }
+  S.org = {instanceUrl: inst, accessToken: tok, name: nick || inst};
   saveStore();
   closeModal('manualModal');
-  log('manually connected', 'ok');
+  audit(`manually connected: ${S.org.name}`, 'ok');
   toast('Connected!', 'ok');
   showDashboard();
 }
 
-// Handle redirect back into page (hash fragment)
-(function checkRedirect() {
+// Handle hash redirect
+(function() {
   if (window.location.hash && window.location.hash.includes('access_token')) {
     handleOAuthResponse(window.location.href);
-    history.replaceState(null,'', window.location.pathname);
+    history.replaceState(null,'',window.location.pathname);
   }
 })();
 
-// ═══════════════════════════════════════════════════════════════
-// SHOW / HIDE VIEWS
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════ VIEWS ═══════════════
 function showDashboard() {
   document.getElementById('landing').classList.add('hidden');
   document.getElementById('dashboard').classList.remove('hidden');
-  document.getElementById('orgNameDisplay').textContent = S.org.name;
-  document.getElementById('orgUrlDisplay').textContent  = S.org.instanceUrl;
+  document.getElementById('orgNameEl').textContent = S.org.name;
+  document.getElementById('orgUrlEl').textContent  = S.org.instanceUrl;
   renderSnapBanner();
+  renderMigrationBanner();
   loadAutomations();
 }
-
 function disconnectOrg() {
-  S.org = null; S.automations = []; S.snapshot = null;
+  S.org = null; S.automations = []; S.snapshot = null; S.migrationMode = false;
   saveStore();
   document.getElementById('dashboard').classList.add('hidden');
   document.getElementById('landing').classList.remove('hidden');
-  log('disconnected', 'info');
+  audit('disconnected', 'info');
 }
 
-// ═══════════════════════════════════════════════════════════════
-// SALESFORCE API HELPERS
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════ SF API ═══════════════
 async function sfGet(path) {
-  const r = await fetch(`${S.org.instanceUrl}${path}`, {
-    headers: { 'Authorization': `Bearer ${S.org.accessToken}`, 'Content-Type': 'application/json' }
-  });
-  if (!r.ok) {
-    const txt = await r.text();
-    throw new Error(`${r.status}: ${txt.slice(0,120)}`);
-  }
+  const r = await fetch(`${S.org.instanceUrl}${path}`, {headers:{'Authorization':`Bearer ${S.org.accessToken}`,'Content-Type':'application/json'}});
+  if (!r.ok) { const t = await r.text(); throw new Error(`${r.status}: ${t.slice(0,120)}`); }
   return r.json();
 }
-
-async function sfPost(path, body) {
-  const r = await fetch(`${S.org.instanceUrl}${path}`, {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${S.org.accessToken}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  const txt = await r.text();
-  try { return JSON.parse(txt); } catch(e) { return txt; }
-}
-
 async function sfPatch(path, body) {
-  const r = await fetch(`${S.org.instanceUrl}${path}`, {
-    method: 'PATCH',
-    headers: { 'Authorization': `Bearer ${S.org.accessToken}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
+  const r = await fetch(`${S.org.instanceUrl}${path}`, {method:'PATCH',headers:{'Authorization':`Bearer ${S.org.accessToken}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
   if (r.status === 204) return true;
-  const txt = await r.text();
-  try { return JSON.parse(txt); } catch(e) { return txt; }
+  const t = await r.text(); try { return JSON.parse(t); } catch(e) { return t; }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// LOAD AUTOMATIONS
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════ LOAD ═══════════════
 async function loadAutomations() {
-  document.getElementById('btnRefresh').innerHTML = '<span class="spinner"></span> Loading…';
-  document.getElementById('groupsContainer').innerHTML = renderSkeletons();
+  document.getElementById('btnRefresh').innerHTML = '<span class="spinner"></span>';
+  document.getElementById('objList').innerHTML = skeletons();
   S.automations = [];
-
   try {
-    const [vrs, flows, triggers, workflows] = await Promise.allSettled([
-      fetchValidationRules(),
-      fetchFlows(),
-      fetchApexTriggers(),
-      fetchWorkflowRules(),
-    ]);
-
-    const collect = (r, label) => {
-      if (r.status === 'fulfilled') return r.value;
-      log(`⚠ ${label}: ${r.reason.message}`, 'warn');
-      return [];
-    };
-
-    S.automations = [
-      ...collect(vrs,      'Validation Rules'),
-      ...collect(flows,    'Flows'),
-      ...collect(triggers, 'Apex Triggers'),
-      ...collect(workflows,'Workflow Rules'),
-    ];
-
-    log(`✓ loaded ${S.automations.length} automations`, 'ok');
-    toast(`Loaded ${S.automations.length} automations`, 'ok');
-    updateStats();
-    renderGroups();
+    const [a,b,c,d] = await Promise.allSettled([fetchVR(), fetchFlows(), fetchTriggers(), fetchWF()]);
+    const get = (r,l) => { if (r.status==='fulfilled') return r.value; audit(`⚠ ${l}: ${r.reason?.message}`, 'warn'); return []; };
+    S.automations = [...get(a,'Validation Rules'), ...get(b,'Flows'), ...get(c,'Apex Triggers'), ...get(d,'Workflow Rules')];
+    audit(`✓ loaded ${S.automations.length} automations`, 'ok');
+    toast(`${S.automations.length} automations loaded`, 'ok');
+    renderTypeCards();
+    renderObjList();
   } catch(err) {
-    log(`error loading: ${err.message}`, 'err');
-    toast('Failed to load automations', 'err');
-    document.getElementById('groupsContainer').innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><h4>Could not load automations</h4><p>${err.message}</p></div>`;
+    audit(`load error: ${err.message}`, 'err');
+    toast('Failed to load', 'err');
+    document.getElementById('objList').innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><h4>Load failed</h4><p>${err.message}</p></div>`;
   }
-
   document.getElementById('btnRefresh').innerHTML = '↻ Refresh';
 }
 
-async function fetchValidationRules() {
-  const data = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent("SELECT Id, ValidationName, Active, EntityDefinition.QualifiedApiName, Description FROM ValidationRule ORDER BY EntityDefinition.QualifiedApiName, ValidationName LIMIT 2000")}`);
-  return (data.records || []).map(r => ({
-    id: r.Id, name: r.ValidationName, active: r.Active,
-    object: r.EntityDefinition?.QualifiedApiName || 'Unknown',
-    type: 'Validation Rule', typeBadge: 'badge-vr', typeCode: 'VR',
-    description: r.Description || '',
-    apiToggle: 'tooling',
-  }));
+async function fetchVR() {
+  const d = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent('SELECT Id,ValidationName,Active,EntityDefinition.QualifiedApiName,Description FROM ValidationRule ORDER BY EntityDefinition.QualifiedApiName,ValidationName LIMIT 2000')}`);
+  return (d.records||[]).map(r => ({id:r.Id, name:r.ValidationName, active:r.Active, object:r.EntityDefinition?.QualifiedApiName||'Unknown', type:'Validation Rule', description:r.Description||'', apiToggle:'vr'}));
 }
-
 async function fetchFlows() {
-  // FlowDefinition gives active version status
-  const data = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent("SELECT Id, DeveloperName, ActiveVersion.Id, ActiveVersion.ProcessType, LatestVersion.ProcessType, LatestVersion.TriggerObjectOrEventLabel FROM FlowDefinition ORDER BY DeveloperName LIMIT 2000")}`);
-  return (data.records || []).map(r => {
-    const isActive = !!r.ActiveVersion;
-    const procType = r.ActiveVersion?.ProcessType || r.LatestVersion?.ProcessType || '';
-    const objName  = r.LatestVersion?.TriggerObjectOrEventLabel || 'No object';
-    let typeCode = 'FL', badge = 'badge-fl';
-    if (procType === 'Workflow') { typeCode = 'PB'; badge = 'badge-pb'; }
-    return {
-      id: r.Id, name: r.DeveloperName, active: isActive,
-      object: objName,
-      type: typeCode === 'PB' ? 'Process Builder' : 'Flow',
-      typeBadge: badge, typeCode,
-      description: procType,
-      apiToggle: 'flow',
-      activeVersionId: r.ActiveVersion?.Id || null,
-    };
+  const d = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent('SELECT Id,DeveloperName,ActiveVersion.Id,ActiveVersion.ProcessType,LatestVersion.ProcessType,LatestVersion.TriggerObjectOrEventLabel FROM FlowDefinition ORDER BY DeveloperName LIMIT 2000')}`);
+  return (d.records||[]).map(r => {
+    const pt = r.ActiveVersion?.ProcessType || r.LatestVersion?.ProcessType || '';
+    const obj = r.LatestVersion?.TriggerObjectOrEventLabel || 'No object';
+    const isPB = pt === 'Workflow';
+    return {id:r.Id, name:r.DeveloperName, active:!!r.ActiveVersion, object:obj, type:isPB?'Process Builder':'Flow', description:pt, apiToggle:'flow', activeVersionId:r.ActiveVersion?.Id||null};
   });
 }
-
-async function fetchApexTriggers() {
-  const data = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent("SELECT Id, Name, Status, TableEnumOrId FROM ApexTrigger ORDER BY TableEnumOrId, Name LIMIT 2000")}`);
-  return (data.records || []).map(r => ({
-    id: r.Id, name: r.Name,
-    active: r.Status === 'Active',
-    object: r.TableEnumOrId || 'Unknown',
-    type: 'Apex Trigger', typeBadge: 'badge-tr', typeCode: 'TR',
-    description: `Status: ${r.Status}`,
-    apiToggle: 'metadata',
-  }));
+async function fetchTriggers() {
+  const d = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent('SELECT Id,Name,Status,TableEnumOrId FROM ApexTrigger ORDER BY TableEnumOrId,Name LIMIT 2000')}`);
+  return (d.records||[]).map(r => ({id:r.Id, name:r.Name, active:r.Status==='Active', object:r.TableEnumOrId||'Unknown', type:'Apex Trigger', description:`Status: ${r.Status}`, apiToggle:'trigger'}));
+}
+async function fetchWF() {
+  const d = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent('SELECT Id,Name,Active,TableEnumOrId FROM WorkflowRule ORDER BY TableEnumOrId,Name LIMIT 2000')}`);
+  return (d.records||[]).map(r => ({id:r.Id, name:r.Name, active:r.Active, object:r.TableEnumOrId||'Unknown', type:'Workflow Rule', description:'', apiToggle:'wf'}));
 }
 
-async function fetchWorkflowRules() {
-  const data = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent("SELECT Id, Name, Active, TableEnumOrId FROM WorkflowRule ORDER BY TableEnumOrId, Name LIMIT 2000")}`);
-  return (data.records || []).map(r => ({
-    id: r.Id, name: r.Name, active: r.Active,
-    object: r.TableEnumOrId || 'Unknown',
-    type: 'Workflow Rule', typeBadge: 'badge-wf', typeCode: 'WF',
-    description: '',
-    apiToggle: 'tooling',
-  }));
+// ═══════════════ TOGGLE ═══════════════
+async function doToggle(a, newActive) {
+  if (a.apiToggle === 'vr') {
+    await sfPatch(`/services/data/v59.0/tooling/sobjects/ValidationRule/${a.id}`, {Active:newActive, Metadata:{active:newActive}});
+  } else if (a.apiToggle === 'flow') {
+    await sfPatch(`/services/data/v59.0/tooling/sobjects/FlowDefinition/${a.id}`, {ActiveVersion: newActive && a.activeVersionId ? {Id:a.activeVersionId} : null});
+  } else if (a.apiToggle === 'trigger') {
+    const q = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent(`SELECT Id,Status,Body FROM ApexTrigger WHERE Id='${a.id}' LIMIT 1`)}`);
+    if (q.records?.length) await sfPatch(`/services/data/v59.0/tooling/sobjects/ApexTrigger/${q.records[0].Id}`, {Status:newActive?'Active':'Inactive', Body:q.records[0].Body});
+  } else if (a.apiToggle === 'wf') {
+    await sfPatch(`/services/data/v59.0/tooling/sobjects/WorkflowRule/${a.id}`, {Active:newActive, Metadata:{active:newActive}});
+  }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// TOGGLE SINGLE AUTOMATION
-// ═══════════════════════════════════════════════════════════════
 async function toggleAutomation(id, newActive) {
   const a = S.automations.find(x => x.id === id);
   if (!a) return;
-  const toggleEl = document.querySelector(`[data-toggle-id="${id}"]`);
-  if (toggleEl) toggleEl.classList.add('loading');
-
-  log(`${newActive ? 'enabling' : 'disabling'} ${a.name}…`, 'info');
+  const tEl = document.querySelector(`[data-tid="${id}"]`);
+  if (tEl) tEl.classList.add('loading');
   try {
     await doToggle(a, newActive);
+    const prev = a.active;
     a.active = newActive;
     saveStore();
-    log(`✓ ${a.name} → ${newActive ? 'active' : 'inactive'}`, 'ok');
-    toast(`${a.name}: ${newActive ? 'enabled' : 'disabled'}`, 'ok', 2000);
-    updateStats();
+    audit(`${a.name} · ${a.object} · ${prev?'ON':'OFF'} → ${newActive?'ON':'OFF'}`, 'ok', {name:a.name, object:a.object, type:a.type, from:prev, to:newActive, trigger:'manual'});
+    toast(`${a.name}: ${newActive?'enabled':'disabled'}`, 'ok', 1800);
     updateRowState(id, newActive);
+    renderTypeCards();
   } catch(err) {
-    log(`✗ ${a.name}: ${err.message}`, 'err');
-    toast(`Failed: ${err.message.slice(0,60)}`, 'err');
-    // revert checkbox
-    const cb = document.querySelector(`input[data-cb-id="${id}"]`);
+    audit(`✗ ${a.name}: ${err.message.slice(0,60)}`, 'err');
+    toast(`Failed: ${err.message.slice(0,50)}`, 'err');
+    const cb = document.querySelector(`input[data-cb="${id}"]`);
     if (cb) cb.checked = a.active;
   }
-  if (toggleEl) toggleEl.classList.remove('loading');
+  if (tEl) tEl.classList.remove('loading');
 }
 
-async function doToggle(a, newActive) {
-  if (a.apiToggle === 'tooling') {
-    // Validation Rules & Workflow Rules — direct Tooling API PATCH
-    const type = a.type === 'Validation Rule' ? 'ValidationRule' : 'WorkflowRule';
-    await sfPatch(`/services/data/v59.0/tooling/sobjects/${type}/${a.id}`, { Active: newActive, Metadata: { active: newActive } });
-  } else if (a.apiToggle === 'flow') {
-    // Flows — activate = POST new active version, deactivate = clear active version
-    if (newActive) {
-      // Reactivate: set active version via FlowDefinition update
-      await sfPatch(`/services/data/v59.0/tooling/sobjects/FlowDefinition/${a.id}`, { ActiveVersion: { Id: a.activeVersionId } });
-    } else {
-      await sfPatch(`/services/data/v59.0/tooling/sobjects/FlowDefinition/${a.id}`, { ActiveVersion: null });
-    }
-  } else if (a.apiToggle === 'metadata') {
-    // Apex Triggers — Metadata API deploy
-    await deployTriggerStatus(a.name, a.object, newActive);
-  }
-}
-
-async function deployTriggerStatus(name, obj, active) {
-  // Use Tooling API to update trigger status directly
-  const data = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent(`SELECT Id, Status, Body FROM ApexTrigger WHERE Name = '${name}' LIMIT 1`)}`);
-  if (!data.records || !data.records.length) throw new Error('Trigger not found');
-  const rec = data.records[0];
-  await sfPatch(`/services/data/v59.0/tooling/sobjects/ApexTrigger/${rec.Id}`, {
-    Status: active ? 'Active' : 'Inactive',
-    Body: rec.Body,
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════
-// BULK OPERATIONS
-// ═══════════════════════════════════════════════════════════════
-async function disableAll() {
-  const active = S.automations.filter(a => a.active);
-  if (!active.length) { toast('All automations already inactive', 'warn'); return; }
-  confirm2(
-    '🔴 Disable all automations',
-    `This will deactivate ${active.length} active automations. A snapshot will be saved first so you can revert exactly.`,
-    async () => {
-      // Take snapshot before touching anything (only if no snapshot exists)
-      if (!S.snapshot) {
-        S.snapshot = { ts: Date.now(), map: {} };
-        S.automations.forEach(a => S.snapshot.map[a.id] = a.active);
-        saveStore();
-        log('📸 snapshot taken', 'warn');
-      }
-      await bulkToggle(S.automations.filter(a => a.active), false, 'Disabling');
-    }
-  );
-}
-
-async function enableAll() {
-  const inactive = S.automations.filter(a => !a.active);
-  if (!inactive.length) { toast('All automations already active', 'ok'); return; }
-  confirm2(
-    '🟢 Enable all automations',
-    `This will activate ${inactive.length} inactive automations.`,
-    async () => { await bulkToggle(S.automations.filter(a => !a.active), true, 'Enabling'); }
-  );
-}
-
-async function revertSnapshot() {
-  if (!S.snapshot) return;
-  confirm2(
-    '↩ Revert to snapshot',
-    `Restore all automations to their exact state at ${new Date(S.snapshot.ts).toLocaleString()}. This is your pre-migration baseline.`,
-    async () => {
-      const toChange = S.automations.filter(a => S.snapshot.map[a.id] !== undefined && S.snapshot.map[a.id] !== a.active);
-      if (!toChange.length) { toast('Already matches snapshot', 'ok'); closeModal('confirmModal'); clearSnapshot(); return; }
-      await bulkToggle(toChange, null, 'Reverting', true);
-      clearSnapshot();
-    }
-  );
-}
-
-async function bulkToggle(items, newActive, label, useSnapshot=false) {
+async function bulkToggle(items, newActive, label, trigger='bulk') {
   closeModal('confirmModal');
   document.getElementById('confirmModal').classList.remove('hidden');
   document.getElementById('confirmActions').classList.add('hidden');
-  document.getElementById('confirmProgress').classList.remove('hidden');
+  document.getElementById('diffWrap').classList.add('hidden');
+  document.getElementById('progressWrap').classList.remove('hidden');
   document.getElementById('confirmTitle').textContent = `${label}…`;
-  document.getElementById('confirmMsg').textContent = `Processing ${items.length} automations. Please wait.`;
+  document.getElementById('confirmMsg').textContent = `Processing ${items.length} automations.`;
 
-  let done = 0;
-  const errors = [];
-
+  let done = 0; const errors = [];
   for (const a of items) {
-    const target = useSnapshot ? S.snapshot.map[a.id] : newActive;
-    document.getElementById('progressFill').style.width = `${Math.round((done/items.length)*100)}%`;
+    document.getElementById('progressFill').style.width = `${Math.round(done/items.length*100)}%`;
     document.getElementById('progressLabel').textContent = `${done}/${items.length} — ${a.name}`;
     try {
-      await doToggle(a, target);
-      a.active = target;
-      updateRowState(a.id, target);
+      await doToggle(a, newActive);
+      const prev = a.active;
+      a.active = newActive;
+      updateRowState(a.id, newActive);
+      audit(`${a.name} · ${prev?'ON':'OFF'} → ${newActive?'ON':'OFF'}`, 'ok', {name:a.name, object:a.object, type:a.type, from:prev, to:newActive, trigger});
     } catch(err) {
       errors.push(a.name);
-      log(`✗ ${a.name}: ${err.message.slice(0,60)}`, 'err');
+      audit(`✗ ${a.name}: ${err.message.slice(0,50)}`, 'err');
     }
     done++;
-    await sleep(120); // rate limiting
+    await sleep(120);
   }
-
   document.getElementById('progressFill').style.width = '100%';
-  document.getElementById('progressLabel').textContent = `Done — ${done - errors.length}/${items.length} succeeded`;
-  updateStats();
+  document.getElementById('progressLabel').textContent = `Done — ${done-errors.length}/${items.length} succeeded`;
   saveStore();
+  renderTypeCards();
   renderSnapBanner();
-
-  if (errors.length) {
-    log(`bulk complete — ${errors.length} error(s): ${errors.join(', ')}`, 'warn');
-    toast(`Done with ${errors.length} error(s)`, 'warn');
-  } else {
-    log(`✓ bulk ${label.toLowerCase()} complete`, 'ok');
-    toast(`${label} complete!`, 'ok');
-  }
-
-  setTimeout(() => closeModal('confirmModal'), 1200);
-}
-
-function clearSnapshot() {
-  S.snapshot = null;
-  saveStore();
-  renderSnapBanner();
+  renderMigrationBanner();
+  if (errors.length) { audit(`bulk complete with ${errors.length} error(s)`, 'warn'); toast(`Done with ${errors.length} error(s)`, 'warn'); }
+  else { audit(`✓ ${label} complete`, 'ok'); toast(`${label} complete!`, 'ok'); }
+  setTimeout(() => closeModal('confirmModal'), 1400);
 }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-// ═══════════════════════════════════════════════════════════════
-// GROUP BULK TOGGLE
-// ═══════════════════════════════════════════════════════════════
-async function bulkToggleGroup(obj, type, newActive) {
+// ═══════════════ BULK ACTIONS ═══════════════
+function bulkToggleType(type, newActive, e) {
+  if (e) e.stopPropagation();
+  const items = S.automations.filter(a => a.type === type && a.active !== newActive);
+  if (!items.length) { toast(`All ${type}s already ${newActive?'active':'inactive'}`, 'warn'); return; }
+  confirmAction(`${newActive?'Enable':'Disable'} all ${type}s`, `This will ${newActive?'activate':'deactivate'} ${items.length} ${type}s.`, null, () => bulkToggle(items, newActive, `${newActive?'Enabling':'Disabling'} ${type}s`));
+}
+function bulkToggleObj(obj, type, newActive, e) {
+  if (e) e.stopPropagation();
   const items = S.automations.filter(a => a.object === obj && a.type === type && a.active !== newActive);
-  if (!items.length) return;
-  log(`${newActive?'enabling':'disabling'} ${items.length} ${type}s on ${obj}…`, 'info');
-  for (const a of items) {
-    try { await doToggle(a, newActive); a.active = newActive; updateRowState(a.id, newActive); } catch(e) { log(`✗ ${a.name}: ${e.message}`, 'err'); }
-    await sleep(100);
-  }
-  updateStats(); saveStore();
-  toast(`${items.length} ${type}(s) on ${obj}: ${newActive?'enabled':'disabled'}`, 'ok', 2000);
+  if (!items.length) { toast('Already up to date', 'warn'); return; }
+  bulkToggle(items, newActive, `${newActive?'Enabling':'Disabling'} ${type}s on ${obj}`);
 }
 
-// ═══════════════════════════════════════════════════════════════
-// RENDER
-// ═══════════════════════════════════════════════════════════════
-function updateStats() {
-  const all    = S.automations;
-  const active = all.filter(a => a.active).length;
-  const objs   = new Set(all.map(a => a.object)).size;
-  document.getElementById('statTotal').textContent    = all.length;
-  document.getElementById('statActive').textContent   = active;
-  document.getElementById('statInactive').textContent = all.length - active;
-  document.getElementById('statObjects').textContent  = objs;
+// ═══════════════ MIGRATION MODE ═══════════════
+async function enterMigrationMode() {
+  const active = S.automations.filter(a => a.active);
+  if (!active.length) { toast('All automations already inactive', 'warn'); return; }
+  confirmAction('🔴 Enter Migration Mode',
+    `This will:\n1. Save a snapshot of current state (${S.automations.length} automations)\n2. Disable all ${active.length} active automations\n\nYou can revert to exact prior state at any time.`,
+    null,
+    async () => {
+      if (!S.snapshot) {
+        S.snapshot = {ts:Date.now(), map:{}, name:'Auto: pre-migration'};
+        S.automations.forEach(a => S.snapshot.map[a.id] = a.active);
+        saveStore();
+        audit('📸 auto-snapshot taken before migration mode', 'warn');
+      }
+      S.migrationMode = true;
+      saveStore();
+      await bulkToggle(S.automations.filter(a => a.active), false, 'Disabling all', 'migration-mode');
+      renderMigrationBanner();
+      renderSnapBanner();
+    }
+  );
 }
 
+function showRevertModal() {
+  if (!S.snapshot) return;
+  const toChange = S.automations.filter(a => S.snapshot.map[a.id] !== undefined && S.snapshot.map[a.id] !== a.active);
+  const diffRows = toChange.map(a =>
+    `<tr><td>${esc(a.name)}</td><td style="color:var(--tx3)">${esc(a.object)}</td><td style="color:var(--tx3)">${a.type}</td><td>${a.active ? `<span class="diff-on">ON</span> → <span class="diff-off">OFF</span>` : `<span class="diff-off">OFF</span> → <span class="diff-on">ON</span>`}</td></tr>`
+  ).join('');
+  document.getElementById('diffBody').innerHTML = diffRows || '<tr><td colspan="4" style="color:var(--tx3);padding:8px">No changes needed — already matches snapshot</td></tr>';
+  document.getElementById('diffWrap').classList.remove('hidden');
+  document.getElementById('progressWrap').classList.add('hidden');
+  document.getElementById('confirmTitle').textContent = '↩ Revert to snapshot';
+  document.getElementById('confirmMsg').textContent = `Taken ${new Date(S.snapshot.ts).toLocaleString()}. ${toChange.length} automation(s) will change.`;
+  document.getElementById('confirmActions').classList.remove('hidden');
+  document.getElementById('confirmOkBtn').onclick = async () => {
+    if (!toChange.length) { clearSnap(); closeModal('confirmModal'); return; }
+    document.getElementById('diffWrap').classList.add('hidden');
+    const items = toChange.map(a => ({...a, _target: S.snapshot.map[a.id]}));
+    closeModal('confirmModal');
+    document.getElementById('confirmModal').classList.remove('hidden');
+    document.getElementById('confirmActions').classList.add('hidden');
+    document.getElementById('progressWrap').classList.remove('hidden');
+    document.getElementById('confirmTitle').textContent = 'Reverting…';
+    document.getElementById('confirmMsg').textContent = `Restoring ${items.length} automations.`;
+    let done = 0; const errors = [];
+    for (const a of items) {
+      document.getElementById('progressFill').style.width = `${Math.round(done/items.length*100)}%`;
+      document.getElementById('progressLabel').textContent = `${done}/${items.length} — ${a.name}`;
+      try { await doToggle(a, a._target); const prev=a.active; a.active=a._target; updateRowState(a.id,a._target); audit(`↩ ${a.name} restored to ${a._target?'ON':'OFF'}`, 'ok', {name:a.name,object:a.object,type:a.type,from:prev,to:a._target,trigger:'revert'}); }
+      catch(err) { errors.push(a.name); audit(`✗ ${a.name}: ${err.message.slice(0,50)}`, 'err'); }
+      done++; await sleep(120);
+    }
+    document.getElementById('progressFill').style.width = '100%';
+    document.getElementById('progressLabel').textContent = `Done — ${done-errors.length}/${items.length} restored`;
+    S.migrationMode = false; clearSnap(); saveStore();
+    renderTypeCards(); renderMigrationBanner(); renderSnapBanner();
+    toast('Reverted!', 'ok');
+    setTimeout(() => closeModal('confirmModal'), 1400);
+  };
+  showModal('confirmModal');
+}
+
+function clearSnap() {
+  S.snapshot = null; S.migrationMode = false;
+  saveStore(); renderSnapBanner(); renderMigrationBanner();
+}
+
+// ═══════════════ NAMED SNAPSHOTS ═══════════════
+function showSnapshotsModal() {
+  renderSnapList();
+  showModal('snapshotsModal');
+}
+function renderSnapList() {
+  const el = document.getElementById('snapListEl');
+  if (!S.snapshots.length) { el.innerHTML = '<p style="font-size:13px;color:var(--tx3)">No saved snapshots yet.</p>'; return; }
+  el.innerHTML = S.snapshots.map((s,i) => {
+    const on = Object.values(s.map).filter(Boolean).length;
+    const total = Object.values(s.map).length;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--b1);font-size:12px">
+      <div style="flex:1">
+        <div style="font-weight:500">${esc(s.name)}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--tx3);margin-top:2px">${new Date(s.ts).toLocaleString()} · ${on}/${total} active</div>
+      </div>
+      <button class="btn btn-ghost" style="font-size:11px" onclick="loadNamedSnapshot(${i})">↩ Revert</button>
+      <button class="btn btn-ghost" style="font-size:11px;color:var(--red)" onclick="deleteSnapshot(${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+function saveNamedSnapshot() {
+  const name = document.getElementById('snapNameInput').value.trim();
+  if (!name) { toast('Enter a name', 'warn'); return; }
+  if (S.snapshots.length >= 5) S.snapshots.pop();
+  const map = {};
+  S.automations.forEach(a => map[a.id] = a.active);
+  S.snapshots.unshift({ts:Date.now(), map, name});
+  saveStore();
+  document.getElementById('snapNameInput').value = '';
+  renderSnapList();
+  audit(`📸 snapshot saved: "${name}"`, 'ok');
+  toast(`Snapshot "${name}" saved`, 'ok');
+}
+function deleteSnapshot(i) {
+  const name = S.snapshots[i]?.name;
+  S.snapshots.splice(i,1);
+  saveStore(); renderSnapList();
+  audit(`snapshot deleted: "${name}"`, 'info');
+}
+async function loadNamedSnapshot(i) {
+  const snap = S.snapshots[i];
+  if (!snap) return;
+  S.snapshot = snap;
+  closeModal('snapshotsModal');
+  showRevertModal();
+}
+
+// ═══════════════ CONFIRM HELPER ═══════════════
+function confirmAction(title, msg, diff, onOk) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent = msg;
+  document.getElementById('diffWrap').classList.add('hidden');
+  document.getElementById('progressWrap').classList.add('hidden');
+  document.getElementById('confirmActions').classList.remove('hidden');
+  document.getElementById('confirmOkBtn').onclick = onOk;
+  showModal('confirmModal');
+}
+
+// ═══════════════ FILTERS ═══════════════
 function setFilter(f, btn) {
   S.filter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b === btn));
-  applyFilters();
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderObjList();
 }
-
 function applyFilters() {
   S.search = document.getElementById('searchInput').value.toLowerCase();
-  renderGroups();
+  renderObjList();
 }
-
-function getFiltered() {
+function getFiltered(type) {
   return S.automations.filter(a => {
-    if (S.filter === 'active'   && !a.active)  return false;
-    if (S.filter === 'inactive' &&  a.active)  return false;
+    if (a.type !== type) return false;
+    if (S.filter === 'active' && !a.active) return false;
+    if (S.filter === 'inactive' && a.active) return false;
     if (S.search && !a.name.toLowerCase().includes(S.search) && !a.object.toLowerCase().includes(S.search)) return false;
     return true;
   });
 }
 
-function renderGroups() {
-  const filtered = getFiltered();
-  const container = document.getElementById('groupsContainer');
-
-  if (!filtered.length) {
-    container.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><h4>No results</h4><p>Try adjusting your search or filter.</p></div>`;
-    return;
-  }
-
-  // Group by object, then by type
-  const byObject = {};
-  filtered.forEach(a => {
-    if (!byObject[a.object]) byObject[a.object] = {};
-    if (!byObject[a.object][a.type]) byObject[a.object][a.type] = [];
-    byObject[a.object][a.type].push(a);
-  });
-
-  const objects = Object.keys(byObject).sort();
-  container.innerHTML = objects.map(obj => {
-    const types = Object.keys(byObject[obj]).sort();
-    const allA  = Object.values(byObject[obj]).flat();
-    const activeN = allA.filter(a=>a.active).length;
-
-    const rowsHtml = types.map(type => {
-      const items = byObject[obj][type];
-      const typeActiveN = items.filter(a=>a.active).length;
-      const subHeader = `
-        <div style="display:flex;align-items:center;gap:8px;padding:8px 18px 4px;border-top:1px solid var(--border)">
-          <span class="auto-type-badge ${items[0].typeBadge}">${items[0].typeCode}</span>
-          <span style="font-size:12px;color:var(--text2);font-weight:500">${type}</span>
-          <span class="status-pill ${typeActiveN===items.length?'pill-green':typeActiveN===0?'pill-red':'pill-amber'}" style="font-size:10px;padding:2px 8px">${typeActiveN}/${items.length} active</span>
-          <div style="flex:1"></div>
-          <button class="btn btn-ghost" style="font-size:10px;padding:4px 8px" onclick="bulkToggleGroup('${esc(obj)}','${esc(type)}',true)">all on</button>
-          <button class="btn btn-ghost" style="font-size:10px;padding:4px 8px" onclick="bulkToggleGroup('${esc(obj)}','${esc(type)}',false)">all off</button>
-        </div>`;
-      const rowsStr = items.map(a => renderAutoRow(a)).join('');
-      return subHeader + rowsStr;
-    }).join('');
-
+// ═══════════════ RENDER TYPE CARDS ═══════════════
+function renderTypeCards() {
+  const container = document.getElementById('typeCards');
+  container.innerHTML = TYPE_ORDER.map(type => {
+    const all    = S.automations.filter(a => a.type === type);
+    const active = all.filter(a => a.active).length;
+    const cfg    = TYPE_CFG[type];
+    const pillCls = active === all.length ? 'pill-all' : active === 0 ? 'pill-none' : 'pill-mix';
+    const isActive = type === S.activeType;
     return `
-      <div class="object-group">
-        <div class="group-header" onclick="toggleGroup(this)">
-          <span class="group-chevron">▾</span>
-          <span class="group-title">${obj}</span>
-          <span class="group-count">${allA.length} automation${allA.length!==1?'s':''}</span>
-          <span class="status-pill ${activeN===allA.length?'pill-green':activeN===0?'pill-red':'pill-amber'}" style="font-size:10px">${activeN}/${allA.length} active</span>
-          <div class="group-line"></div>
-        </div>
-        <div class="group-body">
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden">
-            ${rowsHtml}
-          </div>
+      <div class="type-card ${cfg.cls}${isActive?' active':''}" onclick="selectType('${type}')">
+        <div style="font-size:20px">${cfg.icon}</div>
+        <div class="tc-num">${all.length}</div>
+        <div class="tc-label">${cfg.label}</div>
+        <div class="tc-pill ${pillCls}">${active}/${all.length} active</div>
+        <div class="tc-bulks">
+          <button class="tc-bulk" onclick="bulkToggleType('${type}',true,event)">all on</button>
+          <button class="tc-bulk" onclick="bulkToggleType('${type}',false,event)">all off</button>
         </div>
       </div>`;
   }).join('');
 }
 
+function selectType(type) {
+  S.activeType = type;
+  renderTypeCards();
+  renderObjList();
+  document.getElementById('objList').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// ═══════════════ RENDER OBJ LIST ═══════════════
+function renderObjList() {
+  const filtered = getFiltered(S.activeType);
+  const container = document.getElementById('objList');
+
+  if (!filtered.length) {
+    container.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><h4>No results</h4><p>Try adjusting your search or filter, or select a different automation type above.</p></div>`;
+    return;
+  }
+
+  const byObj = {};
+  filtered.forEach(a => { if (!byObj[a.object]) byObj[a.object] = []; byObj[a.object].push(a); });
+  const objects = Object.keys(byObj).sort();
+
+  container.innerHTML = objects.map(obj => {
+    const items = byObj[obj];
+    const activeN = items.filter(a => a.active).length;
+    const pillCls = activeN === items.length ? 'pill-green' : activeN === 0 ? 'pill-red' : 'pill-amber';
+    const rows = items.map(a => renderAutoRow(a)).join('');
+    return `
+      <div class="obj-group">
+        <div class="obj-header" onclick="toggleObj(this)">
+          <span class="obj-chevron open">▾</span>
+          <span class="obj-title">${esc(obj)}</span>
+          <span class="obj-count">${items.length}</span>
+          <span class="pill ${pillCls}">${activeN}/${items.length} active</span>
+          <div class="obj-bulks">
+            <button class="obj-bulk" onclick="bulkToggleObj('${esc(obj)}','${esc(S.activeType)}',true,event)">all on</button>
+            <button class="obj-bulk" onclick="bulkToggleObj('${esc(obj)}','${esc(S.activeType)}',false,event)">all off</button>
+          </div>
+        </div>
+        <div class="obj-body">${rows}</div>
+      </div>`;
+  }).join('');
+}
+
+function toggleObj(header) {
+  const chev = header.querySelector('.obj-chevron');
+  const body = header.nextElementSibling;
+  if (!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : '';
+  if (chev) { chev.classList.toggle('open', !isOpen); chev.classList.toggle('closed', isOpen); }
+}
+
 function renderAutoRow(a) {
-  const snapWas = S.snapshot ? S.snapshot.map[a.id] : undefined;
-  const snapBadge = snapWas !== undefined
-    ? `<span class="snap-indicator ${snapWas ? 'snap-was-on' : 'snap-was-off'}">${snapWas ? '● was on' : '○ was off'}</span>`
+  const snap = S.snapshot ? S.snapshot.map[a.id] : undefined;
+  const snapBadge = snap !== undefined
+    ? `<span class="snap-was ${snap?'snap-was-on':'snap-was-off'}">${snap?'● was on':'○ was off'}</span>`
     : '';
   return `
-    <div class="auto-row ${a.active ? 'active' : 'inactive'}" id="row-${a.id}">
-      <div class="auto-name">
-        <div class="auto-name-text">${esc(a.name)}</div>
+    <div class="auto-row ${a.active?'active':'inactive'}" id="row-${a.id}">
+      <div class="auto-status-dot"></div>
+      <div style="flex:1;min-width:0">
+        <div class="auto-name">${esc(a.name)}</div>
         ${a.description ? `<div class="auto-meta">${esc(a.description)}</div>` : ''}
       </div>
       ${snapBadge}
-      <span class="auto-api-tag">${a.typeCode}</span>
-      <label class="toggle" data-toggle-id="${a.id}" aria-label="Toggle ${esc(a.name)}">
-        <input type="checkbox" data-cb-id="${a.id}" ${a.active?'checked':''} onchange="toggleAutomation('${a.id}', this.checked)">
+      <label class="toggle" data-tid="${a.id}" aria-label="Toggle ${esc(a.name)}">
+        <input type="checkbox" data-cb="${a.id}" ${a.active?'checked':''} onchange="toggleAutomation('${a.id}',this.checked)">
         <span class="tslider"></span>
       </label>
     </div>`;
@@ -1215,39 +1014,37 @@ function renderAutoRow(a) {
 function updateRowState(id, active) {
   const row = document.getElementById(`row-${id}`);
   if (!row) return;
-  row.className = `auto-row ${active ? 'active' : 'inactive'}`;
-  const cb = row.querySelector(`input[data-cb-id="${id}"]`);
+  row.className = `auto-row ${active?'active':'inactive'}`;
+  const cb = row.querySelector(`input[data-cb="${id}"]`);
   if (cb) cb.checked = active;
 }
 
-function toggleGroup(header) {
-  header.classList.toggle('collapsed');
-  const body = header.nextElementSibling;
-  if (body) body.style.display = header.classList.contains('collapsed') ? 'none' : '';
-}
-
+// ═══════════════ BANNERS ═══════════════
 function renderSnapBanner() {
   const banner = document.getElementById('snapBanner');
-  if (!S.snapshot) { banner.classList.add('hidden'); return; }
+  if (!S.snapshot || S.migrationMode) { banner.classList.add('hidden'); return; }
   banner.classList.remove('hidden');
   document.getElementById('snapTs').textContent = new Date(S.snapshot.ts).toLocaleString();
 }
+function renderMigrationBanner() {
+  const banner = document.getElementById('migrationBanner');
+  banner.classList.toggle('hidden', !S.migrationMode);
+}
 
-function renderSkeletons() {
-  return Array(6).fill(0).map(() => `
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:8px;display:flex;gap:12px;align-items:center">
-      <div class="skeleton" style="width:60px"></div>
-      <div style="flex:1"><div class="skeleton" style="width:60%;margin-bottom:6px"></div><div class="skeleton" style="width:30%"></div></div>
-      <div class="skeleton" style="width:42px;height:23px;border-radius:12px"></div>
+// ═══════════════ SKELETONS ═══════════════
+function skeletons() {
+  return Array(5).fill(0).map(() => `
+    <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);padding:14px 18px;margin-bottom:6px;display:flex;gap:12px;align-items:center">
+      <div class="skeleton" style="width:50%"></div>
+      <div class="skeleton" style="width:60px;margin-left:auto"></div>
+      <div class="skeleton" style="width:40px;height:22px;border-radius:11px"></div>
     </div>`).join('');
 }
 
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-// ═══════════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════════
-if (S.org && S.org.accessToken) {
+// ═══════════════ INIT ═══════════════
+if (S.org?.accessToken) {
   showDashboard();
 } else {
   document.getElementById('landing').classList.remove('hidden');
