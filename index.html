@@ -1182,6 +1182,7 @@ async function doToggle(a, newActive) {
     }
     if (newActive) {
       // Need the VersionNumber (integer) of the latest version, not the 18-char Id
+      audit(`Flow toggle DEBUG: id=${a.id} latestVersionId=${a.latestVersionId} latestVersionNumber=${a.latestVersionNumber}`, 'info');
       let versionNum = a.latestVersionNumber;
       if (!versionNum) {
         // Fetch VersionNumber from FlowVersionView using LatestVersionId
@@ -1201,6 +1202,8 @@ async function doToggle(a, newActive) {
       await sfPatch(`/services/data/${API_VER}/tooling/sobjects/FlowDefinition/${a.id}`, {Metadata:{activeVersionNumber: versionNum}});
     } else {
       // Deactivate: set activeVersionNumber to 0
+      // DEBUG: log the exact ID being used so we can verify DurableId vs Id
+      audit(`Flow DEACTIVATE DEBUG: PATCH /tooling/sobjects/FlowDefinition/${a.id} | name=${a.name} | DurableId format?=${a.id?.startsWith('301')||a.id?.startsWith('0Af')||a.id?.startsWith('0Fl')}`, 'warn');
       await sfPatch(`/services/data/${API_VER}/tooling/sobjects/FlowDefinition/${a.id}`, {Metadata:{activeVersionNumber: 0}});
     }
 
