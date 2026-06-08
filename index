@@ -1,1 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SF Automation Switch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN SYSTEM — dark industrial / control-room aesthetic
+   Primary: slate-900 bg, amber accent, monospace data labels
+═══════════════════════════════════════════════════════════════ */
+:root {
+  --bg:       #0a0c0f;
+  --surface:  #111418;
+  --surface2: #181d24;
+  --surface3: #1e252f;
+  --border:   rgba(255,255,255,0.06);
+  --border2:  rgba(255,255,255,0.11);
+  --text:     #d4d8de;
+  --text2:    #8b95a1;
+  --text3:    #515c68;
+  --amber:    #f59e0b;
+  --amber2:   rgba(245,158,11,0.15);
+  --amber3:   rgba(245,158,11,0.08);
+  --green:    #10b981;
+  --green2:   rgba(16,185,129,0.12);
+  --red:      #f43f5e;
+  --red2:     rgba(244,63,94,0.12);
+  --blue:     #3b82f6;
+  --blue2:    rgba(59,130,246,0.12);
+  --mono:     'JetBrains Mono', monospace;
+  --display:  'Syne', sans-serif;
+  --body:     'Geist', sans-serif;
+  --radius:   10px;
+  --radius-lg:16px;
+}
 
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── NOISE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0; opacity: 0.4;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(10,12,15,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo {
+  display: flex; align-items: center; gap: 12px;
+  font-family: var(--display);
+}
+.logo-mark {
+  width: 32px; height: 32px;
+  background: var(--amber);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 0 20px rgba(245,158,11,0.3);
+}
+.logo-name { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
+.logo-ver  { font-size: 10px; font-family: var(--mono); color: var(--text3); margin-left: 4px; }
+
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+
+/* ── LAYOUT ── */
+.app { position: relative; z-index: 1; }
+
+/* ── LANDING (connect screen) ── */
+.landing {
+  min-height: calc(100vh - 56px);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  padding: 40px 24px;
+  text-align: center;
+}
+.landing-title {
+  font-family: var(--display);
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, var(--text) 40%, var(--amber) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.landing-sub {
+  font-size: 15px; color: var(--text2); max-width: 480px;
+  line-height: 1.7; margin-bottom: 48px;
+}
+.connect-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  width: 100%; max-width: 440px;
+  text-align: left;
+}
+.connect-box h3 {
+  font-family: var(--display); font-size: 16px; font-weight: 600;
+  margin-bottom: 6px;
+}
+.connect-box p { font-size: 13px; color: var(--text2); margin-bottom: 24px; line-height: 1.6; }
+
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.field-label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--text3);
+}
+.field-input, .field-select {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  color: var(--text);
+  font-size: 13px; font-family: var(--body);
+  outline: none; width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.field-input:focus, .field-select:focus {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px rgba(245,158,11,0.12);
+}
+.field-input::placeholder { color: var(--text3); }
+.field-select { appearance: none; cursor: pointer; }
+.field-hint { font-size: 11px; color: var(--text3); line-height: 1.5; }
+.field-hint a { color: var(--amber); text-decoration: none; }
+.field-hint a:hover { text-decoration: underline; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 16px; border-radius: var(--radius);
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 12px; font-weight: 500; font-family: var(--body);
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.btn:hover  { border-color: var(--border2); background: var(--surface3); }
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.btn-amber {
+  background: var(--amber); border-color: var(--amber);
+  color: #0a0c0f; font-weight: 600;
+  box-shadow: 0 0 16px rgba(245,158,11,0.25);
+}
+.btn-amber:hover { background: #fbbf24; border-color: #fbbf24; box-shadow: 0 0 24px rgba(245,158,11,0.4); }
+.btn-green  { background: var(--green2); border-color: rgba(16,185,129,0.3); color: var(--green); }
+.btn-green:hover { background: rgba(16,185,129,0.2); }
+.btn-red    { background: var(--red2);   border-color: rgba(244,63,94,0.3);   color: var(--red); }
+.btn-red:hover   { background: rgba(244,63,94,0.2); }
+.btn-ghost  { background: transparent; border-color: transparent; color: var(--text2); }
+.btn-ghost:hover { background: var(--surface2); color: var(--text); }
+.btn-full { width: 100%; justify-content: center; padding: 11px 16px; }
+
+/* ── MAIN DASHBOARD ── */
+.dashboard { padding: 24px 28px; max-width: 1200px; margin: 0 auto; }
+
+/* ── ORG STRIP ── */
+.org-strip {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 18px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.org-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); flex-shrink: 0; }
+.org-name { font-family: var(--display); font-size: 14px; font-weight: 600; }
+.org-url  { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+.org-sep  { flex: 1; }
+.status-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500;
+  font-family: var(--mono);
+}
+.pill-green { background: var(--green2); color: var(--green); }
+.pill-red   { background: var(--red2);   color: var(--red); }
+.pill-amber { background: var(--amber2); color: var(--amber); }
+.pill-grey  { background: var(--surface3); color: var(--text3); }
+
+/* ── STATS ROW ── */
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 16px 20px;
+}
+.stat-val { font-family: var(--display); font-size: 28px; font-weight: 700; line-height: 1; }
+.stat-label { font-family: var(--mono); font-size: 10px; letter-spacing: 1px; color: var(--text3); text-transform: uppercase; margin-top: 6px; }
+.stat-card.amber .stat-val { color: var(--amber); }
+.stat-card.green .stat-val { color: var(--green); }
+.stat-card.red   .stat-val { color: var(--red); }
+
+/* ── TOOLBAR ── */
+.toolbar {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.toolbar-left  { display: flex; gap: 8px; flex-wrap: wrap; }
+.toolbar-right { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+
+.search-wrap { position: relative; }
+.search-input {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: var(--radius); padding: 8px 12px 8px 34px;
+  color: var(--text); font-size: 12px; font-family: var(--body); outline: none;
+  width: 220px; transition: border-color 0.15s;
+}
+.search-input:focus { border-color: var(--amber); }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--text3); pointer-events: none; }
+
+.filter-btn { font-family: var(--mono); font-size: 11px; padding: 7px 12px; }
+.filter-btn.active { background: var(--amber2); border-color: rgba(245,158,11,0.3); color: var(--amber); }
+
+/* ── SNAPSHOT BANNER ── */
+.snap-banner {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 18px; margin-bottom: 20px;
+  background: var(--amber3); border: 1px solid rgba(245,158,11,0.2);
+  border-radius: var(--radius-lg); font-size: 12px; color: var(--amber);
+  flex-wrap: wrap;
+}
+.snap-banner-left { display: flex; align-items: center; gap: 10px; }
+.snap-ts { font-family: var(--mono); font-size: 11px; opacity: 0.7; }
+
+/* ── OBJECT GROUP ── */
+.object-group { margin-bottom: 24px; }
+.group-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 12px; cursor: pointer; user-select: none;
+}
+.group-chevron { color: var(--text3); font-size: 12px; transition: transform 0.2s; }
+.group-header.collapsed .group-chevron { transform: rotate(-90deg); }
+.group-title { font-family: var(--display); font-size: 13px; font-weight: 600; }
+.group-obj   { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+.group-count { font-family: var(--mono); font-size: 10px; color: var(--text3); background: var(--surface2); padding: 2px 8px; border-radius: 10px; }
+.group-line  { flex: 1; height: 1px; background: var(--border); }
+.group-bulk  { display: flex; gap: 6px; }
+
+.group-body { display: flex; flex-direction: column; gap: 1px; }
+
+/* ── AUTOMATION ROW ── */
+.auto-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: background 0.12s, border-color 0.12s;
+  position: relative; overflow: hidden;
+}
+.auto-row::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  border-radius: 3px 0 0 3px;
+  transition: background 0.2s;
+}
+.auto-row.active::before   { background: var(--green); }
+.auto-row.inactive::before { background: var(--red); }
+.auto-row:hover { background: var(--surface2); border-color: var(--border2); }
+
+.auto-type-badge {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.5px;
+  padding: 3px 8px; border-radius: 6px; flex-shrink: 0;
+  font-weight: 500;
+}
+.badge-vr  { background: rgba(139,92,246,0.15); color: #a78bfa; }
+.badge-fl  { background: rgba(59,130,246,0.15);  color: #60a5fa; }
+.badge-tr  { background: rgba(245,158,11,0.15);  color: #fbbf24; }
+.badge-wf  { background: rgba(20,184,166,0.15);  color: #2dd4bf; }
+.badge-pb  { background: rgba(244,63,94,0.15);   color: #fb7185; }
+.badge-ar  { background: rgba(16,185,129,0.15);  color: #34d399; }
+
+.auto-name { font-size: 13px; font-weight: 500; flex: 1; min-width: 0; }
+.auto-name-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.auto-meta { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+.auto-api-tag {
+  font-family: var(--mono); font-size: 10px; color: var(--text3);
+  background: var(--surface3); padding: 2px 7px; border-radius: 5px; flex-shrink: 0;
+}
+.snap-indicator {
+  font-family: var(--mono); font-size: 10px; padding: 2px 7px;
+  border-radius: 5px; flex-shrink: 0;
+}
+.snap-was-on  { background: var(--green2); color: var(--green); }
+.snap-was-off { background: var(--red2);   color: var(--red); }
+
+/* ── TOGGLE ── */
+.toggle { position: relative; width: 42px; height: 23px; flex-shrink: 0; cursor: pointer; }
+.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.tslider {
+  position: absolute; inset: 0;
+  background: var(--surface3); border: 1px solid var(--border2);
+  border-radius: 23px; transition: background 0.2s, border-color 0.2s;
+}
+.tslider::before {
+  content: ''; position: absolute;
+  height: 15px; width: 15px; left: 3px; bottom: 3px;
+  background: var(--text3); border-radius: 50%; transition: all 0.2s;
+}
+input:checked ~ .tslider { background: var(--green2); border-color: rgba(16,185,129,0.4); }
+input:checked ~ .tslider::before { transform: translateX(19px); background: var(--green); }
+.toggle.loading .tslider::before { animation: pulse-dot 0.6s ease-in-out infinite alternate; }
+@keyframes pulse-dot { from { opacity: 0.4; } to { opacity: 1; } }
+
+/* ── LOADING STATES ── */
+.spinner {
+  width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.15);
+  border-top-color: var(--amber); border-radius: 50%;
+  animation: spin 0.7s linear infinite; display: inline-block; flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--surface2) 25%, var(--surface3) 50%, var(--surface2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 6px; height: 14px;
+}
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+/* ── LOG PANEL ── */
+.log-panel {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(10,12,15,0.96); backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border); padding: 0;
+  transition: height 0.2s ease;
+}
+.log-toggle {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 20px; cursor: pointer;
+  border: none; background: transparent; width: 100%; text-align: left;
+}
+.log-toggle-label { font-family: var(--mono); font-size: 10px; letter-spacing: 1px; color: var(--text3); text-transform: uppercase; }
+.log-live { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 1.5s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.log-body {
+  max-height: 0; overflow: hidden; transition: max-height 0.2s ease;
+  padding: 0 20px;
+}
+.log-body.open { max-height: 140px; overflow-y: auto; padding: 8px 20px 12px; }
+.log-entry { display: flex; gap: 12px; font-family: var(--mono); font-size: 11px; line-height: 1.8; }
+.log-ts    { color: var(--text3); flex-shrink: 0; }
+.log-ok    { color: var(--green); }
+.log-err   { color: var(--red); }
+.log-info  { color: var(--text2); }
+.log-warn  { color: var(--amber); }
+
+/* ── MODAL ── */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 500; padding: 20px;
+  animation: fade-in 0.15s ease;
+}
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+.modal {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: var(--radius-lg); padding: 28px;
+  width: 100%; max-width: 460px;
+  animation: slide-up 0.2s ease;
+}
+@keyframes slide-up { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal h3 { font-family: var(--display); font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+.modal p  { font-size: 13px; color: var(--text2); line-height: 1.7; margin-bottom: 24px; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; }
+
+/* ── SETUP STEPS ── */
+.steps { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
+.step { display: flex; gap: 12px; }
+.step-num {
+  width: 24px; height: 24px; border-radius: 50%; background: var(--amber);
+  color: #0a0c0f; font-size: 11px; font-weight: 700; font-family: var(--display);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+}
+.step-content { font-size: 13px; color: var(--text2); line-height: 1.6; }
+.step-content code { font-family: var(--mono); font-size: 11px; background: var(--surface3); padding: 1px 5px; border-radius: 4px; color: var(--text); }
+.step-content a { color: var(--amber); }
+
+/* ── EMPTY / ERROR ── */
+.empty-state { padding: 60px 24px; text-align: center; color: var(--text2); }
+.empty-state .icon { font-size: 36px; margin-bottom: 12px; opacity: 0.4; }
+.empty-state h4 { font-family: var(--display); font-size: 15px; color: var(--text); margin-bottom: 6px; }
+.empty-state p  { font-size: 13px; max-width: 340px; margin: 0 auto; line-height: 1.6; }
+
+/* ── TOAST ── */
+.toast-container { position: fixed; top: 70px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: var(--radius); padding: 10px 16px;
+  font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  animation: toast-in 0.2s ease; min-width: 220px;
+}
+.toast.ok   { border-left: 3px solid var(--green); }
+.toast.err  { border-left: 3px solid var(--red); }
+.toast.warn { border-left: 3px solid var(--amber); }
+@keyframes toast-in { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* ── PROGRESS BAR ── */
+.progress-bar { height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; margin: 8px 0; }
+.progress-fill { height: 100%; background: var(--amber); border-radius: 2px; transition: width 0.3s ease; }
+
+/* ── UTIL ── */
+.hidden { display: none !important; }
+.mt8 { margin-top: 8px; }
+.page-pad { padding-bottom: 80px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ═══ TOPBAR ═══ -->
+<nav class="topbar">
+  <div class="logo">
+    <div class="logo-mark">⚡</div>
+    <span class="logo-name">SF Automation Switch</span>
+    <span class="logo-ver">v2.0</span>
+  </div>
+  <div class="topbar-right" id="topbarRight">
+    <button class="btn btn-ghost" onclick="showSetupModal()" id="btnSetup">📋 Setup guide</button>
+  </div>
+</nav>
+
+<!-- ═══ LANDING ═══ -->
+<div id="landing" class="landing">
+  <div class="landing-title">Automation<br>Control Center</div>
+  <p class="landing-sub">Connect your Salesforce org to read, toggle, and snapshot every automation — grouped by object. Built for data migrations.</p>
+
+  <div class="connect-box">
+    <h3>Connect via OAuth</h3>
+    <p>You'll be redirected to Salesforce to log in. Your token stays in your browser only — nothing is sent to any server.</p>
+
+    <div class="field">
+      <div class="field-label">Connected App Client ID</div>
+      <input class="field-input" id="clientId" placeholder="3MVG9xOCSsuQDlO…" />
+      <div class="field-hint">From Setup → App Manager → your Connected App. <a href="#" onclick="showSetupModal();return false;">Need help? See setup guide →</a></div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">Environment</div>
+      <select class="field-select" id="loginEnv">
+        <option value="https://login.salesforce.com">Production / Developer org</option>
+        <option value="https://test.salesforce.com">Sandbox</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <div class="field-label">Org nickname (optional)</div>
+      <input class="field-input" id="orgNick" placeholder="e.g. CAIS Sandbox" />
+    </div>
+
+    <button class="btn btn-amber btn-full mt8" onclick="startOAuth()">
+      🔐 Connect to Salesforce
+    </button>
+
+    <div style="margin-top:16px;text-align:center;font-size:12px;color:var(--text3)">
+      or <a href="#" style="color:var(--amber)" onclick="showManualModal();return false;">paste access token manually</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DASHBOARD ═══ -->
+<div id="dashboard" class="dashboard page-pad hidden">
+
+  <!-- ORG STRIP -->
+  <div class="org-strip">
+    <div class="org-dot"></div>
+    <div>
+      <div class="org-name" id="orgNameDisplay">—</div>
+      <div class="org-url"  id="orgUrlDisplay">—</div>
+    </div>
+    <div class="org-sep"></div>
+    <div id="orgStatusPill" class="status-pill pill-green">● connected</div>
+    <button class="btn btn-ghost" onclick="disconnectOrg()" style="font-size:11px">✕ Disconnect</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card amber"><div class="stat-val" id="statTotal">—</div><div class="stat-label">total automations</div></div>
+    <div class="stat-card green"><div class="stat-val" id="statActive">—</div><div class="stat-label">active</div></div>
+    <div class="stat-card red">  <div class="stat-val" id="statInactive">—</div><div class="stat-label">inactive</div></div>
+    <div class="stat-card">      <div class="stat-val" id="statObjects" style="color:var(--blue)">—</div><div class="stat-label">objects</div></div>
+  </div>
+
+  <!-- SNAPSHOT BANNER -->
+  <div id="snapBanner" class="snap-banner hidden">
+    <div class="snap-banner-left">
+      <span>📸</span>
+      <span>Snapshot saved — <strong>Revert</strong> will restore the exact pre-migration state of each automation.</span>
+      <span class="snap-ts" id="snapTs"></span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-amber" onclick="revertSnapshot()" id="btnRevert">↩ Revert to snapshot</button>
+      <button class="btn btn-ghost" onclick="clearSnapshot()" style="font-size:11px">✕</button>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" id="searchInput" placeholder="Search automations…" oninput="applyFilters()">
+      </div>
+      <button class="btn filter-btn active" data-filter="all"    onclick="setFilter('all',this)">All</button>
+      <button class="btn filter-btn"        data-filter="active"   onclick="setFilter('active',this)">Active</button>
+      <button class="btn filter-btn"        data-filter="inactive" onclick="setFilter('inactive',this)">Inactive</button>
+    </div>
+    <div class="toolbar-right">
+      <button class="btn" onclick="loadAutomations()" id="btnRefresh">↻ Refresh</button>
+      <button class="btn btn-red"   onclick="disableAll()" id="btnDisableAll">🔴 Disable all</button>
+      <button class="btn btn-green" onclick="enableAll()"  id="btnEnableAll">🟢 Enable all</button>
+    </div>
+  </div>
+
+  <!-- AUTOMATION GROUPS -->
+  <div id="groupsContainer"></div>
+</div>
+
+<!-- ═══ LOG PANEL ═══ -->
+<div class="log-panel">
+  <button class="log-toggle" onclick="toggleLog()">
+    <div class="log-live"></div>
+    <span class="log-toggle-label">Activity log</span>
+    <span id="logCount" style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-left:auto">0 events</span>
+  </button>
+  <div class="log-body" id="logBody"></div>
+</div>
+
+<!-- ═══ TOAST CONTAINER ═══ -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ═══ SETUP MODAL ═══ -->
+<div class="modal-backdrop hidden" id="setupModal">
+  <div class="modal" style="max-width:520px">
+    <h3>⚡ One-time Setup</h3>
+    <p>You need a Connected App in each Salesforce org. This is a one-time step per org.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">In Salesforce: <strong>Setup → App Manager → New Connected App</strong></div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">Enable OAuth. Set callback URL to: <br><code id="callbackUrlDisplay" style="word-break:break-all"></code></div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">Add OAuth scopes: <code>api</code>, <code>refresh_token</code>, <code>full</code></div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">Save, wait ~2 min for SF to propagate, then copy the <strong>Consumer Key</strong> (= Client ID) and paste it above.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">For <strong>Apex Triggers</strong> & <strong>Assignment Rules</strong> toggling, your profile needs <code>ModifyAllData</code> or <code>ManageMetadata</code> permission.</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-amber" onclick="closeModal('setupModal')">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MANUAL TOKEN MODAL ═══ -->
+<div class="modal-backdrop hidden" id="manualModal">
+  <div class="modal">
+    <h3>Paste Access Token</h3>
+    <p>OAuth popup was blocked or you prefer to connect manually. Get your token from Workbench or <code style="font-family:var(--mono);font-size:11px;background:var(--surface3);padding:1px 5px;border-radius:4px">sfdx org display</code>.</p>
+    <div class="field">
+      <div class="field-label">Instance URL</div>
+      <input class="field-input" id="manualInstance" placeholder="https://yourorg.my.salesforce.com" />
+    </div>
+    <div class="field">
+      <div class="field-label">Access Token</div>
+      <input class="field-input" id="manualToken" placeholder="00D…" />
+    </div>
+    <div class="field">
+      <div class="field-label">Org nickname (optional)</div>
+      <input class="field-input" id="manualNick" placeholder="e.g. CAIS Production" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('manualModal')">Cancel</button>
+      <button class="btn btn-amber" onclick="connectManual()">Connect</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CONFIRM MODAL ═══ -->
+<div class="modal-backdrop hidden" id="confirmModal">
+  <div class="modal">
+    <h3 id="confirmTitle">Are you sure?</h3>
+    <p id="confirmMsg"></p>
+    <div id="confirmProgress" class="hidden">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:4px" id="progressLabel"></div>
+    </div>
+    <div class="modal-actions" id="confirmActions">
+      <button class="btn" onclick="closeModal('confirmModal')">Cancel</button>
+      <button class="btn btn-amber" id="confirmOkBtn">Proceed</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+const STORE_KEY = 'sfas_v2';
+let S = {
+  org: null,       // { instanceUrl, accessToken, name }
+  automations: [], // full list from API
+  snapshot: null,  // { ts, map: {id: active} }
+  filter: 'all',
+  search: '',
+};
+
+function loadStore() {
+  try { const d = localStorage.getItem(STORE_KEY); if(d) { const p = JSON.parse(d); S.org = p.org||null; S.snapshot = p.snapshot||null; } } catch(e){}
+}
+function saveStore() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({ org: S.org, snapshot: S.snapshot })); } catch(e){}
+}
+loadStore();
+
+// ═══════════════════════════════════════════════════════════════
+// LOG
+// ═══════════════════════════════════════════════════════════════
+let logOpen = false, logCount = 0;
+function log(msg, type='info') {
+  logCount++;
+  document.getElementById('logCount').textContent = logCount + ' event' + (logCount!==1?'s':'');
+  const body = document.getElementById('logBody');
+  const ts = new Date().toTimeString().slice(0,8);
+  const el = document.createElement('div');
+  el.className = 'log-entry';
+  el.innerHTML = `<span class="log-ts">${ts}</span><span class="log-${type}">${msg}</span>`;
+  body.insertBefore(el, body.firstChild);
+  if (body.children.length > 100) body.removeChild(body.lastChild);
+}
+function toggleLog() {
+  logOpen = !logOpen;
+  document.getElementById('logBody').classList.toggle('open', logOpen);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════════
+function toast(msg, type='ok', duration=3000) {
+  const c = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  const icon = type==='ok'?'✓':type==='err'?'✕':'⚠';
+  el.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  c.appendChild(el);
+  setTimeout(() => { el.style.opacity='0'; el.style.transform='translateX(20px)'; el.style.transition='all 0.3s'; setTimeout(()=>el.remove(),300); }, duration);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════════════════════
+function showSetupModal()  { document.getElementById('callbackUrlDisplay').textContent = window.location.href.split('?')[0].split('#')[0]; document.getElementById('setupModal').classList.remove('hidden'); }
+function showManualModal() { document.getElementById('manualModal').classList.remove('hidden'); }
+function closeModal(id)    { document.getElementById(id).classList.add('hidden'); }
+document.querySelectorAll('.modal-backdrop').forEach(b => b.addEventListener('click', e => { if(e.target===b) b.classList.add('hidden'); }));
+
+function confirm2(title, msg, onOk) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent = msg;
+  document.getElementById('confirmProgress').classList.add('hidden');
+  document.getElementById('confirmActions').classList.remove('hidden');
+  const btn = document.getElementById('confirmOkBtn');
+  btn.onclick = () => { onOk(); };
+  document.getElementById('confirmModal').classList.remove('hidden');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// OAUTH
+// ═══════════════════════════════════════════════════════════════
+function startOAuth() {
+  const clientId = document.getElementById('clientId').value.trim();
+  const env      = document.getElementById('loginEnv').value;
+  const nick     = document.getElementById('orgNick').value.trim();
+  if (!clientId) { toast('Please enter your Connected App Client ID', 'err'); return; }
+  const cb = encodeURIComponent(window.location.href.split('?')[0].split('#')[0]);
+  const state = encodeURIComponent(JSON.stringify({ nick: nick || 'My Org', clientId }));
+  const url = `${env}/services/oauth2/authorize?response_type=token&client_id=${clientId}&redirect_uri=${cb}&state=${state}&prompt=login`;
+  log('opening Salesforce OAuth…', 'info');
+  const popup = window.open(url, 'sfauth', 'width=640,height=720,resizable=yes');
+  if (!popup) {
+    toast('Popup blocked — please use "paste access token" instead', 'warn');
+    showManualModal();
+    return;
+  }
+  const poll = setInterval(() => {
+    try {
+      if (!popup || popup.closed) { clearInterval(poll); return; }
+      const h = popup.location.href;
+      if (h && h.includes('access_token')) {
+        clearInterval(poll); popup.close();
+        handleOAuthResponse(h);
+      }
+    } catch(ex) { /* cross-origin */ }
+  }, 400);
+}
+
+function handleOAuthResponse(url) {
+  const hash = (url.includes('#') ? url.split('#')[1] : url.split('?')[1]) || '';
+  const p = Object.fromEntries(hash.split('&').map(x => x.split('=')));
+  const token       = decodeURIComponent(p.access_token || '');
+  const instanceUrl = decodeURIComponent(p.instance_url || '');
+  let stateObj = {};
+  try { stateObj = JSON.parse(decodeURIComponent(p.state||'{}')); } catch(e){}
+  if (!token || !instanceUrl) { toast('OAuth failed — missing token', 'err'); return; }
+  S.org = { accessToken: token, instanceUrl, name: stateObj.nick || instanceUrl };
+  saveStore();
+  log(`✓ connected: ${instanceUrl}`, 'ok');
+  toast('Connected!', 'ok');
+  showDashboard();
+}
+
+function connectManual() {
+  const instanceUrl = document.getElementById('manualInstance').value.trim().replace(/\/$/,'');
+  const accessToken = document.getElementById('manualToken').value.trim();
+  const nick        = document.getElementById('manualNick').value.trim();
+  if (!instanceUrl || !accessToken) { toast('Instance URL and token are required', 'err'); return; }
+  S.org = { instanceUrl, accessToken, name: nick || instanceUrl };
+  saveStore();
+  closeModal('manualModal');
+  log('manually connected', 'ok');
+  toast('Connected!', 'ok');
+  showDashboard();
+}
+
+// Handle redirect back into page (hash fragment)
+(function checkRedirect() {
+  if (window.location.hash && window.location.hash.includes('access_token')) {
+    handleOAuthResponse(window.location.href);
+    history.replaceState(null,'', window.location.pathname);
+  }
+})();
+
+// ═══════════════════════════════════════════════════════════════
+// SHOW / HIDE VIEWS
+// ═══════════════════════════════════════════════════════════════
+function showDashboard() {
+  document.getElementById('landing').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('hidden');
+  document.getElementById('orgNameDisplay').textContent = S.org.name;
+  document.getElementById('orgUrlDisplay').textContent  = S.org.instanceUrl;
+  renderSnapBanner();
+  loadAutomations();
+}
+
+function disconnectOrg() {
+  S.org = null; S.automations = []; S.snapshot = null;
+  saveStore();
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('landing').classList.remove('hidden');
+  log('disconnected', 'info');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SALESFORCE API HELPERS
+// ═══════════════════════════════════════════════════════════════
+async function sfGet(path) {
+  const r = await fetch(`${S.org.instanceUrl}${path}`, {
+    headers: { 'Authorization': `Bearer ${S.org.accessToken}`, 'Content-Type': 'application/json' }
+  });
+  if (!r.ok) {
+    const txt = await r.text();
+    throw new Error(`${r.status}: ${txt.slice(0,120)}`);
+  }
+  return r.json();
+}
+
+async function sfPost(path, body) {
+  const r = await fetch(`${S.org.instanceUrl}${path}`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${S.org.accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const txt = await r.text();
+  try { return JSON.parse(txt); } catch(e) { return txt; }
+}
+
+async function sfPatch(path, body) {
+  const r = await fetch(`${S.org.instanceUrl}${path}`, {
+    method: 'PATCH',
+    headers: { 'Authorization': `Bearer ${S.org.accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (r.status === 204) return true;
+  const txt = await r.text();
+  try { return JSON.parse(txt); } catch(e) { return txt; }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LOAD AUTOMATIONS
+// ═══════════════════════════════════════════════════════════════
+async function loadAutomations() {
+  document.getElementById('btnRefresh').innerHTML = '<span class="spinner"></span> Loading…';
+  document.getElementById('groupsContainer').innerHTML = renderSkeletons();
+  S.automations = [];
+
+  try {
+    const [vrs, flows, triggers, workflows] = await Promise.allSettled([
+      fetchValidationRules(),
+      fetchFlows(),
+      fetchApexTriggers(),
+      fetchWorkflowRules(),
+    ]);
+
+    const collect = (r, label) => {
+      if (r.status === 'fulfilled') return r.value;
+      log(`⚠ ${label}: ${r.reason.message}`, 'warn');
+      return [];
+    };
+
+    S.automations = [
+      ...collect(vrs,      'Validation Rules'),
+      ...collect(flows,    'Flows'),
+      ...collect(triggers, 'Apex Triggers'),
+      ...collect(workflows,'Workflow Rules'),
+    ];
+
+    log(`✓ loaded ${S.automations.length} automations`, 'ok');
+    toast(`Loaded ${S.automations.length} automations`, 'ok');
+    updateStats();
+    renderGroups();
+  } catch(err) {
+    log(`error loading: ${err.message}`, 'err');
+    toast('Failed to load automations', 'err');
+    document.getElementById('groupsContainer').innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><h4>Could not load automations</h4><p>${err.message}</p></div>`;
+  }
+
+  document.getElementById('btnRefresh').innerHTML = '↻ Refresh';
+}
+
+async function fetchValidationRules() {
+  const data = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent("SELECT Id, ValidationName, Active, EntityDefinition.QualifiedApiName, Description FROM ValidationRule ORDER BY EntityDefinition.QualifiedApiName, ValidationName LIMIT 2000")}`);
+  return (data.records || []).map(r => ({
+    id: r.Id, name: r.ValidationName, active: r.Active,
+    object: r.EntityDefinition?.QualifiedApiName || 'Unknown',
+    type: 'Validation Rule', typeBadge: 'badge-vr', typeCode: 'VR',
+    description: r.Description || '',
+    apiToggle: 'tooling',
+  }));
+}
+
+async function fetchFlows() {
+  // FlowDefinition gives active version status
+  const data = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent("SELECT Id, DeveloperName, ActiveVersion.Id, ActiveVersion.ProcessType, LatestVersion.ProcessType, LatestVersion.TriggerObjectOrEventLabel FROM FlowDefinition ORDER BY DeveloperName LIMIT 2000")}`);
+  return (data.records || []).map(r => {
+    const isActive = !!r.ActiveVersion;
+    const procType = r.ActiveVersion?.ProcessType || r.LatestVersion?.ProcessType || '';
+    const objName  = r.LatestVersion?.TriggerObjectOrEventLabel || 'No object';
+    let typeCode = 'FL', badge = 'badge-fl';
+    if (procType === 'Workflow') { typeCode = 'PB'; badge = 'badge-pb'; }
+    return {
+      id: r.Id, name: r.DeveloperName, active: isActive,
+      object: objName,
+      type: typeCode === 'PB' ? 'Process Builder' : 'Flow',
+      typeBadge: badge, typeCode,
+      description: procType,
+      apiToggle: 'flow',
+      activeVersionId: r.ActiveVersion?.Id || null,
+    };
+  });
+}
+
+async function fetchApexTriggers() {
+  const data = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent("SELECT Id, Name, Status, TableEnumOrId FROM ApexTrigger ORDER BY TableEnumOrId, Name LIMIT 2000")}`);
+  return (data.records || []).map(r => ({
+    id: r.Id, name: r.Name,
+    active: r.Status === 'Active',
+    object: r.TableEnumOrId || 'Unknown',
+    type: 'Apex Trigger', typeBadge: 'badge-tr', typeCode: 'TR',
+    description: `Status: ${r.Status}`,
+    apiToggle: 'metadata',
+  }));
+}
+
+async function fetchWorkflowRules() {
+  const data = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent("SELECT Id, Name, Active, TableEnumOrId FROM WorkflowRule ORDER BY TableEnumOrId, Name LIMIT 2000")}`);
+  return (data.records || []).map(r => ({
+    id: r.Id, name: r.Name, active: r.Active,
+    object: r.TableEnumOrId || 'Unknown',
+    type: 'Workflow Rule', typeBadge: 'badge-wf', typeCode: 'WF',
+    description: '',
+    apiToggle: 'tooling',
+  }));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TOGGLE SINGLE AUTOMATION
+// ═══════════════════════════════════════════════════════════════
+async function toggleAutomation(id, newActive) {
+  const a = S.automations.find(x => x.id === id);
+  if (!a) return;
+  const toggleEl = document.querySelector(`[data-toggle-id="${id}"]`);
+  if (toggleEl) toggleEl.classList.add('loading');
+
+  log(`${newActive ? 'enabling' : 'disabling'} ${a.name}…`, 'info');
+  try {
+    await doToggle(a, newActive);
+    a.active = newActive;
+    saveStore();
+    log(`✓ ${a.name} → ${newActive ? 'active' : 'inactive'}`, 'ok');
+    toast(`${a.name}: ${newActive ? 'enabled' : 'disabled'}`, 'ok', 2000);
+    updateStats();
+    updateRowState(id, newActive);
+  } catch(err) {
+    log(`✗ ${a.name}: ${err.message}`, 'err');
+    toast(`Failed: ${err.message.slice(0,60)}`, 'err');
+    // revert checkbox
+    const cb = document.querySelector(`input[data-cb-id="${id}"]`);
+    if (cb) cb.checked = a.active;
+  }
+  if (toggleEl) toggleEl.classList.remove('loading');
+}
+
+async function doToggle(a, newActive) {
+  if (a.apiToggle === 'tooling') {
+    // Validation Rules & Workflow Rules — direct Tooling API PATCH
+    const type = a.type === 'Validation Rule' ? 'ValidationRule' : 'WorkflowRule';
+    await sfPatch(`/services/data/v59.0/tooling/sobjects/${type}/${a.id}`, { Active: newActive, Metadata: { active: newActive } });
+  } else if (a.apiToggle === 'flow') {
+    // Flows — activate = POST new active version, deactivate = clear active version
+    if (newActive) {
+      // Reactivate: set active version via FlowDefinition update
+      await sfPatch(`/services/data/v59.0/tooling/sobjects/FlowDefinition/${a.id}`, { ActiveVersion: { Id: a.activeVersionId } });
+    } else {
+      await sfPatch(`/services/data/v59.0/tooling/sobjects/FlowDefinition/${a.id}`, { ActiveVersion: null });
+    }
+  } else if (a.apiToggle === 'metadata') {
+    // Apex Triggers — Metadata API deploy
+    await deployTriggerStatus(a.name, a.object, newActive);
+  }
+}
+
+async function deployTriggerStatus(name, obj, active) {
+  // Use Tooling API to update trigger status directly
+  const data = await sfGet(`/services/data/v59.0/tooling/query?q=${encodeURIComponent(`SELECT Id, Status, Body FROM ApexTrigger WHERE Name = '${name}' LIMIT 1`)}`);
+  if (!data.records || !data.records.length) throw new Error('Trigger not found');
+  const rec = data.records[0];
+  await sfPatch(`/services/data/v59.0/tooling/sobjects/ApexTrigger/${rec.Id}`, {
+    Status: active ? 'Active' : 'Inactive',
+    Body: rec.Body,
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BULK OPERATIONS
+// ═══════════════════════════════════════════════════════════════
+async function disableAll() {
+  const active = S.automations.filter(a => a.active);
+  if (!active.length) { toast('All automations already inactive', 'warn'); return; }
+  confirm2(
+    '🔴 Disable all automations',
+    `This will deactivate ${active.length} active automations. A snapshot will be saved first so you can revert exactly.`,
+    async () => {
+      // Take snapshot before touching anything (only if no snapshot exists)
+      if (!S.snapshot) {
+        S.snapshot = { ts: Date.now(), map: {} };
+        S.automations.forEach(a => S.snapshot.map[a.id] = a.active);
+        saveStore();
+        log('📸 snapshot taken', 'warn');
+      }
+      await bulkToggle(S.automations.filter(a => a.active), false, 'Disabling');
+    }
+  );
+}
+
+async function enableAll() {
+  const inactive = S.automations.filter(a => !a.active);
+  if (!inactive.length) { toast('All automations already active', 'ok'); return; }
+  confirm2(
+    '🟢 Enable all automations',
+    `This will activate ${inactive.length} inactive automations.`,
+    async () => { await bulkToggle(S.automations.filter(a => !a.active), true, 'Enabling'); }
+  );
+}
+
+async function revertSnapshot() {
+  if (!S.snapshot) return;
+  confirm2(
+    '↩ Revert to snapshot',
+    `Restore all automations to their exact state at ${new Date(S.snapshot.ts).toLocaleString()}. This is your pre-migration baseline.`,
+    async () => {
+      const toChange = S.automations.filter(a => S.snapshot.map[a.id] !== undefined && S.snapshot.map[a.id] !== a.active);
+      if (!toChange.length) { toast('Already matches snapshot', 'ok'); closeModal('confirmModal'); clearSnapshot(); return; }
+      await bulkToggle(toChange, null, 'Reverting', true);
+      clearSnapshot();
+    }
+  );
+}
+
+async function bulkToggle(items, newActive, label, useSnapshot=false) {
+  closeModal('confirmModal');
+  document.getElementById('confirmModal').classList.remove('hidden');
+  document.getElementById('confirmActions').classList.add('hidden');
+  document.getElementById('confirmProgress').classList.remove('hidden');
+  document.getElementById('confirmTitle').textContent = `${label}…`;
+  document.getElementById('confirmMsg').textContent = `Processing ${items.length} automations. Please wait.`;
+
+  let done = 0;
+  const errors = [];
+
+  for (const a of items) {
+    const target = useSnapshot ? S.snapshot.map[a.id] : newActive;
+    document.getElementById('progressFill').style.width = `${Math.round((done/items.length)*100)}%`;
+    document.getElementById('progressLabel').textContent = `${done}/${items.length} — ${a.name}`;
+    try {
+      await doToggle(a, target);
+      a.active = target;
+      updateRowState(a.id, target);
+    } catch(err) {
+      errors.push(a.name);
+      log(`✗ ${a.name}: ${err.message.slice(0,60)}`, 'err');
+    }
+    done++;
+    await sleep(120); // rate limiting
+  }
+
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressLabel').textContent = `Done — ${done - errors.length}/${items.length} succeeded`;
+  updateStats();
+  saveStore();
+  renderSnapBanner();
+
+  if (errors.length) {
+    log(`bulk complete — ${errors.length} error(s): ${errors.join(', ')}`, 'warn');
+    toast(`Done with ${errors.length} error(s)`, 'warn');
+  } else {
+    log(`✓ bulk ${label.toLowerCase()} complete`, 'ok');
+    toast(`${label} complete!`, 'ok');
+  }
+
+  setTimeout(() => closeModal('confirmModal'), 1200);
+}
+
+function clearSnapshot() {
+  S.snapshot = null;
+  saveStore();
+  renderSnapBanner();
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ═══════════════════════════════════════════════════════════════
+// GROUP BULK TOGGLE
+// ═══════════════════════════════════════════════════════════════
+async function bulkToggleGroup(obj, type, newActive) {
+  const items = S.automations.filter(a => a.object === obj && a.type === type && a.active !== newActive);
+  if (!items.length) return;
+  log(`${newActive?'enabling':'disabling'} ${items.length} ${type}s on ${obj}…`, 'info');
+  for (const a of items) {
+    try { await doToggle(a, newActive); a.active = newActive; updateRowState(a.id, newActive); } catch(e) { log(`✗ ${a.name}: ${e.message}`, 'err'); }
+    await sleep(100);
+  }
+  updateStats(); saveStore();
+  toast(`${items.length} ${type}(s) on ${obj}: ${newActive?'enabled':'disabled'}`, 'ok', 2000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+function updateStats() {
+  const all    = S.automations;
+  const active = all.filter(a => a.active).length;
+  const objs   = new Set(all.map(a => a.object)).size;
+  document.getElementById('statTotal').textContent    = all.length;
+  document.getElementById('statActive').textContent   = active;
+  document.getElementById('statInactive').textContent = all.length - active;
+  document.getElementById('statObjects').textContent  = objs;
+}
+
+function setFilter(f, btn) {
+  S.filter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b === btn));
+  applyFilters();
+}
+
+function applyFilters() {
+  S.search = document.getElementById('searchInput').value.toLowerCase();
+  renderGroups();
+}
+
+function getFiltered() {
+  return S.automations.filter(a => {
+    if (S.filter === 'active'   && !a.active)  return false;
+    if (S.filter === 'inactive' &&  a.active)  return false;
+    if (S.search && !a.name.toLowerCase().includes(S.search) && !a.object.toLowerCase().includes(S.search)) return false;
+    return true;
+  });
+}
+
+function renderGroups() {
+  const filtered = getFiltered();
+  const container = document.getElementById('groupsContainer');
+
+  if (!filtered.length) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><h4>No results</h4><p>Try adjusting your search or filter.</p></div>`;
+    return;
+  }
+
+  // Group by object, then by type
+  const byObject = {};
+  filtered.forEach(a => {
+    if (!byObject[a.object]) byObject[a.object] = {};
+    if (!byObject[a.object][a.type]) byObject[a.object][a.type] = [];
+    byObject[a.object][a.type].push(a);
+  });
+
+  const objects = Object.keys(byObject).sort();
+  container.innerHTML = objects.map(obj => {
+    const types = Object.keys(byObject[obj]).sort();
+    const allA  = Object.values(byObject[obj]).flat();
+    const activeN = allA.filter(a=>a.active).length;
+
+    const rowsHtml = types.map(type => {
+      const items = byObject[obj][type];
+      const typeActiveN = items.filter(a=>a.active).length;
+      const subHeader = `
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 18px 4px;border-top:1px solid var(--border)">
+          <span class="auto-type-badge ${items[0].typeBadge}">${items[0].typeCode}</span>
+          <span style="font-size:12px;color:var(--text2);font-weight:500">${type}</span>
+          <span class="status-pill ${typeActiveN===items.length?'pill-green':typeActiveN===0?'pill-red':'pill-amber'}" style="font-size:10px;padding:2px 8px">${typeActiveN}/${items.length} active</span>
+          <div style="flex:1"></div>
+          <button class="btn btn-ghost" style="font-size:10px;padding:4px 8px" onclick="bulkToggleGroup('${esc(obj)}','${esc(type)}',true)">all on</button>
+          <button class="btn btn-ghost" style="font-size:10px;padding:4px 8px" onclick="bulkToggleGroup('${esc(obj)}','${esc(type)}',false)">all off</button>
+        </div>`;
+      const rowsStr = items.map(a => renderAutoRow(a)).join('');
+      return subHeader + rowsStr;
+    }).join('');
+
+    return `
+      <div class="object-group">
+        <div class="group-header" onclick="toggleGroup(this)">
+          <span class="group-chevron">▾</span>
+          <span class="group-title">${obj}</span>
+          <span class="group-count">${allA.length} automation${allA.length!==1?'s':''}</span>
+          <span class="status-pill ${activeN===allA.length?'pill-green':activeN===0?'pill-red':'pill-amber'}" style="font-size:10px">${activeN}/${allA.length} active</span>
+          <div class="group-line"></div>
+        </div>
+        <div class="group-body">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden">
+            ${rowsHtml}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderAutoRow(a) {
+  const snapWas = S.snapshot ? S.snapshot.map[a.id] : undefined;
+  const snapBadge = snapWas !== undefined
+    ? `<span class="snap-indicator ${snapWas ? 'snap-was-on' : 'snap-was-off'}">${snapWas ? '● was on' : '○ was off'}</span>`
+    : '';
+  return `
+    <div class="auto-row ${a.active ? 'active' : 'inactive'}" id="row-${a.id}">
+      <div class="auto-name">
+        <div class="auto-name-text">${esc(a.name)}</div>
+        ${a.description ? `<div class="auto-meta">${esc(a.description)}</div>` : ''}
+      </div>
+      ${snapBadge}
+      <span class="auto-api-tag">${a.typeCode}</span>
+      <label class="toggle" data-toggle-id="${a.id}" aria-label="Toggle ${esc(a.name)}">
+        <input type="checkbox" data-cb-id="${a.id}" ${a.active?'checked':''} onchange="toggleAutomation('${a.id}', this.checked)">
+        <span class="tslider"></span>
+      </label>
+    </div>`;
+}
+
+function updateRowState(id, active) {
+  const row = document.getElementById(`row-${id}`);
+  if (!row) return;
+  row.className = `auto-row ${active ? 'active' : 'inactive'}`;
+  const cb = row.querySelector(`input[data-cb-id="${id}"]`);
+  if (cb) cb.checked = active;
+}
+
+function toggleGroup(header) {
+  header.classList.toggle('collapsed');
+  const body = header.nextElementSibling;
+  if (body) body.style.display = header.classList.contains('collapsed') ? 'none' : '';
+}
+
+function renderSnapBanner() {
+  const banner = document.getElementById('snapBanner');
+  if (!S.snapshot) { banner.classList.add('hidden'); return; }
+  banner.classList.remove('hidden');
+  document.getElementById('snapTs').textContent = new Date(S.snapshot.ts).toLocaleString();
+}
+
+function renderSkeletons() {
+  return Array(6).fill(0).map(() => `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:8px;display:flex;gap:12px;align-items:center">
+      <div class="skeleton" style="width:60px"></div>
+      <div style="flex:1"><div class="skeleton" style="width:60%;margin-bottom:6px"></div><div class="skeleton" style="width:30%"></div></div>
+      <div class="skeleton" style="width:42px;height:23px;border-radius:12px"></div>
+    </div>`).join('');
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+if (S.org && S.org.accessToken) {
+  showDashboard();
+} else {
+  document.getElementById('landing').classList.remove('hidden');
+}
+</script>
+</body>
+</html>
