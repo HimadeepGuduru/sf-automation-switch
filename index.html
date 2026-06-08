@@ -1016,7 +1016,7 @@ async function sfPatch(path, body) {
 async function loadAutomations() {
   document.getElementById('btnRefresh').innerHTML = '<span class="spinner"></span>';
   document.getElementById('objList').innerHTML = skeletons();
-  S.automations = []; S.changeStack = []; renderUndoBar();
+  S.automations = []; S.changeStack = []; renderUndoBar(); // changeStack rebuilt after load from audit
   try {
     const [a,b,c,d] = await Promise.allSettled([fetchVR(), fetchFlows(), fetchTriggers(), fetchWF()]);
     const get = (r,l) => { if (r.status==='fulfilled') return r.value; audit(`⚠ ${l}: ${r.reason?.message}`, 'warn'); return []; };
@@ -1025,6 +1025,10 @@ async function loadAutomations() {
     toast(`${S.automations.length} automations loaded`, 'ok');
     renderTypeCards();
     renderObjList();
+    // Rebuild changeStack from today's audit log (manual toggles only)
+    // This restores the undo bar after a page refresh within the same session
+    rebuildChangeStackFromAudit();
+
     // Auto-open revert modal if user came via Reconnect & Revert
     if (S._autoRevert && S.snapshot) {
       S._autoRevert = false;
@@ -1087,8 +1091,39 @@ async function fetchFlows() {
   return records.map(r => {
     const pt  = r.ActiveVersion?.ProcessType || r.LatestVersion?.ProcessType || '';
     const vid = r.LatestVersion?.Id || r.ActiveVersion?.Id;
-    const obj = (vid && triggerMap[vid]) || 'No object';
+    const rawObj = (vid && triggerMap[vid]) || '';
     const isPB = pt === 'Workflow';
+
+    // Map ProcessType to a meaningful object/category label
+    // rawObj from TriggerObjectOrEventLabel is the best — use it when available
+    let obj;
+    if (rawObj && rawObj !== 'No object') {
+      obj = rawObj;
+    } else {
+      // Derive from ProcessType
+      const ptMap = {
+        'AutoLaunchedFlow':        'Auto-launched',
+        'Flow':                    'Screen Flow',
+        'Workflow':                'Process Builder',
+        'InvocableProcess':        'Invocable Process',
+        'CustomEvent':             'Platform Event',
+        'CheckoutFlow':            'Checkout Flow',
+        'ContactRequestFlow':      'Contact Request',
+        'ActionPlan':              'Action Plan',
+        'FieldServiceWeb':         'Field Service',
+        'FieldServiceMobile':      'Field Service Mobile',
+        'Survey':                  'Survey',
+        'SurveyEnrich':            'Survey Enrich',
+        'Orchestrator':            'Orchestrator',
+        'EvaluationFlow':          'Evaluation Flow',
+        'ManagedContentFlow':      'CMS Flow',
+        'TransactionSecurityFlow': 'Transaction Security',
+        'UserProvisioningFlow':    'User Provisioning',
+        'RoutingFlow':             'Routing Flow',
+      };
+      obj = ptMap[pt] || (pt ? pt : 'Unclassified');
+    }
+
     return {id:r.Id, name:r.DeveloperName, active:!!r.ActiveVersion, object:obj,
       type:isPB?'Process Builder':'Flow', description:pt, apiToggle:'flow',
       activeVersionId:r.ActiveVersion?.Id||null};
@@ -1396,6 +1431,40 @@ async function loadNamedSnapshot(i) {
 }
 
 // ═══════════════ UNDO / SESSION ROLLBACK ═══════════════
+function rebuildChangeStackFromAudit() {
+  // Rebuild from audit entries made today with trigger='manual'
+  // so undo bar survives page refresh within same day
+  const today = new Date().toDateString();
+  const recentManual = S.auditLog.filter(e =>
+    e.trigger === 'manual' &&
+    e.from !== undefined &&
+    e.to !== undefined &&
+    new Date(e.ts).toDateString() === today
+  );
+  if (!recentManual.length) return;
+
+  // Only add entries for automations that still match the logged state
+  // (don't add if already reverted)
+  const rebuilt = [];
+  recentManual.reverse().forEach(e => { // oldest first
+    const a = S.automations.find(x => x.id === e.id || (x.name === e.name && x.object === e.object));
+    if (a) {
+      // Only track if automation's current state matches what we changed it TO
+      // (meaning the change hasn't already been undone)
+      const alreadyInStack = rebuilt.find(c => c.id === a.id);
+      if (!alreadyInStack) {
+        rebuilt.push({id:a.id, name:e.name, object:e.object||'', type:e.type||a.type, from:e.from, to:e.to, ts:new Date(e.ts).getTime()});
+      }
+    }
+  });
+  if (rebuilt.length) {
+    S.changeStack = rebuilt;
+    renderUndoBar();
+    audit(`↩ restored ${rebuilt.length} undoable change(s) from today's session`, 'info');
+  }
+}
+
+
 function renderUndoBar() {
   const bar = document.getElementById('undoBar');
   const label = document.getElementById('undoLabel');
