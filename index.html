@@ -64,10 +64,10 @@ body{font-family:var(--body);background:var(--bg);color:var(--tx);min-height:100
 .env-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .env-btn{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);padding:14px 10px;cursor:pointer;color:var(--tx);text-align:center;transition:all 0.15s;font-family:var(--body)}
 .env-btn:hover{background:var(--s3)}
-.env-btn.active{border-color:var(--amber);background:var(--amber3)}
-.env-btn-icon{font-size:20px;margin-bottom:5px}
-.env-btn-label{font-size:13px;font-weight:500}
-.env-btn-sub{font-size:11px;color:var(--tx3);margin-top:2px}
+.env-btn.active{border-color:var(--amber);background:var(--amber3);box-shadow:0 0 0 2px rgba(245,158,11,0.3)}
+.env-btn-icon{font-size:20px;margin-bottom:5px;pointer-events:none}
+.env-btn-label{font-size:13px;font-weight:500;pointer-events:none}
+.env-btn-sub{font-size:11px;color:var(--tx3);margin-top:2px;pointer-events:none}
 
 /* DASHBOARD */
 .dash{padding:20px 24px 100px;max-width:1200px;margin:0 auto}
