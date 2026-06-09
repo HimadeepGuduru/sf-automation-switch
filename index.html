@@ -780,41 +780,21 @@ function updateSessionHealth() {
 
 let _refreshing = false;
 async function silentRefreshToken() {
-  if (_refreshing || !S.org?.refreshToken) return;
+  if (_refreshing || !S.org) return;
   _refreshing = true;
+  // Use silent iframe re-auth (implicit flow with prompt=none)
+  // This works without a refresh_token for browser-only apps
+  if (S.org.loginBase) {
+    startImplicitFlow(S.org.loginBase, S.org.name, true);
+    return;
+  }
   const el = document.getElementById('sessionHealth');
   const label = document.getElementById('shLabel');
   const dot = document.getElementById('shDot');
   if (el) { el.className = 'session-health refreshing'; dot.className = 'sh-dot spin'; }
   if (label) label.textContent = 'refreshing…';
   try {
-    const loginBase = S.org.instanceUrl.includes('sandbox') || S.org.loginBase?.includes('test')
-      ? 'https://test.salesforce.com' : 'https://login.salesforce.com';
-    const params = new URLSearchParams({
-      grant_type: 'refresh_token',
-      client_id: CLIENT_ID,
-      refresh_token: S.org.refreshToken,
-    });
-    const r = await fetch(`${loginBase}/services/oauth2/token`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: params.toString()
-    });
-    if (!r.ok) throw new Error(`refresh failed: ${r.status}`);
-    const data = await r.json();
-    if (data.access_token) {
-      S.org.accessToken = data.access_token;
-      saveStore();
-      const expiry = parseInt(data.expires_in || '7200');
-      _tokenExpiry = Date.now() + expiry * 1000;
-      audit('✓ token silently refreshed', 'ok');
-      updateSessionHealth();
-    }
-  } catch(err) {
-    audit(`⚠ token refresh failed: ${err.message}`, 'warn');
-    updateSessionHealth();
-  }
-  _refreshing = false;
+      _refreshing = false;
 }
 
 async function manualRefreshToken() {
@@ -824,8 +804,8 @@ async function manualRefreshToken() {
     toast('Session refreshed', 'ok');
   } else {
     // No refresh token (implicit flow) — redirect to re-auth
-    toast('No refresh token — reconnecting…', 'warn');
-    setTimeout(() => reconnectSameOrg(), 1000);
+    toast('Refreshing session…', 'warn');
+    setTimeout(() => reconnectSameOrg(), 500);
   }
 }
 
@@ -833,7 +813,7 @@ function reconnectSameOrg() {
   if (!S.org) return;
   if (S.snapshot && Object.keys(S.snapshot.map||{}).length) S._autoRevert = true;
   const env = S.org.loginBase || (S.org.instanceUrl.includes('sandbox') ? 'https://test.salesforce.com' : 'https://login.salesforce.com');
-  startPKCE(env, S.org.name);
+  startImplicitFlow(env, S.org.name);
 }
 
 function checkPendingRevert() {
@@ -862,12 +842,23 @@ function dismissPendingAlert() {
 async function detectApiVersion() {
   try {
     const r = await fetch(`${S.org.instanceUrl}/services/data/`, {headers:{'Authorization':`Bearer ${S.org.accessToken}`}});
+    if (r.status === 401) {
+      // Token expired — trigger reconnect flow gracefully
+      audit('⚠ token expired during API version check (401)', 'warn');
+      handleSessionExpiry();
+      throw new Error('Token expired');
+    }
     if (r.ok) {
       const versions = await r.json();
       const latest = versions.sort((a,b) => parseFloat(b.version)-parseFloat(a.version))[0];
       if (latest?.version) { API_VER = `v${latest.version}`; audit(`API version: ${API_VER}`, 'info'); }
     }
-  } catch(e) { API_VER = API_FALLBACK; }
+  } catch(e) {
+    API_VER = API_FALLBACK;
+    if (e.message === 'Token expired') throw e; // re-throw to stop loadAutomations
+    // Network/CORS error — log but continue with fallback version
+    audit(`⚠ API version detection failed (${e.message.slice(0,40)}) — using ${API_FALLBACK}`, 'warn');
+  }
 }
 const TYPE_ORDER = ['Validation Rule','Flow','Process Builder','Apex Trigger','Workflow Rule'];
 const TYPE_CFG = {
@@ -980,119 +971,105 @@ function setEnv(type, btn) {
 
 async function startOAuth() {
   const nick = document.getElementById('orgNick').value.trim();
-  await startPKCE(selEnv, nick || (selEnv.includes('test') ? 'Sandbox' : 'Production'));
+  // Clear any stale token — fresh connect should start clean
+  // (preserve snapshot/snapshots so pending revert is still available)
+  if (S.org) { S.org.accessToken = null; S.org.connectedAt = null; }
+  clearSessionWatcher();
+  startImplicitFlow(selEnv, nick || (selEnv.includes('test') ? 'Sandbox' : 'Production'));
 }
 
-async function startPKCE(loginBase, nick) {
-  const verifier   = pkceRandom(64);
-  const challenge  = await pkceChallenge(verifier);
-  const cb         = window.location.href.split('?')[0].split('#')[0];
-  const stateData  = JSON.stringify({nick, loginBase});
-
-  // Store verifier — survives popup round-trip
-  sessionStorage.setItem(PKCE_KEY, JSON.stringify({verifier, nick, loginBase}));
-
+// Salesforce recommends implicit flow (response_type=token) for pure browser/SPA clients.
+// PKCE token exchange via fetch() is blocked by Salesforce CORS policy for browser origins.
+// Implicit flow returns access_token directly in the URL hash — no server round-trip needed.
+// Refresh is handled via silent re-auth using the existing session cookie (prompt=none).
+// Reference: developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/intro_oauth_and_connected_apps.htm
+function startImplicitFlow(loginBase, nick, silent=false) {
+  const cb = window.location.href.split('?')[0].split('#')[0];
+  sessionStorage.setItem(PKCE_KEY, JSON.stringify({nick, loginBase}));
   const params = new URLSearchParams({
-    response_type: 'code',
+    response_type: 'token',
     client_id: CLIENT_ID,
     redirect_uri: cb,
-    code_challenge: challenge,
-    code_challenge_method: 'S256',
-    state: btoa(stateData),
-    prompt: 'login',
+    state: btoa(JSON.stringify({nick, loginBase})),
+    ...(silent ? {prompt:'none'} : {prompt:'login'}),
   });
   const url = `${loginBase}/services/oauth2/authorize?${params}`;
-  audit('opening PKCE OAuth…', 'info');
-
+  if (silent) {
+    // Silent refresh via hidden iframe
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = url;
+    document.body.appendChild(iframe);
+    const timer = setTimeout(() => {
+      iframe.remove();
+      audit('⚠ silent refresh timed out', 'warn');
+      _refreshing = false;
+    }, 10000);
+    iframe.onload = () => {
+      try {
+        const h = iframe.contentWindow.location.href;
+        if (h && h.includes('access_token')) {
+          clearTimeout(timer);
+          iframe.remove();
+          handleImplicitResponse(h, true);
+        }
+      } catch(e) { /* cross-origin — SF redirecting back */ }
+    };
+    return;
+  }
+  audit('opening Salesforce OAuth…', 'info');
   const popup = window.open(url, 'sfauth', 'width=640,height=720,resizable=yes');
   if (!popup) { toast('Popup blocked — use manual token', 'warn'); showModal('manualModal'); return; }
-
   const poll = setInterval(() => {
     try {
       if (!popup || popup.closed) { clearInterval(poll); return; }
       const h = popup.location.href;
-      if (h && (h.includes('code=') || h.includes('error='))) {
-        clearInterval(poll);
-        const u = new URL(h);
-        popup.close();
-        if (u.searchParams.get('error')) {
-          toast(`Auth error: ${u.searchParams.get('error_description') || u.searchParams.get('error')}`, 'err');
-          return;
-        }
-        handlePKCECallback(u.searchParams.get('code'), cb);
+      if (h && h.includes('access_token')) { clearInterval(poll); popup.close(); handleImplicitResponse(h, false); }
+      if (h && h.includes('error=')) {
+        clearInterval(poll); popup.close();
+        const u = new URL(h.includes('#') ? h.replace('#','?') : h);
+        toast(`Auth error: ${u.searchParams.get('error_description') || u.searchParams.get('error')}`, 'err');
       }
-    } catch(ex) { /* cross-origin, keep polling */ }
+    } catch(ex) { /* cross-origin */ }
   }, 400);
 }
 
-async function handlePKCECallback(code, redirectUri) {
-  const stored = sessionStorage.getItem(PKCE_KEY);
-  if (!stored) { toast('PKCE state lost — please try again', 'err'); return; }
-  const {verifier, nick, loginBase} = JSON.parse(stored);
-  sessionStorage.removeItem(PKCE_KEY);
-
-  try {
-    const params = new URLSearchParams({
-      grant_type: 'authorization_code',
-      client_id: CLIENT_ID,
-      redirect_uri: redirectUri,
-      code,
-      code_verifier: verifier,
-    });
-    const r = await fetch(`${loginBase}/services/oauth2/token`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: params.toString()
-    });
-    if (!r.ok) {
-      const e = await r.json().catch(() => ({}));
-      throw new Error(e.error_description || e.error || `HTTP ${r.status}`);
-    }
-    const data = await r.json();
-    // Preserve existing snapshot/snapshots if reconnecting same org
-    const prevSnap     = S.org?.instanceUrl === data.instance_url?.replace(/\/$/,'') ? S.snapshot : null;
-    const prevSnapshots = S.org?.instanceUrl === data.instance_url?.replace(/\/$/,'') ? S.snapshots : S.snapshots;
-    S.org = {
-      accessToken:  data.access_token,
-      refreshToken: data.refresh_token || null,
-      instanceUrl:  (data.instance_url || '').replace(/\/$/,''),
-      name: nick,
-      loginBase,
-      connectedAt: Date.now(),
-    };
-    if (prevSnap) S.snapshot = prevSnap;
-    saveStore();
-    audit(`✓ PKCE connected: ${S.org.name} (refresh_token: ${data.refresh_token ? 'yes' : 'no'})`, 'ok');
+function handleImplicitResponse(url, isSilent=false) {
+  const hash = (url.includes('#') ? url.split('#')[1] : url.split('?')[1]) || '';
+  const p = Object.fromEntries(hash.split('&').map(x => { const [k,...v]=x.split('='); return [k, decodeURIComponent(v.join('='))]; }));
+  if (!p.access_token || !p.instance_url) { if (!isSilent) toast('OAuth failed — no token received', 'err'); return; }
+  let nick = S.org?.name || 'My Org';
+  let loginBase = selEnv;
+  try { const s = JSON.parse(atob(p.state||'')); nick = s.nick || nick; loginBase = s.loginBase || loginBase; } catch(e) {}
+  const prevSnap = S.org?.instanceUrl === p.instance_url.replace(/\/$/,'') ? S.snapshot : null;
+  S.org = {
+    accessToken: p.access_token,
+    instanceUrl: p.instance_url.replace(/\/$/,''),
+    name: nick,
+    loginBase,
+    connectedAt: Date.now(),
+    issuedAt: parseInt(p.issued_at || Date.now()),
+  };
+  if (prevSnap) S.snapshot = prevSnap;
+  saveStore();
+  const expiry = parseInt(p.expires_in || '7200');
+  if (isSilent) {
+    audit('✓ session silently refreshed', 'ok');
+    _tokenExpiry = Date.now() + expiry * 1000;
+    _refreshing = false;
+    updateSessionHealth();
+  } else {
+    audit(`✓ connected: ${S.org.name}`, 'ok');
     toast('Connected!', 'ok');
-    const expiry = parseInt(data.expires_in || '7200');
     startSessionWatcher(expiry);
     showDashboard();
-  } catch(err) {
-    audit(`✗ PKCE token exchange failed: ${err.message}`, 'err');
-    toast(`Connection failed: ${err.message}`, 'err');
   }
 }
 
-// Handle PKCE code callback when SF redirects back to this page
+// Handle implicit flow redirect back into the page
 (function() {
-  const u = new URL(window.location.href);
-  const code = u.searchParams.get('code');
-  if (code) {
-    const cb = window.location.href.split('?')[0];
-    history.replaceState(null, '', window.location.pathname);
-    handlePKCECallback(code, cb);
-    return;
-  }
-  // Legacy implicit flow fallback (in case someone bookmarked with hash)
   if (window.location.hash && window.location.hash.includes('access_token')) {
-    const hash = window.location.hash.slice(1);
-    const p = Object.fromEntries(hash.split('&').map(x => { const [k,...v]=x.split('='); return [k, decodeURIComponent(v.join('='))]; }));
-    if (p.access_token && p.instance_url) {
-      S.org = {accessToken: p.access_token, instanceUrl: p.instance_url.replace(/\/$/,''), name: 'My Org', connectedAt: Date.now()};
-      saveStore();
-      startSessionWatcher(7200);
-      showDashboard();
-    }
+    handleImplicitResponse(window.location.href, false);
     history.replaceState(null, '', window.location.pathname);
   }
 })();
@@ -1124,8 +1101,12 @@ async function showDashboard() {
   if (dot) { dot.style.background = ''; dot.style.boxShadow = ''; }
   renderSnapBanner();
   renderMigrationBanner();
-  await detectApiVersion();
-  // If reconnecting (connectedAt recent), start fresh watcher
+  try {
+    await detectApiVersion();
+  } catch(e) {
+    // Token expired during version check — handleSessionExpiry already called
+    if (e.message === 'Token expired') return;
+  }
   if (!_tokenExpiry) startSessionWatcher(7200);
   loadAutomations();
 }
@@ -1145,7 +1126,10 @@ function disconnectOrg() {
 // ═══════════════ SF API ═══════════════
 async function sfGet(path) {
   const r = await fetch(`${S.org.instanceUrl}${path}`, {headers:{'Authorization':`Bearer ${S.org.accessToken}`,'Content-Type':'application/json'}});
-  if (r.status === 401) { handleSessionExpiry(); throw new Error('Session expired — please reconnect'); }
+  if (r.status === 401) {
+    handleSessionExpiry();
+    throw new Error('Session expired — click Reconnect & Revert to restore your session');
+  }
   if (!r.ok) { const t = await r.text(); throw new Error(`${r.status}: ${t.slice(0,200)}`); }
   return r.json();
 }
@@ -1970,19 +1954,23 @@ if (!S.org && !localStorage.getItem('sfas_seen_onboarding')) {
 }
 
 if (S.org?.accessToken) {
-  showDashboard();
-  // If we have connectedAt, estimate remaining time (assume 2hr tokens)
-  if (S.org.connectedAt) {
-    const elapsed = Math.floor((Date.now() - S.org.connectedAt) / 1000);
-    const remaining = Math.max(0, 7200 - elapsed);
-    if (remaining > 0) {
-      startSessionWatcher(remaining);
-    } else {
-      // Token likely expired — show reconnect immediately
-      handleSessionExpiry();
-    }
+  // Validate token age before auto-loading dashboard
+  // Implicit flow tokens last 2h (7200s); if older, show reconnect instead of failing
+  const elapsed = S.org.connectedAt ? Math.floor((Date.now() - S.org.connectedAt) / 1000) : 9999;
+  const tokenAge = elapsed;
+  if (tokenAge > 7000) {
+    // Token likely expired — go to landing with reconnect prompt
+    document.getElementById('landing').classList.remove('hidden');
+    checkPendingRevert();
+    // Show a soft reconnect notice
+    setTimeout(() => {
+      toast('Previous session expired — please reconnect', 'warn', 5000);
+      audit('⚠ stored session expired, showing reconnect', 'warn');
+    }, 500);
   } else {
-    startSessionWatcher(7200);
+    showDashboard();
+    const remaining = Math.max(0, 7200 - tokenAge);
+    startSessionWatcher(remaining);
   }
 } else {
   document.getElementById('landing').classList.remove('hidden');
