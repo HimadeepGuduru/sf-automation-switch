@@ -364,18 +364,10 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
     <p>Pick your environment and connect. You'll log in via Salesforce — your token never leaves your browser.</p>
     <div class="field">
       <div class="field-label">Environment</div>
-      <div class="env-grid">
-        <button class="env-btn active" id="envProd" onclick="setEnv('prod',this)">
-          <div class="env-btn-icon">🏢</div>
-          <div class="env-btn-label">Production</div>
-          <div class="env-btn-sub">login.salesforce.com</div>
-        </button>
-        <button class="env-btn" id="envSb" onclick="setEnv('sandbox',this)">
-          <div class="env-btn-icon">🧪</div>
-          <div class="env-btn-label">Sandbox</div>
-          <div class="env-btn-sub">test.salesforce.com</div>
-        </button>
-      </div>
+      <select class="field-select" id="envSelect" onchange="selEnv=this.value" style="font-size:14px;padding:12px 14px">
+        <option value="https://login.salesforce.com">🏢 Production (login.salesforce.com)</option>
+        <option value="https://test.salesforce.com">🧪 Sandbox (test.salesforce.com)</option>
+      </select>
     </div>
     <div class="field">
       <div class="field-label">Org nickname (optional)</div>
@@ -963,11 +955,12 @@ function setEnv(type, btn) {
 
 async function startOAuth() {
   const nick = document.getElementById('orgNick').value.trim();
-  // Clear any stale token — fresh connect should start clean
-  // (preserve snapshot/snapshots so pending revert is still available)
+  const envSel = document.getElementById('envSelect');
+  if (envSel) selEnv = envSel.value;
   if (S.org) { S.org.accessToken = null; S.org.connectedAt = null; }
   clearSessionWatcher();
-  startImplicitFlow(selEnv, nick || (selEnv.includes('test') ? 'Sandbox' : 'Production'));
+  const label = nick || (selEnv.includes('test') ? 'Sandbox' : 'Production');
+  startImplicitFlow(selEnv, label);
 }
 
 // Salesforce recommends implicit flow (response_type=token) for pure browser/SPA clients.
@@ -1010,8 +1003,15 @@ function startImplicitFlow(loginBase, nick, silent=false) {
     return;
   }
   audit('opening Salesforce OAuth…', 'info');
+  // Try popup first; if blocked, fall back to full-page redirect
   const popup = window.open(url, 'sfauth', 'width=640,height=720,resizable=yes');
-  if (!popup) { toast('Popup blocked — use manual token', 'warn'); showModal('manualModal'); return; }
+  if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+    // Popup blocked — save nick/loginBase for when we return, then redirect
+    audit('popup blocked — using full page redirect', 'warn');
+    sessionStorage.setItem(PKCE_KEY, JSON.stringify({nick, loginBase}));
+    window.location.href = url;
+    return;
+  }
   const poll = setInterval(() => {
     try {
       if (!popup || popup.closed) { clearInterval(poll); return; }
@@ -1019,10 +1019,10 @@ function startImplicitFlow(loginBase, nick, silent=false) {
       if (h && h.includes('access_token')) { clearInterval(poll); popup.close(); handleImplicitResponse(h, false); }
       if (h && h.includes('error=')) {
         clearInterval(poll); popup.close();
-        const u = new URL(h.includes('#') ? h.replace('#','?') : h);
-        toast(`Auth error: ${u.searchParams.get('error_description') || u.searchParams.get('error')}`, 'err');
+        const errUrl = new URL(h.includes('#') ? h.replace('#','?') : h);
+        toast(`Auth error: ${errUrl.searchParams.get('error_description') || errUrl.searchParams.get('error')}`, 'err', 8000);
       }
-    } catch(ex) { /* cross-origin */ }
+    } catch(ex) { /* cross-origin, keep polling */ }
   }, 400);
 }
 
@@ -1033,6 +1033,13 @@ function handleImplicitResponse(url, isSilent=false) {
   let nick = S.org?.name || 'My Org';
   let loginBase = selEnv;
   try { const s = JSON.parse(atob(p.state||'')); nick = s.nick || nick; loginBase = s.loginBase || loginBase; } catch(e) {}
+  // Fallback: read from sessionStorage (set during full-page redirect)
+  try {
+    const sn = sessionStorage.getItem('_sfas_nick');
+    const sl = sessionStorage.getItem('_sfas_loginBase');
+    if (sn) { nick = sn; sessionStorage.removeItem('_sfas_nick'); }
+    if (sl) { loginBase = sl; sessionStorage.removeItem('_sfas_loginBase'); }
+  } catch(e) {}
   const prevSnap = S.org?.instanceUrl === p.instance_url.replace(/\/$/,'') ? S.snapshot : null;
   S.org = {
     accessToken: p.access_token,
@@ -1058,10 +1065,20 @@ function handleImplicitResponse(url, isSilent=false) {
   }
 }
 
-// Handle implicit flow redirect back into the page
+// Handle implicit flow redirect back (both popup and full-page redirect)
 (function() {
-  if (window.location.hash && window.location.hash.includes('access_token')) {
-    handleImplicitResponse(window.location.href, false);
+  const href = window.location.href;
+  if (href.includes('access_token')) {
+    // Restore nick/loginBase if this was a full-page redirect
+    try {
+      const stored = sessionStorage.getItem(PKCE_KEY);
+      if (stored) {
+        const {nick, loginBase} = JSON.parse(stored);
+        if (nick) sessionStorage.setItem('_sfas_nick', nick);
+        if (loginBase) sessionStorage.setItem('_sfas_loginBase', loginBase);
+      }
+    } catch(e) {}
+    handleImplicitResponse(href, false);
     history.replaceState(null, '', window.location.pathname);
   }
 })();
