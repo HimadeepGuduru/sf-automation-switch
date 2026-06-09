@@ -777,9 +777,8 @@ async function silentRefreshToken() {
   const dot = document.getElementById('shDot');
   if (el) { el.className = 'session-health refreshing'; dot.className = 'sh-dot spin'; }
   if (label) label.textContent = 'refreshing…';
-  try {
-      _refreshing = false;
-}
+  // silent refresh via implicit flow redirect not supported
+  _refreshing = false;
 
 async function manualRefreshToken() {
   _refreshing = false; // reset lock
@@ -1942,6 +1941,7 @@ if (S.org?.accessToken) {
 } else {
   // Landing is visible by default, just check for pending revert
   checkPendingRevert();
+}
 }
 </script>
 </body>
