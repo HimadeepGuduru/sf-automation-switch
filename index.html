@@ -265,6 +265,42 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
 .undo-bar-right{display:flex;gap:8px;flex-wrap:wrap}
 .undo-icon{font-size:16px}
 
+/* ONBOARDING MODAL */
+.onb-tab{padding:7px 14px;border-radius:var(--r);border:1px solid transparent;background:transparent;color:var(--tx2);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s;font-family:var(--body)}
+.onb-tab:hover{background:var(--s2);color:var(--tx)}
+.onb-tab.active{background:var(--s2);border-color:var(--b2);color:var(--tx)}
+.onb-pane{display:block}.onb-pane.hidden{display:none}
+.onb-req{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden}
+.onb-req-header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--b1)}
+.onb-req-num{width:26px;height:26px;border-radius:50%;background:var(--amber);color:#0a0c0f;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--display)}
+.onb-req-title{font-size:13px;font-weight:600}
+.onb-req-sub{font-size:11px;color:var(--tx3);margin-top:2px}
+.onb-badge{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:10px;margin-left:auto;flex-shrink:0}
+.onb-badge-req{background:var(--red3);color:var(--red)}
+.onb-badge-warn{background:var(--amber3);color:var(--amber)}
+.onb-req-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.onb-nav-path{display:flex;align-items:center;gap:4px;flex-wrap:wrap;background:var(--s3);padding:8px 12px;border-radius:var(--r)}
+.onb-nav-step{font-family:var(--mono);font-size:11px;color:var(--tx);background:var(--s1);padding:3px 8px;border-radius:5px;border:1px solid var(--b2)}
+.onb-nav-arrow{color:var(--tx3);font-size:12px}
+.onb-field-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.onb-field-label{font-family:var(--mono);font-size:10px;color:var(--tx3);min-width:120px}
+.onb-code{font-family:var(--mono);font-size:11px;background:var(--s3);padding:3px 8px;border-radius:5px;color:var(--tx);border:1px solid var(--b2)}
+.onb-copy-btn{font-size:10px;font-family:var(--mono);padding:3px 8px;border-radius:5px;border:1px solid var(--b2);background:var(--s1);color:var(--tx2);cursor:pointer;transition:all 0.15s;flex-shrink:0}
+.onb-copy-btn:hover{border-color:var(--amber);color:var(--amber)}
+.onb-note{font-size:11px;color:var(--tx3);line-height:1.6;padding:8px 10px;background:var(--s3);border-radius:6px;border-left:2px solid var(--blue)}
+.onb-apex{font-family:var(--mono);font-size:11px;background:var(--s3);padding:14px;border-radius:var(--r);color:var(--tx);white-space:pre;overflow-x:auto;line-height:1.7;border:1px solid var(--b2)}
+.onb-perm-row{display:flex;align-items:center;gap:6px;font-size:11px;padding:5px 8px;background:var(--s3);border-radius:6px}
+.onb-perm-icon{color:var(--green);font-size:13px;flex-shrink:0}
+.onb-perm-for{font-family:var(--mono);font-size:10px;color:var(--tx3);margin-left:auto}
+.onb-table{width:100%;border-collapse:collapse;font-size:12px}
+.onb-table th{font-family:var(--mono);font-size:10px;color:var(--tx3);text-align:left;padding:6px 10px;border-bottom:1px solid var(--b2);text-transform:uppercase;letter-spacing:0.5px}
+.onb-table td{padding:8px 10px;border-bottom:1px solid var(--b1);color:var(--tx2)}
+.onb-table tr:last-child td{border-bottom:none}
+.onb-faq{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--b1)}
+.onb-faq:last-child{border-bottom:none;margin-bottom:0}
+.onb-faq-q{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:6px}
+.onb-faq-a{font-size:12px;color:var(--tx2);line-height:1.7}
+
 /* PENDING REVERT ALERT */
 .pending-alert{display:flex;align-items:center;gap:16px;padding:20px 24px;background:var(--amber3);border:1px solid rgba(245,158,11,0.35);border-radius:var(--rl);width:100%;max-width:520px;margin-bottom:20px;flex-wrap:wrap}
 .pa-icon{font-size:28px;flex-shrink:0}
@@ -301,7 +337,7 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
       <span id="shLabel">session</span>
       <button class="btn btn-ghost" style="padding:2px 8px;font-size:10px;margin-left:4px;font-family:var(--mono)" id="shRefreshBtn" onclick="manualRefreshToken()" title="Refresh session">↻</button>
     </div>
-    <button class="btn btn-ghost" onclick="showModal('howModal')">ℹ️ How it works</button>
+    <button class="btn btn-ghost" onclick="showOnboarding()">&#128218; Setup guide</button>
   </div>
 </nav>
 
@@ -451,13 +487,146 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
 <!-- TOASTS -->
 <div class="toast-wrap" id="toastWrap"></div>
 
-<!-- HOW IT WORKS MODAL -->
+<!-- ONBOARDING MODAL -->
 <div class="modal-bg hidden" id="howModal">
-  <div class="modal">
-    <h3>⚡ How it works</h3>
-    <p>No setup needed. This tool uses a pre-registered Connected App. Just connect and go.</p>
-    <div class="steps">
-      <div class="step"><div class="step-num">1</div><div class="step-content">Pick <strong>Production</strong> or <strong>Sandbox</strong> → click Connect</div></div>
+  <div class="modal" style="max-width:640px;max-height:90vh;display:flex;flex-direction:column">
+    <div style="display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--b2);padding-bottom:12px;flex-wrap:wrap">
+      <button class="onb-tab active" onclick="switchTab('tab-prereq',this)">&#9888; Before you connect</button>
+      <button class="onb-tab" onclick="switchTab('tab-howto',this)">&#9654; How to use</button>
+      <button class="onb-tab" onclick="switchTab('tab-perms',this)">&#128274; Permissions</button>
+      <button class="onb-tab" onclick="switchTab('tab-faq',this)">&#63; FAQ</button>
+    </div>
+    <div style="overflow-y:auto;flex:1">
+
+    <!-- TAB 1 -->
+    <div id="tab-prereq" class="onb-pane">
+      <h3 style="margin-bottom:6px">Before you connect</h3>
+      <p style="font-size:13px;color:var(--tx2);margin-bottom:18px">Two settings required in <strong>each Salesforce org</strong> before connecting. Takes ~2 minutes per org.</p>
+
+      <div class="onb-req">
+        <div class="onb-req-header">
+          <div class="onb-req-num">1</div>
+          <div><div class="onb-req-title">Add CORS allowlist entry</div><div class="onb-req-sub">Allows browser API calls to Salesforce</div></div>
+          <span class="onb-badge onb-badge-req">Required</span>
+        </div>
+        <div class="onb-req-body">
+          <div class="onb-nav-path"><span class="onb-nav-step">Setup</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">Security</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">CORS</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">New</span></div>
+          <div class="onb-field-row"><span class="onb-field-label">Origin URL Pattern</span><code class="onb-code" id="corsUrlCode">https://sf-automation-switch.github.io</code><button class="onb-copy-btn" onclick="copyOnbCode('corsUrlCode')">Copy</button></div>
+          <div class="onb-note">&#9432; Without this, automations load but all toggles silently fail.</div>
+        </div>
+      </div>
+
+      <div class="onb-req" style="margin-top:10px">
+        <div class="onb-req-header">
+          <div class="onb-req-num">2</div>
+          <div><div class="onb-req-title">Add CSP Trusted Site</div><div class="onb-req-sub">Required for Content Security Policy</div></div>
+          <span class="onb-badge onb-badge-req">Required</span>
+        </div>
+        <div class="onb-req-body">
+          <div class="onb-nav-path"><span class="onb-nav-step">Setup</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">Security</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">CSP Trusted Sites</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">New Trusted Site</span></div>
+          <div class="onb-field-row"><span class="onb-field-label">Trusted Site Name</span><code class="onb-code">SFAutomationSwitch</code></div>
+          <div class="onb-field-row"><span class="onb-field-label">Trusted Site URL</span><code class="onb-code" id="cspUrlCode">https://sf-automation-switch.github.io</code><button class="onb-copy-btn" onclick="copyOnbCode('cspUrlCode')">Copy</button></div>
+          <div class="onb-field-row"><span class="onb-field-label">Context</span><code class="onb-code">&#10003; All (check all checkboxes)</code></div>
+        </div>
+      </div>
+
+      <div class="onb-req" style="margin-top:10px">
+        <div class="onb-req-header">
+          <div class="onb-req-num">3</div>
+          <div><div class="onb-req-title">Verify profile permissions</div><div class="onb-req-sub">Your user needs these to toggle automations</div></div>
+          <span class="onb-badge onb-badge-warn">Recommended</span>
+        </div>
+        <div class="onb-req-body">
+          <div class="onb-nav-path"><span class="onb-nav-step">Setup</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">Users</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">Profiles</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">System Administrator</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">
+            <div class="onb-perm-row"><span class="onb-perm-icon">&#10003;</span><span>Modify All Data</span><span class="onb-perm-for">VR, Triggers, WF</span></div>
+            <div class="onb-perm-row"><span class="onb-perm-icon">&#10003;</span><span>Author Apex</span><span class="onb-perm-for">Apex Triggers</span></div>
+            <div class="onb-perm-row"><span class="onb-perm-icon">&#10003;</span><span>Manage Flow</span><span class="onb-perm-for">Flows, PB</span></div>
+            <div class="onb-perm-row"><span class="onb-perm-icon">&#10003;</span><span>View Setup</span><span class="onb-perm-for">All types (read)</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="onb-req" style="margin-top:10px">
+        <div class="onb-req-header">
+          <div class="onb-req-num">&#9889;</div>
+          <div><div class="onb-req-title">Quick setup — Anonymous Apex</div><div class="onb-req-sub">Adds CORS + CSP automatically in 30 seconds</div></div>
+          <span class="onb-badge" style="background:var(--blue2);color:var(--blue)">Shortcut</span>
+        </div>
+        <div class="onb-req-body">
+          <div class="onb-nav-path"><span class="onb-nav-step">Setup</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">Developer Console</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">Debug</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">Execute Anonymous Window</span></div>
+          <div style="position:relative;margin-top:8px">
+            <pre class="onb-apex" id="apexCode">// SF Automation Switch — CORS + CSP setup
+// Run once in each org you want to connect
+
+CorsWhitelistEntry cors = new CorsWhitelistEntry();
+cors.UrlPattern = 'https://sf-automation-switch.github.io';
+insert cors;
+
+CspTrustedSite csp = new CspTrustedSite();
+csp.EndpointUrl = 'https://sf-automation-switch.github.io';
+csp.EndpointName = 'SFAutomationSwitch';
+csp.Context = 'All';
+csp.IsActive = true;
+insert csp;
+
+System.debug('Done — SF Automation Switch ready');</pre>
+            <button class="onb-copy-btn" style="position:absolute;top:8px;right:8px" onclick="copyOnbCode('apexCode')">&#128203; Copy Apex</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2 -->
+    <div id="tab-howto" class="onb-pane hidden">
+      <h3 style="margin-bottom:6px">Migration workflow</h3>
+      <p style="font-size:13px;color:var(--tx2);margin-bottom:16px">Recommended steps for a safe data migration.</p>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-content"><strong>Connect your org</strong> — pick Production or Sandbox, click Connect, log in via Salesforce OAuth popup.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-content"><strong>Browse automations</strong> — click any type card (Validation Rules, Flows…) to see automations grouped by object. Green dot = active, Red = inactive.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-content"><strong>Save a named snapshot</strong> (&#128248; Snapshots) — captures exact state of every automation. Survives browser close. Do this before any changes.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-content"><strong>Enter Migration Mode</strong> — auto-snapshots + disables all automations in one click. Run your data import.</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-content"><strong>Revert</strong> — click &#8617; Revert to snapshot. Shows exact diff before confirming. Restores every automation to its pre-migration state.</div></div>
+        <div class="step"><div class="step-num">6</div><div class="step-content"><strong>Audit log</strong> — every change logged with timestamp. Export to CSV via &#11015; CSV. Useful for compliance and post-migration review.</div></div>
+      </div>
+    </div>
+
+    <!-- TAB 3 -->
+    <div id="tab-perms" class="onb-pane hidden">
+      <h3 style="margin-bottom:6px">Permissions by type</h3>
+      <p style="font-size:13px;color:var(--tx2);margin-bottom:16px">What each automation type requires to toggle.</p>
+      <table class="onb-table">
+        <thead><tr><th>Type</th><th>Read requires</th><th>Toggle requires</th><th>Cannot toggle if</th></tr></thead>
+        <tbody>
+          <tr><td><span class="auto-type-badge badge-vr">VR</span> Validation Rules</td><td>View Setup</td><td>Modify All Data</td><td>&#8212;</td></tr>
+          <tr><td><span class="auto-type-badge badge-fl">FL</span> Flows</td><td>View Setup</td><td>Manage Flow</td><td>Managed package</td></tr>
+          <tr><td><span class="auto-type-badge badge-pb">PB</span> Process Builder</td><td>View Setup</td><td>Manage Flow</td><td>Managed package</td></tr>
+          <tr><td><span class="auto-type-badge badge-tr">TR</span> Apex Triggers</td><td>View Setup</td><td>Author Apex</td><td>Managed package or no Author Apex</td></tr>
+          <tr><td><span class="auto-type-badge badge-wf">WF</span> Workflow Rules</td><td>View Setup</td><td>Modify All Data</td><td>Some org editions block Tooling API</td></tr>
+        </tbody>
+      </table>
+      <div class="onb-note" style="margin-top:12px">&#9432; <strong>pkg</strong> badge = managed package. Cannot be modified via API — disable via package settings instead.</div>
+      <div class="onb-note" style="margin-top:8px">&#9432; Missing <strong>Author Apex</strong>? Setup &#8250; Users &#8250; Permission Sets &#8250; New &#8250; enable Author Apex &#8250; assign to your user.</div>
+    </div>
+
+    <!-- TAB 4 -->
+    <div id="tab-faq" class="onb-pane hidden">
+      <h3 style="margin-bottom:16px">FAQ</h3>
+      <div class="onb-faq"><div class="onb-faq-q">Is my Salesforce password stored anywhere?</div><div class="onb-faq-a">No. Authentication uses Salesforce OAuth PKCE — credentials go directly to Salesforce, never to this tool. The access token lives only in your browser session.</div></div>
+      <div class="onb-faq"><div class="onb-faq-q">Will the session expire during a long migration?</div><div class="onb-faq-a">PKCE issues a refresh token valid until revoked. The tool silently refreshes before expiry. The session health indicator (top right) shows time remaining.</div></div>
+      <div class="onb-faq"><div class="onb-faq-q">What if I close the browser mid-migration?</div><div class="onb-faq-a">Your snapshot survives in localStorage. When you return, a "pending revert" alert appears with a one-click Reconnect &amp; Revert button.</div></div>
+      <div class="onb-faq"><div class="onb-faq-q">Do I need CORS and CSP in every org?</div><div class="onb-faq-a">Yes — once per org. Use the Anonymous Apex script on the first tab. Settings are org-specific and don't transfer between sandboxes and production.</div></div>
+      <div class="onb-faq"><div class="onb-faq-q">Why do some automations have a "pkg" badge and grey toggle?</div><div class="onb-faq-a">They are managed package automations (e.g. Vlocity, AgentSync). Salesforce API cannot modify managed metadata — disable them through the package settings.</div></div>
+      <div class="onb-faq"><div class="onb-faq-q">Workflow Rules show 0 — why?</div><div class="onb-faq-a">WorkflowRule is unavailable in the Tooling API on some org editions (notably Vlocity/Industries). This is a Salesforce platform limitation.</div></div>
+    </div>
+
+    </div>
+    <div class="modal-actions" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--b1)">
+      <button class="btn btn-ghost" onclick="closeModal('howModal')">Close</button>
+      <button class="btn btn-amber" onclick="closeModal('howModal')">Get started &#8594;</button>
+    </div>
+  </div>
+</div>
       <div class="step"><div class="step-num">2</div><div class="step-content">Log in with your Salesforce credentials → click <strong>Allow</strong></div></div>
       <div class="step"><div class="step-num">3</div><div class="step-content">All automations load grouped by <strong>type</strong> → expand to see objects</div></div>
       <div class="step"><div class="step-num">4</div><div class="step-content"><strong>Migration mode</strong> — auto-snapshots then disables everything. Revert restores exact prior state</div></div>
@@ -1182,7 +1351,6 @@ async function doToggle(a, newActive) {
     }
     if (newActive) {
       // Need the VersionNumber (integer) of the latest version, not the 18-char Id
-      audit(`Flow toggle DEBUG: id=${a.id} latestVersionId=${a.latestVersionId} latestVersionNumber=${a.latestVersionNumber}`, 'info');
       let versionNum = a.latestVersionNumber;
       if (!versionNum) {
         // Fetch VersionNumber from FlowVersionView using LatestVersionId
@@ -1202,8 +1370,6 @@ async function doToggle(a, newActive) {
       await sfPatch(`/services/data/${API_VER}/tooling/sobjects/FlowDefinition/${a.id}`, {Metadata:{activeVersionNumber: versionNum}});
     } else {
       // Deactivate: set activeVersionNumber to 0
-      // DEBUG: log the exact ID being used so we can verify DurableId vs Id
-      audit(`Flow DEACTIVATE DEBUG: PATCH /tooling/sobjects/FlowDefinition/${a.id} | name=${a.name} | DurableId format?=${a.id?.startsWith('301')||a.id?.startsWith('0Af')||a.id?.startsWith('0Fl')}`, 'warn');
       await sfPatch(`/services/data/${API_VER}/tooling/sobjects/FlowDefinition/${a.id}`, {Metadata:{activeVersionNumber: 0}});
     }
 
@@ -1474,6 +1640,26 @@ async function loadNamedSnapshot(i) {
   S.snapshot = snap;
   closeModal('snapshotsModal');
   showRevertModal();
+}
+
+// ═══════════════ ONBOARDING ═══════════════
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.onb-pane').forEach(p => p.classList.add('hidden'));
+  document.querySelectorAll('.onb-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(tabId)?.classList.remove('hidden');
+  btn.classList.add('active');
+}
+function copyOnbCode(elId) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    toast('Copied to clipboard', 'ok', 1500);
+  });
+}
+function showOnboarding() {
+  // Reset to first tab
+  switchTab('tab-prereq', document.querySelector('.onb-tab'));
+  showModal('howModal');
 }
 
 // ═══════════════ UNDO / SESSION ROLLBACK ═══════════════
@@ -1775,6 +1961,14 @@ function skeletons() {
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ═══════════════ INIT ═══════════════
+// Show onboarding automatically on first visit (no stored org)
+if (!S.org && !localStorage.getItem('sfas_seen_onboarding')) {
+  setTimeout(() => {
+    showModal('howModal');
+    localStorage.setItem('sfas_seen_onboarding', '1');
+  }, 600);
+}
+
 if (S.org?.accessToken) {
   showDashboard();
   // If we have connectedAt, estimate remaining time (assume 2hr tokens)
