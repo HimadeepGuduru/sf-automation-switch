@@ -712,21 +712,13 @@ function updateSessionHealth(){
 }
 
 // ═══════ VIEWS ═══════
-async function showDashboard(){
+function showDashboard(){
   document.getElementById('landing').classList.add('hidden');
   document.getElementById('dashboard').classList.remove('hidden');
   document.getElementById('orgNameEl').textContent=S.org.name;
   document.getElementById('orgUrlEl').textContent=S.org.instanceUrl;
   renderSnapBanner(); renderMigBanner();
-  try {
-    const r=await fetch(`${S.org.instanceUrl}/services/data/`,{headers:{'Authorization':`Bearer ${S.org.accessToken}`}});
-    if(r.status===401){handleSessionExpired();return;}
-    if(r.ok){const vs=await r.json();const latest=vs.sort((a,b)=>parseFloat(b.version)-parseFloat(a.version))[0];if(latest?.version)API_VER=`v${latest.version}`;}
-  } catch(e){
-    // CORS or network error on version detect — continue with fallback version
-    audit(`API version detection skipped: ${e.message.slice(0,40)}. Using ${API_VER}`,'info');
-  }
-  audit(`API version: ${API_VER}`,'info');
+  audit(`Connected: ${S.org.name} — using API ${API_VER}`,'ok');
   loadAutomations();
 }
 function handleSessionExpired(){
@@ -1237,4 +1229,3 @@ if(S.org?.accessToken){
 </script>
 </body>
 </html>
-
