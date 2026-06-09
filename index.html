@@ -963,68 +963,22 @@ async function startOAuth() {
   startImplicitFlow(selEnv, label);
 }
 
-// Salesforce recommends implicit flow (response_type=token) for pure browser/SPA clients.
-// PKCE token exchange via fetch() is blocked by Salesforce CORS policy for browser origins.
-// Implicit flow returns access_token directly in the URL hash — no server round-trip needed.
-// Refresh is handled via silent re-auth using the existing session cookie (prompt=none).
-// Reference: developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/intro_oauth_and_connected_apps.htm
+// OAuth: direct page redirect to Salesforce — no popup, no CORS issues
+// SF redirects back to this page with #access_token=... in the URL hash
 function startImplicitFlow(loginBase, nick, silent=false) {
+  if (silent) return; // silent refresh not supported without popup — skip
   const cb = window.location.href.split('?')[0].split('#')[0];
   sessionStorage.setItem(PKCE_KEY, JSON.stringify({nick, loginBase}));
   const params = new URLSearchParams({
     response_type: 'token',
     client_id: CLIENT_ID,
     redirect_uri: cb,
-    state: btoa(JSON.stringify({nick, loginBase})),
-    ...(silent ? {prompt:'none'} : {prompt:'login'}),
+    state: btoa(unescape(encodeURIComponent(JSON.stringify({nick, loginBase})))),
+    prompt: 'login',
   });
-  const url = `${loginBase}/services/oauth2/authorize?${params}`;
-  if (silent) {
-    // Silent refresh via hidden iframe
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = url;
-    document.body.appendChild(iframe);
-    const timer = setTimeout(() => {
-      iframe.remove();
-      audit('⚠ silent refresh timed out', 'warn');
-      _refreshing = false;
-    }, 10000);
-    iframe.onload = () => {
-      try {
-        const h = iframe.contentWindow.location.href;
-        if (h && h.includes('access_token')) {
-          clearTimeout(timer);
-          iframe.remove();
-          handleImplicitResponse(h, true);
-        }
-      } catch(e) { /* cross-origin — SF redirecting back */ }
-    };
-    return;
-  }
-  audit('opening Salesforce OAuth…', 'info');
-  // Try popup first; if blocked, fall back to full-page redirect
-  const popup = window.open(url, 'sfauth', 'width=640,height=720,resizable=yes');
-  if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-    // Popup blocked — save nick/loginBase for when we return, then redirect
-    audit('popup blocked — using full page redirect', 'warn');
-    sessionStorage.setItem(PKCE_KEY, JSON.stringify({nick, loginBase}));
-    window.location.href = url;
-    return;
-  }
-  const poll = setInterval(() => {
-    try {
-      if (!popup || popup.closed) { clearInterval(poll); return; }
-      const h = popup.location.href;
-      if (h && h.includes('access_token')) { clearInterval(poll); popup.close(); handleImplicitResponse(h, false); }
-      if (h && h.includes('error=')) {
-        clearInterval(poll); popup.close();
-        const errUrl = new URL(h.includes('#') ? h.replace('#','?') : h);
-        toast(`Auth error: ${errUrl.searchParams.get('error_description') || errUrl.searchParams.get('error')}`, 'err', 8000);
-      }
-    } catch(ex) { /* cross-origin, keep polling */ }
-  }, 400);
+  window.location.href = `${loginBase}/services/oauth2/authorize?${params}`;
 }
+
 
 function handleImplicitResponse(url, isSilent=false) {
   const hash = (url.includes('#') ? url.split('#')[1] : url.split('?')[1]) || '';
