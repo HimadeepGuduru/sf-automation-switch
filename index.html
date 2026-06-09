@@ -214,7 +214,7 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
 .audit-export{font-size:11px;padding:4px 10px;margin-left:auto}
 
 /* MODAL */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:500;padding:20px;animation:fadein 0.15s}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:flex-start;justify-content:center;z-index:500;padding:20px;overflow-y:auto;animation:fadein 0.15s}
 @keyframes fadein{from{opacity:0}to{opacity:1}}
 .modal{background:var(--s1);border:1px solid var(--b2);border-radius:var(--rl);padding:28px;width:100%;max-width:460px;animation:slideup 0.2s}
 @keyframes slideup{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
@@ -342,7 +342,7 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
 </nav>
 
 <!-- LANDING -->
-<div id="landing" class="landing hidden">
+<div id="landing" class="landing">
   <div class="landing-title">Automation<br>Control Center</div>
   <p class="landing-sub">Connect any Salesforce org. Read, toggle, snapshot and revert every automation — grouped by type and object. Built for migrations.</p>
   <!-- PENDING REVERT ALERT -->
@@ -1120,6 +1120,7 @@ function disconnectOrg() {
   saveStore();
   document.getElementById('dashboard').classList.add('hidden');
   document.getElementById('landing').classList.remove('hidden');
+  checkPendingRevert();
   audit('disconnected', 'info');
 }
 
@@ -1947,10 +1948,13 @@ function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'
 // ═══════════════ INIT ═══════════════
 // Show onboarding automatically on first visit (no stored org)
 if (!S.org && !localStorage.getItem('sfas_seen_onboarding')) {
-  setTimeout(() => {
-    showModal('howModal');
-    localStorage.setItem('sfas_seen_onboarding', '1');
-  }, 600);
+  // Wait for full DOM render before showing modal
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      showOnboarding();
+      localStorage.setItem('sfas_seen_onboarding', '1');
+    }, 400);
+  });
 }
 
 if (S.org?.accessToken) {
@@ -1973,7 +1977,7 @@ if (S.org?.accessToken) {
     startSessionWatcher(remaining);
   }
 } else {
-  document.getElementById('landing').classList.remove('hidden');
+  // Landing is visible by default, just check for pending revert
   checkPendingRevert();
 }
 </script>
