@@ -4,163 +4,143 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SF Automation Switch</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=JetBrains+Mono:wght@400;500&family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:#0a0c0f; --s1:#111418; --s2:#181d24; --s3:#1e252f; --s4:#252e3a;
-  --b1:rgba(255,255,255,0.06); --b2:rgba(255,255,255,0.11); --b3:rgba(255,255,255,0.18);
-  --tx:#d4d8de; --tx2:#8b95a1; --tx3:#515c68;
-  --amber:#f59e0b; --amber2:rgba(245,158,11,0.15); --amber3:rgba(245,158,11,0.08);
-  --green:#10b981; --green2:rgba(16,185,129,0.15); --green3:rgba(16,185,129,0.08);
-  --red:#f43f5e; --red2:rgba(244,63,94,0.15); --red3:rgba(244,63,94,0.08);
-  --blue:#3b82f6; --blue2:rgba(59,130,246,0.15);
-  --vr:#8b5cf6; --vr2:rgba(139,92,246,0.15); --vr3:rgba(139,92,246,0.08);
-  --fl:#3b82f6; --fl2:rgba(59,130,246,0.15); --fl3:rgba(59,130,246,0.08);
-  --pb:#f43f5e; --pb2:rgba(244,63,94,0.15); --pb3:rgba(244,63,94,0.08);
-  --tr:#f59e0b; --tr2:rgba(245,158,11,0.15); --tr3:rgba(245,158,11,0.08);
-  --wf:#10b981; --wf2:rgba(16,185,129,0.15); --wf3:rgba(16,185,129,0.08);
-  --mono:'JetBrains Mono',monospace; --display:'Syne',sans-serif; --body:'Geist',sans-serif;
-  --r:10px; --rl:16px;
+  --bg:#0a0c0f;--s1:#111418;--s2:#181d24;--s3:#1e252f;
+  --b1:rgba(255,255,255,0.06);--b2:rgba(255,255,255,0.11);--b3:rgba(255,255,255,0.18);
+  --tx:#d4d8de;--tx2:#8b95a1;--tx3:#515c68;
+  --amber:#f59e0b;--amber2:rgba(245,158,11,0.15);--amber3:rgba(245,158,11,0.08);
+  --green:#10b981;--green2:rgba(16,185,129,0.15);--green3:rgba(16,185,129,0.08);
+  --red:#f43f5e;--red2:rgba(244,63,94,0.15);--red3:rgba(244,63,94,0.08);
+  --blue:#3b82f6;--blue2:rgba(59,130,246,0.15);
+  --vr:#8b5cf6;--fl:#3b82f6;--pb:#f43f5e;--tr:#f59e0b;--wf:#10b981;
+  --mono:'JetBrains Mono',monospace;--display:'Syne',sans-serif;--body:'Geist',sans-serif;
+  --r:10px;--rl:16px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
 body{font-family:var(--body);background:var(--bg);color:var(--tx);min-height:100vh;-webkit-font-smoothing:antialiased}
 
 /* TOPBAR */
-.topbar{position:sticky;top:0;z-index:200;background:rgba(10,12,15,0.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--b1);padding:0 24px;height:54px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.topbar{position:sticky;top:0;z-index:200;background:rgba(10,12,15,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--b1);padding:0 24px;height:54px;display:flex;align-items:center;justify-content:space-between}
 .logo{display:flex;align-items:center;gap:10px}
-.logo-mark{width:30px;height:30px;background:var(--amber);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 0 16px rgba(245,158,11,0.3);flex-shrink:0}
-.logo-name{font-family:var(--display);font-size:14px;font-weight:600;letter-spacing:-0.3px}
-.logo-ver{font-family:var(--mono);font-size:10px;color:var(--tx3);margin-left:2px}
-.topbar-right{display:flex;align-items:center;gap:8px}
+.logo-mark{width:30px;height:30px;background:var(--amber);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.logo-name{font-family:var(--display);font-size:14px;font-weight:600}
+.logo-ver{font-family:var(--mono);font-size:10px;color:var(--tx3)}
 
 /* BUTTONS */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r);border:1px solid var(--b2);background:var(--s2);color:var(--tx);font-size:12px;font-weight:500;font-family:var(--body);cursor:pointer;transition:all 0.15s;white-space:nowrap}
-.btn:hover{background:var(--s3);border-color:var(--b3)}
+.btn:hover{background:var(--s3)}
 .btn:active{transform:scale(0.97)}
-.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
-.btn-amber{background:var(--amber);border-color:var(--amber);color:#0a0c0f;font-weight:600;box-shadow:0 0 14px rgba(245,158,11,0.2)}
-.btn-amber:hover{background:#fbbf24;border-color:#fbbf24}
-.btn-green{background:var(--green3);border-color:rgba(16,185,129,0.25);color:var(--green)}
-.btn-green:hover{background:var(--green2)}
-.btn-red{background:var(--red3);border-color:rgba(244,63,94,0.25);color:var(--red)}
-.btn-red:hover{background:var(--red2)}
+.btn-amber{background:var(--amber);border-color:var(--amber);color:#0a0c0f;font-weight:600}
+.btn-amber:hover{background:#fbbf24}
+.btn-green{background:var(--green3);border-color:rgba(16,185,129,0.3);color:var(--green)}
+.btn-red{background:var(--red3);border-color:rgba(244,63,94,0.3);color:var(--red)}
 .btn-ghost{background:transparent;border-color:transparent;color:var(--tx2)}
 .btn-ghost:hover{background:var(--s2);color:var(--tx)}
-.btn-full{width:100%;justify-content:center;padding:11px}
+.btn-full{width:100%;justify-content:center;padding:13px}
 
 /* LANDING */
 .landing{min-height:calc(100vh - 54px);display:flex;align-items:center;justify-content:center;flex-direction:column;padding:40px 24px;text-align:center}
 .landing-title{font-family:var(--display);font-size:clamp(32px,5vw,52px);font-weight:700;letter-spacing:-1.5px;line-height:1.05;margin-bottom:14px;background:linear-gradient(135deg,var(--tx) 40%,var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.landing-sub{font-size:15px;color:var(--tx2);max-width:460px;line-height:1.7;margin-bottom:48px}
-.connect-box{background:var(--s1);border:1px solid var(--b2);border-radius:var(--rl);padding:32px;width:100%;max-width:420px;text-align:left}
+.landing-sub{font-size:15px;color:var(--tx2);max-width:460px;line-height:1.7;margin-bottom:40px}
+.connect-box{background:var(--s1);border:1px solid var(--b2);border-radius:var(--rl);padding:28px;width:100%;max-width:420px;text-align:left}
 .connect-box h3{font-family:var(--display);font-size:16px;font-weight:600;margin-bottom:6px}
-.connect-box p{font-size:13px;color:var(--tx2);margin-bottom:24px;line-height:1.6}
+.connect-box p{font-size:13px;color:var(--tx2);margin-bottom:22px;line-height:1.6}
 .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
 .field-label{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--tx3)}
-.field-input{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);padding:9px 12px;color:var(--tx);font-size:13px;font-family:var(--body);outline:none;width:100%;transition:border-color 0.15s}
-.field-input:focus{border-color:var(--amber)}
+.field-input,.field-select{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);padding:10px 12px;color:var(--tx);font-size:13px;font-family:var(--body);outline:none;width:100%;transition:border-color 0.15s}
+.field-input:focus,.field-select:focus{border-color:var(--amber)}
 .field-input::placeholder{color:var(--tx3)}
-.env-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.env-btn{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);padding:14px 10px;cursor:pointer;color:var(--tx);text-align:center;transition:all 0.15s;font-family:var(--body)}
-.env-btn:hover{background:var(--s3)}
-.env-btn.active{border-color:var(--amber);background:var(--amber3);box-shadow:0 0 0 2px rgba(245,158,11,0.3)}
-.env-btn-icon{font-size:20px;margin-bottom:5px;pointer-events:none}
-.env-btn-label{font-size:13px;font-weight:500;pointer-events:none}
-.env-btn-sub{font-size:11px;color:var(--tx3);margin-top:2px;pointer-events:none}
 
 /* DASHBOARD */
 .dash{padding:20px 24px 100px;max-width:1200px;margin:0 auto}
-
-/* ORG STRIP */
 .org-strip{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);margin-bottom:20px;flex-wrap:wrap}
 .org-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);flex-shrink:0}
 .org-info{flex:1;min-width:0}
 .org-name{font-family:var(--display);font-size:14px;font-weight:600}
 .org-url{font-family:var(--mono);font-size:11px;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.org-actions{display:flex;gap:8px;flex-wrap:wrap}
 
-/* MIGRATION MODE BANNER */
-.migration-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 18px;margin-bottom:20px;background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.25);border-radius:var(--rl);flex-wrap:wrap;animation:pulse-border 2s ease-in-out infinite}
-@keyframes pulse-border{0%,100%{border-color:rgba(244,63,94,0.25)}50%{border-color:rgba(244,63,94,0.5)}}
-.migration-banner-left{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--red)}
-.migration-live{width:8px;height:8px;border-radius:50%;background:var(--red);animation:blink 1s ease-in-out infinite;flex-shrink:0}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+/* SESSION HEALTH */
+.session-pill{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:var(--r);border:1px solid var(--b2);background:var(--s2);font-family:var(--mono);font-size:11px;cursor:default}
+.session-pill.good{border-color:rgba(16,185,129,0.3);background:var(--green3);color:var(--green)}
+.session-pill.warn{border-color:rgba(245,158,11,0.3);background:var(--amber3);color:var(--amber)}
+.session-pill.danger{border-color:rgba(244,63,94,0.3);background:var(--red3);color:var(--red)}
+.sh-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
 
-/* SNAPSHOT BANNER */
-.snap-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;margin-bottom:20px;background:var(--amber3);border:1px solid rgba(245,158,11,0.2);border-radius:var(--rl);font-size:12px;color:var(--amber);flex-wrap:wrap}
-.snap-banner-left{display:flex;align-items:center;gap:8px}
-.snap-ts{font-family:var(--mono);font-size:11px;opacity:0.7}
-
-/* KPI TYPE CARDS */
+/* TYPE CARDS */
 .type-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}
-.type-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);padding:16px 14px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
-.type-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--rl) var(--rl) 0 0;transition:height 0.2s}
-.type-card.vr::before{background:var(--vr)}
-.type-card.fl::before{background:var(--fl)}
-.type-card.pb::before{background:var(--pb)}
-.type-card.tr::before{background:var(--tr)}
+.type-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);padding:16px 14px;cursor:pointer;transition:all 0.15s;position:relative;overflow:hidden}
+.type-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.type-card.vr::before{background:var(--vr)}.type-card.fl::before{background:var(--fl)}
+.type-card.pb::before{background:var(--pb)}.type-card.tr::before{background:var(--tr)}
 .type-card.wf::before{background:var(--wf)}
 .type-card:hover{background:var(--s2);border-color:var(--b2)}
-.type-card.active{border-color:var(--b3);background:var(--s2)}
-.type-card.active::before{height:4px}
-.type-card.vr.active{border-color:rgba(139,92,246,0.4);background:var(--vr3)}
-.type-card.fl.active{border-color:rgba(59,130,246,0.4);background:var(--fl3)}
-.type-card.pb.active{border-color:rgba(244,63,94,0.4);background:var(--pb3)}
-.type-card.tr.active{border-color:rgba(245,158,11,0.4);background:var(--tr3)}
-.type-card.wf.active{border-color:rgba(16,185,129,0.4);background:var(--wf3)}
+.type-card.active.vr{border-color:rgba(139,92,246,0.4);background:rgba(139,92,246,0.06)}
+.type-card.active.fl{border-color:rgba(59,130,246,0.4);background:rgba(59,130,246,0.06)}
+.type-card.active.pb{border-color:rgba(244,63,94,0.4);background:rgba(244,63,94,0.06)}
+.type-card.active.tr{border-color:rgba(245,158,11,0.4);background:rgba(245,158,11,0.06)}
+.type-card.active.wf{border-color:rgba(16,185,129,0.4);background:rgba(16,185,129,0.06)}
 .tc-num{font-family:var(--display);font-size:30px;font-weight:700;line-height:1;margin-top:4px}
-.type-card.vr .tc-num{color:var(--vr)}
-.type-card.fl .tc-num{color:var(--fl)}
-.type-card.pb .tc-num{color:var(--pb)}
-.type-card.tr .tc-num{color:var(--tr)}
+.type-card.vr .tc-num{color:var(--vr)}.type-card.fl .tc-num{color:var(--fl)}
+.type-card.pb .tc-num{color:var(--pb)}.type-card.tr .tc-num{color:var(--tr)}
 .type-card.wf .tc-num{color:var(--wf)}
 .tc-label{font-size:12px;color:var(--tx2);margin-top:6px;font-weight:500}
-.tc-pill{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:20px;margin-top:8px}
-.pill-all{background:var(--green3);color:var(--green)}
-.pill-mix{background:var(--amber3);color:var(--amber)}
-.pill-none{background:var(--red3);color:var(--red)}
+.tc-pill{display:inline-flex;align-items:center;font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:20px;margin-top:6px}
+.tc-pill.all{background:var(--green3);color:var(--green)}
+.tc-pill.mix{background:var(--amber3);color:var(--amber)}
+.tc-pill.none{background:var(--red3);color:var(--red)}
 .tc-bulks{display:flex;gap:4px;margin-top:8px}
 .tc-bulk{font-size:10px;font-family:var(--mono);padding:3px 8px;border-radius:6px;border:1px solid var(--b2);background:transparent;color:var(--tx3);cursor:pointer;transition:all 0.15s}
-.tc-bulk:hover{border-color:var(--b3);color:var(--tx)}
+.tc-bulk:hover{color:var(--tx);border-color:var(--b3)}
 
 /* TOOLBAR */
 .toolbar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-.search-wrap{position:relative;flex:1;min-width:200px}
+.search-wrap{position:relative;flex:1;min-width:180px}
 .search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--tx3);font-size:13px;pointer-events:none}
 .search-input{background:var(--s1);border:1px solid var(--b2);border-radius:var(--r);padding:8px 12px 8px 32px;color:var(--tx);font-size:12px;font-family:var(--body);outline:none;width:100%;transition:border-color 0.15s}
 .search-input:focus{border-color:var(--amber)}
 .filter-btn{font-family:var(--mono);font-size:11px;padding:7px 12px}
 .filter-btn.active{background:var(--amber2);border-color:rgba(245,158,11,0.3);color:var(--amber)}
-.toolbar-right{display:flex;gap:6px;margin-left:auto}
 
-/* OBJECT LIST */
+/* BANNERS */
+.banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;margin-bottom:16px;border-radius:var(--rl);flex-wrap:wrap;font-size:13px}
+.banner-amber{background:var(--amber3);border:1px solid rgba(245,158,11,0.25);color:var(--amber)}
+.banner-red{background:var(--red3);border:1px solid rgba(244,63,94,0.25);color:var(--red);animation:pulse-b 2s ease-in-out infinite}
+@keyframes pulse-b{0%,100%{border-color:rgba(244,63,94,0.25)}50%{border-color:rgba(244,63,94,0.5)}}
+.banner-blue{background:var(--blue2);border:1px solid rgba(59,130,246,0.25);color:var(--blue)}
+
+/* OBJ LIST */
 .obj-list{display:flex;flex-direction:column;gap:6px}
 .obj-group{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);overflow:hidden}
-.obj-header{display:flex;align-items:center;gap:12px;padding:13px 18px;cursor:pointer;transition:background 0.12s;user-select:none}
+.obj-header{display:flex;align-items:center;gap:10px;padding:12px 18px;cursor:pointer;transition:background 0.12s;user-select:none}
 .obj-header:hover{background:var(--s2)}
-.obj-chevron{font-size:10px;color:var(--tx3);transition:transform 0.2s;flex-shrink:0}
-.obj-chevron.open{transform:rotate(0deg)}
-.obj-chevron.closed{transform:rotate(-90deg)}
+.obj-chev{font-size:10px;color:var(--tx3);transition:transform 0.2s;flex-shrink:0}
+.obj-chev.closed{transform:rotate(-90deg)}
 .obj-title{font-family:var(--display);font-size:13px;font-weight:600;flex:1}
 .obj-count{font-family:var(--mono);font-size:10px;color:var(--tx3);background:var(--s3);padding:2px 8px;border-radius:8px}
 .obj-bulks{display:flex;gap:4px}
 .obj-bulk{font-size:10px;font-family:var(--mono);padding:3px 8px;border-radius:6px;border:1px solid var(--b2);background:transparent;color:var(--tx3);cursor:pointer;transition:all 0.15s}
 .obj-bulk:hover{border-color:var(--b3);color:var(--tx)}
 .obj-body{border-top:1px solid var(--b1)}
+.pill{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:20px}
+.pill-green{background:var(--green3);color:var(--green)}
+.pill-amber{background:var(--amber3);color:var(--amber)}
+.pill-red{background:var(--red3);color:var(--red)}
 
-/* AUTOMATION ROW */
+/* AUTO ROW */
 .auto-row{display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--b1);transition:background 0.1s;position:relative}
 .auto-row:last-child{border-bottom:none}
 .auto-row:hover{background:var(--s2)}
-.auto-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;border-radius:0}
+.auto-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px}
 .auto-row.active::before{background:var(--green)}
 .auto-row.inactive::before{background:var(--red)}
-.auto-status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.auto-row.active .auto-status-dot{background:var(--green)}
-.auto-row.inactive .auto-status-dot{background:var(--red)}
+.auto-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.auto-row.active .auto-dot{background:var(--green)}
+.auto-row.inactive .auto-dot{background:var(--red)}
 .auto-name{font-size:13px;font-weight:500;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .auto-meta{font-family:var(--mono);font-size:10px;color:var(--tx3);margin-top:2px}
+.pkg-badge{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:4px;background:var(--s3);color:var(--tx3);flex-shrink:0}
 .snap-was{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:5px;flex-shrink:0}
 .snap-was-on{background:var(--green3);color:var(--green)}
 .snap-was-off{background:var(--red3);color:var(--red)}
@@ -172,51 +152,18 @@ body{font-family:var(--body);background:var(--bg);color:var(--tx);min-height:100
 .tslider::before{content:'';position:absolute;height:14px;width:14px;left:3px;bottom:3px;background:var(--tx3);border-radius:50%;transition:all 0.2s}
 input:checked~.tslider{background:var(--green3);border-color:rgba(16,185,129,0.4)}
 input:checked~.tslider::before{transform:translateX(18px);background:var(--green)}
-.toggle.loading .tslider::before{animation:spin 0.5s linear infinite;background:var(--amber)}
+.toggle.loading .tslider::before{animation:tspin 0.5s linear infinite;background:var(--amber)}
 .toggle.disabled{opacity:0.4;cursor:not-allowed;pointer-events:none}
-@keyframes spin{to{transform:translateX(0) rotate(360deg)}}
+@keyframes tspin{to{transform:translateX(0) rotate(360deg)}}
 
-/* STATUS PILLS */
-.pill{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:20px}
-.pill-green{background:var(--green3);color:var(--green)}
-.pill-amber{background:var(--amber3);color:var(--amber)}
-.pill-red{background:var(--red3);color:var(--red)}
-.pill-grey{background:var(--s3);color:var(--tx3)}
-
-/* SNAPSHOTS PANEL */
-.snapshots-panel{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);margin-bottom:20px;overflow:hidden}
-.snapshots-header{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--b1)}
-.snapshots-title{font-family:var(--display);font-size:13px;font-weight:600;flex:1}
-.snap-list{padding:8px 0}
-.snap-item{display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--b1);font-size:12px;transition:background 0.1s}
-.snap-item:last-child{border-bottom:none}
-.snap-item:hover{background:var(--s2)}
-.snap-item-name{font-weight:500;flex:1}
-.snap-item-ts{font-family:var(--mono);font-size:10px;color:var(--tx3)}
-.snap-item-counts{font-family:var(--mono);font-size:10px;color:var(--tx2)}
-
-/* AUDIT LOG */
-.audit-panel{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(10,12,15,0.97);backdrop-filter:blur(16px);border-top:1px solid var(--b2)}
-.audit-toggle{display:flex;align-items:center;gap:10px;padding:8px 20px;cursor:pointer;border:none;background:transparent;width:100%;text-align:left}
-.audit-live{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.5s ease-in-out infinite}
-.audit-label{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--tx3);text-transform:uppercase}
-.audit-count{font-family:var(--mono);font-size:10px;color:var(--tx3);margin-left:auto}
-.audit-body{max-height:0;overflow:hidden;transition:max-height 0.2s}
-.audit-body.open{max-height:160px;overflow-y:auto}
-.audit-inner{padding:6px 20px 12px}
-.audit-row{display:flex;gap:12px;font-family:var(--mono);font-size:11px;line-height:1.8;align-items:baseline}
-.audit-ts{color:var(--tx3);flex-shrink:0;min-width:64px}
-.audit-type{padding:1px 6px;border-radius:4px;font-size:10px;flex-shrink:0}
-.audit-msg-ok{color:var(--green)}
-.audit-msg-err{color:var(--red)}
-.audit-msg-warn{color:var(--amber)}
-.audit-msg-info{color:var(--tx2)}
-.audit-export{font-size:11px;padding:4px 10px;margin-left:auto}
+/* UNDO BAR */
+.undo-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;margin-bottom:16px;background:var(--blue2);border:1px solid rgba(59,130,246,0.25);border-radius:var(--rl);flex-wrap:wrap}
+.undo-bar-left{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--blue)}
 
 /* MODAL */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:flex-start;justify-content:center;z-index:500;padding:20px;overflow-y:auto;animation:fadein 0.15s}
 @keyframes fadein{from{opacity:0}to{opacity:1}}
-.modal{background:var(--s1);border:1px solid var(--b2);border-radius:var(--rl);padding:28px;width:100%;max-width:460px;animation:slideup 0.2s}
+.modal{background:var(--s1);border:1px solid var(--b2);border-radius:var(--rl);padding:28px;width:100%;max-width:460px;animation:slideup 0.2s;margin:auto}
 @keyframes slideup{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
 .modal h3{font-family:var(--display);font-size:18px;font-weight:600;margin-bottom:8px}
 .modal p{font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:16px}
@@ -224,30 +171,55 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
 .progress-bar{height:2px;background:var(--b2);border-radius:2px;overflow:hidden;margin:10px 0}
 .progress-fill{height:100%;background:var(--amber);border-radius:2px;transition:width 0.3s}
 
-/* DIFF TABLE */
-.diff-table{width:100%;font-size:12px;border-collapse:collapse;margin:12px 0}
-.diff-table th{font-family:var(--mono);font-size:10px;color:var(--tx3);text-align:left;padding:4px 8px;border-bottom:1px solid var(--b2)}
-.diff-table td{padding:5px 8px;border-bottom:1px solid var(--b1)}
-.diff-on{color:var(--green);font-family:var(--mono);font-size:10px}
-.diff-off{color:var(--red);font-family:var(--mono);font-size:10px}
+/* ONBOARDING TABS */
+.onb-tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--b2);padding-bottom:12px;flex-wrap:wrap}
+.onb-tab{padding:6px 14px;border-radius:var(--r);border:1px solid transparent;background:transparent;color:var(--tx2);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--body);transition:all 0.15s}
+.onb-tab:hover{background:var(--s2);color:var(--tx)}
+.onb-tab.active{background:var(--s2);border-color:var(--b2);color:var(--tx)}
+.onb-pane{display:block}.onb-pane.hidden{display:none}
+.nav-path{display:flex;align-items:center;gap:4px;flex-wrap:wrap;background:var(--s3);padding:8px 12px;border-radius:var(--r);margin:10px 0}
+.nav-step{font-family:var(--mono);font-size:11px;color:var(--tx);background:var(--s1);padding:3px 8px;border-radius:5px;border:1px solid var(--b2)}
+.nav-arr{color:var(--tx3);font-size:12px}
+.onb-note{font-size:11px;color:var(--tx3);line-height:1.6;padding:8px 10px;background:var(--s3);border-radius:6px;border-left:2px solid var(--blue)}
+.onb-code{font-family:var(--mono);font-size:11px;background:var(--s3);padding:3px 8px;border-radius:5px;color:var(--tx);border:1px solid var(--b2)}
+.onb-apex{font-family:var(--mono);font-size:11px;background:var(--s3);padding:14px;border-radius:var(--r);color:var(--tx);white-space:pre;overflow-x:auto;line-height:1.7;border:1px solid var(--b2);position:relative}
+.onb-copy{font-size:10px;font-family:var(--mono);padding:4px 10px;border-radius:5px;border:1px solid var(--b2);background:var(--s1);color:var(--tx2);cursor:pointer;margin-top:6px;transition:all 0.15s;display:inline-block}
+.onb-copy:hover{border-color:var(--amber);color:var(--amber)}
+.onb-table{width:100%;border-collapse:collapse;font-size:12px}
+.onb-table th{font-family:var(--mono);font-size:10px;color:var(--tx3);text-align:left;padding:6px 10px;border-bottom:1px solid var(--b2);text-transform:uppercase}
+.onb-table td{padding:8px 10px;border-bottom:1px solid var(--b1);color:var(--tx2)}
+.onb-table tr:last-child td{border-bottom:none}
+.onb-faq-q{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:5px;margin-top:14px}
+.onb-faq-a{font-size:12px;color:var(--tx2);line-height:1.7}
 
-/* STEPS */
-.steps{display:flex;flex-direction:column;gap:12px;margin:12px 0}
-.step{display:flex;gap:12px}
-.step-num{width:22px;height:22px;border-radius:50%;background:var(--amber);color:#0a0c0f;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
-.step-content{font-size:13px;color:var(--tx2);line-height:1.6}
-.step-content code{font-family:var(--mono);font-size:11px;background:var(--s3);padding:1px 5px;border-radius:4px;color:var(--tx)}
+/* DIFF TABLE */
+.diff-table{width:100%;font-size:12px;border-collapse:collapse;margin:10px 0}
+.diff-table th{font-family:var(--mono);font-size:10px;color:var(--tx3);text-align:left;padding:5px 8px;border-bottom:1px solid var(--b2)}
+.diff-table td{padding:6px 8px;border-bottom:1px solid var(--b1)}
+
+/* AUDIT LOG */
+.audit-panel{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(10,12,15,0.97);backdrop-filter:blur(12px);border-top:1px solid var(--b2)}
+.audit-toggle{display:flex;align-items:center;gap:10px;padding:8px 20px;cursor:pointer;border:none;background:transparent;width:100%;text-align:left}
+.audit-live{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.5s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.audit-label{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--tx3);text-transform:uppercase}
+.audit-count{font-family:var(--mono);font-size:10px;color:var(--tx3);margin-left:auto}
+.audit-body{max-height:0;overflow:hidden;transition:max-height 0.2s}
+.audit-body.open{max-height:160px;overflow-y:auto}
+.audit-inner{padding:6px 20px 12px}
+.audit-row{display:flex;gap:12px;font-family:var(--mono);font-size:11px;line-height:1.8}
+.audit-ts{color:var(--tx3);flex-shrink:0;min-width:64px}
+.log-ok{color:var(--green)}.log-err{color:var(--red)}.log-warn{color:var(--amber)}.log-info{color:var(--tx2)}
 
 /* TOAST */
 .toast-wrap{position:fixed;top:66px;right:20px;z-index:999;display:flex;flex-direction:column;gap:6px}
-.toast{background:var(--s1);border:1px solid var(--b2);border-radius:var(--r);padding:9px 14px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,0.4);animation:toast-in 0.2s;min-width:200px}
-.toast.ok{border-left:3px solid var(--green)}
-.toast.err{border-left:3px solid var(--red)}
-.toast.warn{border-left:3px solid var(--amber)}
-@keyframes toast-in{from{transform:translateX(16px);opacity:0}to{transform:translateX(0);opacity:1}}
+.toast{background:var(--s1);border:1px solid var(--b2);border-radius:var(--r);padding:9px 14px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,0.4);animation:tin 0.2s;min-width:200px}
+.toast.ok{border-left:3px solid var(--green)}.toast.err{border-left:3px solid var(--red)}.toast.warn{border-left:3px solid var(--amber)}
+@keyframes tin{from{transform:translateX(16px);opacity:0}to{transform:translateX(0);opacity:1}}
 
 /* SPINNER/SKELETON */
 .spinner{width:13px;height:13px;border:2px solid rgba(255,255,255,0.1);border-top-color:var(--amber);border-radius:50%;animation:spin 0.6s linear infinite;display:inline-block;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
 .skeleton{background:linear-gradient(90deg,var(--s2) 25%,var(--s3) 50%,var(--s2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;height:13px}
 @keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
 
@@ -256,71 +228,6 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
 .empty h4{font-family:var(--display);font-size:15px;color:var(--tx);margin-bottom:6px}
 .empty p{font-size:13px;max-width:320px;margin:0 auto;line-height:1.6}
 .hidden{display:none!important}
-.mt8{margin-top:8px}
-.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
-
-/* UNDO BAR */
-.undo-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;margin-bottom:16px;background:var(--blue2);border:1px solid rgba(59,130,246,0.25);border-radius:var(--rl);flex-wrap:wrap}
-.undo-bar-left{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--blue)}
-.undo-bar-right{display:flex;gap:8px;flex-wrap:wrap}
-.undo-icon{font-size:16px}
-
-/* ONBOARDING MODAL */
-.onb-tab{padding:7px 14px;border-radius:var(--r);border:1px solid transparent;background:transparent;color:var(--tx2);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s;font-family:var(--body)}
-.onb-tab:hover{background:var(--s2);color:var(--tx)}
-.onb-tab.active{background:var(--s2);border-color:var(--b2);color:var(--tx)}
-.onb-pane{display:block}.onb-pane.hidden{display:none}
-.onb-req{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden}
-.onb-req-header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--b1)}
-.onb-req-num{width:26px;height:26px;border-radius:50%;background:var(--amber);color:#0a0c0f;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--display)}
-.onb-req-title{font-size:13px;font-weight:600}
-.onb-req-sub{font-size:11px;color:var(--tx3);margin-top:2px}
-.onb-badge{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:10px;margin-left:auto;flex-shrink:0}
-.onb-badge-req{background:var(--red3);color:var(--red)}
-.onb-badge-warn{background:var(--amber3);color:var(--amber)}
-.onb-req-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
-.onb-nav-path{display:flex;align-items:center;gap:4px;flex-wrap:wrap;background:var(--s3);padding:8px 12px;border-radius:var(--r)}
-.onb-nav-step{font-family:var(--mono);font-size:11px;color:var(--tx);background:var(--s1);padding:3px 8px;border-radius:5px;border:1px solid var(--b2)}
-.onb-nav-arrow{color:var(--tx3);font-size:12px}
-.onb-field-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.onb-field-label{font-family:var(--mono);font-size:10px;color:var(--tx3);min-width:120px}
-.onb-code{font-family:var(--mono);font-size:11px;background:var(--s3);padding:3px 8px;border-radius:5px;color:var(--tx);border:1px solid var(--b2)}
-.onb-copy-btn{font-size:10px;font-family:var(--mono);padding:3px 8px;border-radius:5px;border:1px solid var(--b2);background:var(--s1);color:var(--tx2);cursor:pointer;transition:all 0.15s;flex-shrink:0}
-.onb-copy-btn:hover{border-color:var(--amber);color:var(--amber)}
-.onb-note{font-size:11px;color:var(--tx3);line-height:1.6;padding:8px 10px;background:var(--s3);border-radius:6px;border-left:2px solid var(--blue)}
-.onb-apex{font-family:var(--mono);font-size:11px;background:var(--s3);padding:14px;border-radius:var(--r);color:var(--tx);white-space:pre;overflow-x:auto;line-height:1.7;border:1px solid var(--b2)}
-.onb-perm-row{display:flex;align-items:center;gap:6px;font-size:11px;padding:5px 8px;background:var(--s3);border-radius:6px}
-.onb-perm-icon{color:var(--green);font-size:13px;flex-shrink:0}
-.onb-perm-for{font-family:var(--mono);font-size:10px;color:var(--tx3);margin-left:auto}
-.onb-table{width:100%;border-collapse:collapse;font-size:12px}
-.onb-table th{font-family:var(--mono);font-size:10px;color:var(--tx3);text-align:left;padding:6px 10px;border-bottom:1px solid var(--b2);text-transform:uppercase;letter-spacing:0.5px}
-.onb-table td{padding:8px 10px;border-bottom:1px solid var(--b1);color:var(--tx2)}
-.onb-table tr:last-child td{border-bottom:none}
-.onb-faq{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--b1)}
-.onb-faq:last-child{border-bottom:none;margin-bottom:0}
-.onb-faq-q{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:6px}
-.onb-faq-a{font-size:12px;color:var(--tx2);line-height:1.7}
-
-/* PENDING REVERT ALERT */
-.pending-alert{display:flex;align-items:center;gap:16px;padding:20px 24px;background:var(--amber3);border:1px solid rgba(245,158,11,0.35);border-radius:var(--rl);width:100%;max-width:520px;margin-bottom:20px;flex-wrap:wrap}
-.pa-icon{font-size:28px;flex-shrink:0}
-.pa-content{flex:1;min-width:0}
-.pa-title{font-family:var(--display);font-size:15px;font-weight:600;color:var(--amber);margin-bottom:4px}
-.pa-org{font-size:13px;color:var(--tx);font-weight:500}
-.pa-detail{font-family:var(--mono);font-size:11px;color:var(--tx3);margin-top:3px}
-.pa-dismiss{font-size:11px;margin-top:4px;color:var(--tx3);cursor:pointer;text-decoration:underline;display:block}
-
-/* SESSION HEALTH */
-.session-health{display:flex;align-items:center;gap:8px;padding:5px 12px;border-radius:var(--r);border:1px solid var(--b2);background:var(--s2);font-family:var(--mono);font-size:11px;cursor:default}
-.session-health.good{border-color:rgba(16,185,129,0.3);background:var(--green3);color:var(--green)}
-.session-health.warn{border-color:rgba(245,158,11,0.3);background:var(--amber3);color:var(--amber)}
-.session-health.danger{border-color:rgba(244,63,94,0.3);background:var(--red3);color:var(--red);animation:pulse-border 1s ease-in-out infinite}
-.session-health.refreshing{border-color:rgba(59,130,246,0.3);background:var(--blue2);color:var(--blue)}
-.sh-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
-.sh-dot.spin{animation:spin 1s linear infinite}
-/* RECONNECT BANNER */
-.reconnect-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 18px;margin-bottom:20px;background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.3);border-radius:var(--rl);flex-wrap:wrap}
-.reconnect-banner p{font-size:13px;color:var(--red);flex:1}
 </style>
 </head>
 <body>
@@ -329,15 +236,14 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
   <div class="logo">
     <div class="logo-mark">⚡</div>
     <span class="logo-name">SF Automation Switch</span>
-    <span class="logo-ver">v3.0</span>
+    <span class="logo-ver" style="margin-left:4px">v3.0</span>
   </div>
-  <div class="topbar-right" id="topbarRight">
-    <div id="sessionHealth" class="session-health hidden">
-      <span class="sh-dot" id="shDot"></span>
-      <span id="shLabel">session</span>
-      <button class="btn btn-ghost" style="padding:2px 8px;font-size:10px;margin-left:4px;font-family:var(--mono)" id="shRefreshBtn" onclick="manualRefreshToken()" title="Refresh session">↻</button>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div id="sessionHealth" class="session-pill hidden">
+      <div class="sh-dot"></div>
+      <span id="shLabel">—</span>
     </div>
-    <button class="btn btn-ghost" onclick="showOnboarding()">&#128218; Setup guide</button>
+    <button class="btn btn-ghost" onclick="showOnboarding()">📚 Setup guide</button>
   </div>
 </nav>
 
@@ -345,104 +251,66 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
 <div id="landing" class="landing">
   <div class="landing-title">Automation<br>Control Center</div>
   <p class="landing-sub">Connect any Salesforce org. Read, toggle, snapshot and revert every automation — grouped by type and object. Built for migrations.</p>
-  <!-- PENDING REVERT ALERT -->
-  <div id="pendingRevertAlert" class="pending-alert hidden">
-    <div class="pa-icon">&#128248;</div>
-    <div class="pa-content">
-      <div class="pa-title">You have a pending revert</div>
-      <div class="pa-org" id="paOrgName"></div>
-      <div class="pa-detail" id="paDetail"></div>
+  <div id="pendingAlert" class="hidden" style="background:var(--amber3);border:1px solid rgba(245,158,11,0.3);border-radius:var(--rl);padding:16px 20px;margin-bottom:20px;max-width:420px;width:100%;display:flex;align-items:center;gap:14px">
+    <span style="font-size:24px">📸</span>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:600;color:var(--amber)">Pending revert</div>
+      <div id="pendingDetail" style="font-family:var(--mono);font-size:11px;color:var(--tx3);margin-top:3px"></div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0">
-      <button class="btn btn-amber" onclick="quickReconnect()">&#128272; Reconnect &amp; Revert</button>
-      <span class="pa-dismiss" onclick="dismissPendingAlert()">dismiss</span>
-    </div>
+    <button class="btn btn-amber" style="font-size:11px" onclick="reconnectForRevert()">↩ Reconnect</button>
   </div>
-
   <div class="connect-box">
     <h3>Connect to Salesforce</h3>
-    <p>Pick your environment and connect. You'll log in via Salesforce — your token never leaves your browser.</p>
+    <p>Select your environment and click Connect. You'll be taken to Salesforce to log in — your token never leaves your browser.</p>
     <div class="field">
       <div class="field-label">Environment</div>
-      <select class="field-select" id="envSelect" onchange="selEnv=this.value" style="font-size:14px;padding:12px 14px">
+      <select class="field-select" id="envSelect" style="font-size:14px;padding:11px 12px">
         <option value="https://login.salesforce.com">🏢 Production (login.salesforce.com)</option>
         <option value="https://test.salesforce.com">🧪 Sandbox (test.salesforce.com)</option>
       </select>
     </div>
     <div class="field">
       <div class="field-label">Org nickname (optional)</div>
-      <input class="field-input" id="orgNick" placeholder="e.g. CAIS Production, Client A Dev…">
+      <input class="field-input" id="orgNick" placeholder="e.g. CAIS Sandbox, Client A Dev…">
     </div>
-    <button class="btn btn-amber btn-full mt8" style="font-size:14px;padding:13px" onclick="startOAuth()">🔐 Connect to Salesforce</button>
-    <div style="margin-top:14px;text-align:center;font-size:12px;color:var(--tx3)">or <a href="#" style="color:var(--amber)" onclick="showModal('manualModal');return false">paste access token manually</a></div>
+    <button class="btn btn-amber btn-full" style="margin-top:8px;font-size:14px" onclick="doConnect()">🔐 Connect to Salesforce</button>
+    <div style="margin-top:12px;text-align:center;font-size:12px;color:var(--tx3)">or <a href="#" style="color:var(--amber)" onclick="showModal('manualModal');return false">paste access token manually</a></div>
   </div>
 </div>
 
 <!-- DASHBOARD -->
 <div id="dashboard" class="dash hidden">
-
-  <!-- ORG STRIP -->
   <div class="org-strip">
     <div class="org-dot"></div>
     <div class="org-info">
-      <div class="org-name" id="orgNameEl">—</div>
-      <div class="org-url" id="orgUrlEl">—</div>
+      <div class="org-name" id="orgNameEl"></div>
+      <div class="org-url" id="orgUrlEl"></div>
     </div>
-    <div class="org-actions">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-ghost" style="font-size:11px" onclick="disconnectOrg()">✕ Disconnect</button>
     </div>
   </div>
 
-  <!-- MIGRATION BANNER -->
-  <div id="migrationBanner" class="migration-banner hidden">
-    <div class="migration-banner-left">
-      <div class="migration-live"></div>
-      <strong>Migration mode active</strong> — all automations disabled. Snapshot saved.
-    </div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-amber" onclick="showRevertModal()" id="btnRevert">↩ Revert to snapshot</button>
-    </div>
+  <div id="migBanner" class="banner banner-red hidden">
+    <div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:var(--red);animation:blink 1s ease-in-out infinite;display:inline-block"></span><strong>Migration mode active</strong> — all automations disabled.</div>
+    <button class="btn btn-amber" onclick="showRevertModal()">↩ Revert to snapshot</button>
   </div>
 
-  <!-- SNAPSHOT BANNER -->
-  <div id="snapBanner" class="snap-banner hidden">
-    <div class="snap-banner-left">
-      <span>📸</span>
-      <span>Snapshot saved — revert restores exact pre-migration state</span>
-      <span class="snap-ts" id="snapTs"></span>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button class="btn btn-amber" onclick="showRevertModal()" id="btnRevert2">↩ Revert</button>
-      <button class="btn btn-ghost" style="font-size:11px" onclick="clearSnap()">✕</button>
-    </div>
+  <div id="snapBanner" class="banner banner-amber hidden">
+    <div style="display:flex;align-items:center;gap:8px"><span>📸</span><span>Snapshot saved — revert restores exact pre-migration state</span><span id="snapTs" style="font-family:var(--mono);font-size:10px;opacity:0.7"></span></div>
+    <div style="display:flex;gap:8px"><button class="btn btn-amber" onclick="showRevertModal()">↩ Revert</button><button class="btn btn-ghost" style="font-size:11px" onclick="clearSnap()">✕</button></div>
   </div>
 
-  <!-- RECONNECT BANNER -->
-  <div id="reconnectBanner" class="reconnect-banner hidden">
-    <div style="display:flex;flex-direction:column;gap:4px;flex:1">
-      <p>&#9888; <strong>Session expired.</strong> Your snapshot is safe &#8212; all changes can still be reverted.</p>
-      <span id="reconnectSnapDetail" style="font-family:var(--mono);font-size:11px;color:var(--red);opacity:0.8"></span>
-    </div>
-    <button class="btn btn-amber" onclick="reconnectSameOrg()">&#128272; Reconnect &amp; Revert</button>
-  </div>
-
-  <!-- UNDO BAR -->
   <div id="undoBar" class="undo-bar hidden">
-    <div class="undo-bar-left">
-      <span class="undo-icon">&#8635;</span>
-      <span id="undoLabel">0 changes this session</span>
-    </div>
-    <div class="undo-bar-right">
-      <button class="btn" style="font-size:11px;padding:5px 12px" onclick="showUndoModal()">&#8617; Undo last change</button>
-      <button class="btn btn-amber" style="font-size:11px;padding:5px 12px" onclick="undoAllSession()">&#8617; Undo all session changes</button>
-      <button class="btn btn-ghost" style="font-size:11px" onclick="clearChangeStack()">&#10005; Dismiss</button>
+    <div class="undo-bar-left"><span>↺</span><span id="undoLabel">0 changes</span></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn" style="font-size:11px" onclick="showUndoModal()">↩ Undo changes</button>
+      <button class="btn btn-ghost" style="font-size:11px" onclick="clearChangeStack()">✕</button>
     </div>
   </div>
 
-  <!-- KPI TYPE CARDS -->
   <div class="type-cards" id="typeCards"></div>
 
-  <!-- TOOLBAR -->
   <div class="toolbar">
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
@@ -451,16 +319,14 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
     <button class="btn filter-btn active" onclick="setFilter('all',this)">All</button>
     <button class="btn filter-btn" onclick="setFilter('active',this)">Active</button>
     <button class="btn filter-btn" onclick="setFilter('inactive',this)">Inactive</button>
-    <div class="toolbar-right">
+    <div style="display:flex;gap:6px;margin-left:auto">
       <button class="btn" onclick="loadAutomations()" id="btnRefresh">↻ Refresh</button>
       <button class="btn" onclick="showSnapshotsModal()">📸 Snapshots</button>
-      <button class="btn btn-red" onclick="enterMigrationMode()" id="btnMigrate">🔴 Migration mode</button>
+      <button class="btn btn-red" onclick="enterMigrationMode()">🔴 Migration mode</button>
     </div>
   </div>
 
-  <!-- OBJECT LIST -->
   <div id="objList" class="obj-list"></div>
-
 </div>
 
 <!-- AUDIT LOG -->
@@ -469,156 +335,12 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
     <div class="audit-live"></div>
     <span class="audit-label">Audit log</span>
     <span id="auditCount" class="audit-count">0 events</span>
-    <button class="btn btn-ghost audit-export" onclick="event.stopPropagation();exportAudit()" title="Export CSV">⬇ CSV</button>
+    <button class="btn btn-ghost" style="font-size:11px;margin-left:8px" onclick="event.stopPropagation();exportAudit()">⬇ CSV</button>
   </button>
-  <div class="audit-body" id="auditBody">
-    <div class="audit-inner" id="auditInner"></div>
-  </div>
+  <div class="audit-body" id="auditBody"><div class="audit-inner" id="auditInner"></div></div>
 </div>
 
-<!-- TOASTS -->
 <div class="toast-wrap" id="toastWrap"></div>
-
-<!-- ONBOARDING MODAL -->
-<div class="modal-bg hidden" id="howModal">
-  <div class="modal" style="max-width:640px;max-height:90vh;display:flex;flex-direction:column">
-    <div style="display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--b2);padding-bottom:12px;flex-wrap:wrap">
-      <button class="onb-tab active" onclick="switchTab('tab-prereq',this)">&#9888; Before you connect</button>
-      <button class="onb-tab" onclick="switchTab('tab-howto',this)">&#9654; How to use</button>
-      <button class="onb-tab" onclick="switchTab('tab-perms',this)">&#128274; Permissions</button>
-      <button class="onb-tab" onclick="switchTab('tab-faq',this)">&#63; FAQ</button>
-    </div>
-    <div style="overflow-y:auto;flex:1">
-
-    <!-- TAB 1 -->
-    <div id="tab-prereq" class="onb-pane">
-      <h3 style="margin-bottom:6px">Before you connect</h3>
-      <p style="font-size:13px;color:var(--tx2);margin-bottom:18px">Two settings required in <strong>each Salesforce org</strong> before connecting. Takes ~2 minutes per org.</p>
-
-      <div class="onb-req">
-        <div class="onb-req-header">
-          <div class="onb-req-num">1</div>
-          <div><div class="onb-req-title">Add CORS allowlist entry</div><div class="onb-req-sub">Allows browser API calls to Salesforce</div></div>
-          <span class="onb-badge onb-badge-req">Required</span>
-        </div>
-        <div class="onb-req-body">
-          <div class="onb-nav-path"><span class="onb-nav-step">Setup</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">Security</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">CORS</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">New</span></div>
-          <div class="onb-field-row"><span class="onb-field-label">Origin URL Pattern</span><code class="onb-code" id="corsUrlCode">https://sf-automation-switch.github.io</code><button class="onb-copy-btn" onclick="copyOnbCode('corsUrlCode')">Copy</button></div>
-          <div class="onb-note">&#9432; Without this, automations load but all toggles silently fail.</div>
-        </div>
-      </div>
-
-      <div class="onb-req" style="margin-top:10px">
-        <div class="onb-req-header">
-          <div class="onb-req-num">2</div>
-          <div><div class="onb-req-title">Add CSP Trusted Site</div><div class="onb-req-sub">Required for Content Security Policy</div></div>
-          <span class="onb-badge onb-badge-req">Required</span>
-        </div>
-        <div class="onb-req-body">
-          <div class="onb-nav-path"><span class="onb-nav-step">Setup</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">Security</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">CSP Trusted Sites</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">New Trusted Site</span></div>
-          <div class="onb-field-row"><span class="onb-field-label">Trusted Site Name</span><code class="onb-code">SFAutomationSwitch</code></div>
-          <div class="onb-field-row"><span class="onb-field-label">Trusted Site URL</span><code class="onb-code" id="cspUrlCode">https://sf-automation-switch.github.io</code><button class="onb-copy-btn" onclick="copyOnbCode('cspUrlCode')">Copy</button></div>
-          <div class="onb-field-row"><span class="onb-field-label">Context</span><code class="onb-code">&#10003; All (check all checkboxes)</code></div>
-        </div>
-      </div>
-
-      <div class="onb-req" style="margin-top:10px">
-        <div class="onb-req-header">
-          <div class="onb-req-num">3</div>
-          <div><div class="onb-req-title">Verify profile permissions</div><div class="onb-req-sub">Your user needs these to toggle automations</div></div>
-          <span class="onb-badge onb-badge-warn">Recommended</span>
-        </div>
-        <div class="onb-req-body">
-          <div class="onb-nav-path"><span class="onb-nav-step">Setup</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">Users</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">Profiles</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">System Administrator</span></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">
-            <div class="onb-perm-row"><span class="onb-perm-icon">&#10003;</span><span>Modify All Data</span><span class="onb-perm-for">VR, Triggers, WF</span></div>
-            <div class="onb-perm-row"><span class="onb-perm-icon">&#10003;</span><span>Author Apex</span><span class="onb-perm-for">Apex Triggers</span></div>
-            <div class="onb-perm-row"><span class="onb-perm-icon">&#10003;</span><span>Manage Flow</span><span class="onb-perm-for">Flows, PB</span></div>
-            <div class="onb-perm-row"><span class="onb-perm-icon">&#10003;</span><span>View Setup</span><span class="onb-perm-for">All types (read)</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="onb-req" style="margin-top:10px">
-        <div class="onb-req-header">
-          <div class="onb-req-num">&#9889;</div>
-          <div><div class="onb-req-title">Quick setup — Anonymous Apex</div><div class="onb-req-sub">Adds CORS + CSP automatically in 30 seconds</div></div>
-          <span class="onb-badge" style="background:var(--blue2);color:var(--blue)">Shortcut</span>
-        </div>
-        <div class="onb-req-body">
-          <div class="onb-nav-path"><span class="onb-nav-step">Setup</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">Developer Console</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">Debug</span><span class="onb-nav-arrow">&#8250;</span><span class="onb-nav-step">Execute Anonymous Window</span></div>
-          <div style="position:relative;margin-top:8px">
-            <pre class="onb-apex" id="apexCode">// SF Automation Switch — CORS + CSP setup
-// Run once in each org you want to connect
-
-CorsWhitelistEntry cors = new CorsWhitelistEntry();
-cors.UrlPattern = 'https://sf-automation-switch.github.io';
-insert cors;
-
-CspTrustedSite csp = new CspTrustedSite();
-csp.EndpointUrl = 'https://sf-automation-switch.github.io';
-csp.EndpointName = 'SFAutomationSwitch';
-csp.Context = 'All';
-csp.IsActive = true;
-insert csp;
-
-System.debug('Done — SF Automation Switch ready');</pre>
-            <button class="onb-copy-btn" style="position:absolute;top:8px;right:8px" onclick="copyOnbCode('apexCode')">&#128203; Copy Apex</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 2 -->
-    <div id="tab-howto" class="onb-pane hidden">
-      <h3 style="margin-bottom:6px">Migration workflow</h3>
-      <p style="font-size:13px;color:var(--tx2);margin-bottom:16px">Recommended steps for a safe data migration.</p>
-      <div class="steps">
-        <div class="step"><div class="step-num">1</div><div class="step-content"><strong>Connect your org</strong> — pick Production or Sandbox, click Connect, log in via Salesforce OAuth popup.</div></div>
-        <div class="step"><div class="step-num">2</div><div class="step-content"><strong>Browse automations</strong> — click any type card (Validation Rules, Flows…) to see automations grouped by object. Green dot = active, Red = inactive.</div></div>
-        <div class="step"><div class="step-num">3</div><div class="step-content"><strong>Save a named snapshot</strong> (&#128248; Snapshots) — captures exact state of every automation. Survives browser close. Do this before any changes.</div></div>
-        <div class="step"><div class="step-num">4</div><div class="step-content"><strong>Enter Migration Mode</strong> — auto-snapshots + disables all automations in one click. Run your data import.</div></div>
-        <div class="step"><div class="step-num">5</div><div class="step-content"><strong>Revert</strong> — click &#8617; Revert to snapshot. Shows exact diff before confirming. Restores every automation to its pre-migration state.</div></div>
-        <div class="step"><div class="step-num">6</div><div class="step-content"><strong>Audit log</strong> — every change logged with timestamp. Export to CSV via &#11015; CSV. Useful for compliance and post-migration review.</div></div>
-      </div>
-    </div>
-
-    <!-- TAB 3 -->
-    <div id="tab-perms" class="onb-pane hidden">
-      <h3 style="margin-bottom:6px">Permissions by type</h3>
-      <p style="font-size:13px;color:var(--tx2);margin-bottom:16px">What each automation type requires to toggle.</p>
-      <table class="onb-table">
-        <thead><tr><th>Type</th><th>Read requires</th><th>Toggle requires</th><th>Cannot toggle if</th></tr></thead>
-        <tbody>
-          <tr><td><span class="auto-type-badge badge-vr">VR</span> Validation Rules</td><td>View Setup</td><td>Modify All Data</td><td>&#8212;</td></tr>
-          <tr><td><span class="auto-type-badge badge-fl">FL</span> Flows</td><td>View Setup</td><td>Manage Flow</td><td>Managed package</td></tr>
-          <tr><td><span class="auto-type-badge badge-pb">PB</span> Process Builder</td><td>View Setup</td><td>Manage Flow</td><td>Managed package</td></tr>
-          <tr><td><span class="auto-type-badge badge-tr">TR</span> Apex Triggers</td><td>View Setup</td><td>Author Apex</td><td>Managed package or no Author Apex</td></tr>
-          <tr><td><span class="auto-type-badge badge-wf">WF</span> Workflow Rules</td><td>View Setup</td><td>Modify All Data</td><td>Some org editions block Tooling API</td></tr>
-        </tbody>
-      </table>
-      <div class="onb-note" style="margin-top:12px">&#9432; <strong>pkg</strong> badge = managed package. Cannot be modified via API — disable via package settings instead.</div>
-      <div class="onb-note" style="margin-top:8px">&#9432; Missing <strong>Author Apex</strong>? Setup &#8250; Users &#8250; Permission Sets &#8250; New &#8250; enable Author Apex &#8250; assign to your user.</div>
-    </div>
-
-    <!-- TAB 4 -->
-    <div id="tab-faq" class="onb-pane hidden">
-      <h3 style="margin-bottom:16px">FAQ</h3>
-      <div class="onb-faq"><div class="onb-faq-q">Is my Salesforce password stored anywhere?</div><div class="onb-faq-a">No. Authentication uses Salesforce OAuth PKCE — credentials go directly to Salesforce, never to this tool. The access token lives only in your browser session.</div></div>
-      <div class="onb-faq"><div class="onb-faq-q">Will the session expire during a long migration?</div><div class="onb-faq-a">PKCE issues a refresh token valid until revoked. The tool silently refreshes before expiry. The session health indicator (top right) shows time remaining.</div></div>
-      <div class="onb-faq"><div class="onb-faq-q">What if I close the browser mid-migration?</div><div class="onb-faq-a">Your snapshot survives in localStorage. When you return, a "pending revert" alert appears with a one-click Reconnect &amp; Revert button.</div></div>
-      <div class="onb-faq"><div class="onb-faq-q">Do I need CORS and CSP in every org?</div><div class="onb-faq-a">Yes — once per org. Use the Anonymous Apex script on the first tab. Settings are org-specific and don't transfer between sandboxes and production.</div></div>
-      <div class="onb-faq"><div class="onb-faq-q">Why do some automations have a "pkg" badge and grey toggle?</div><div class="onb-faq-a">They are managed package automations (e.g. Vlocity, AgentSync). Salesforce API cannot modify managed metadata — disable them through the package settings.</div></div>
-      <div class="onb-faq"><div class="onb-faq-q">Workflow Rules show 0 — why?</div><div class="onb-faq-a">WorkflowRule is unavailable in the Tooling API on some org editions (notably Vlocity/Industries). This is a Salesforce platform limitation.</div></div>
-    </div>
-
-    </div>
-    <div class="modal-actions" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--b1)">
-      <button class="btn btn-ghost" onclick="closeModal('howModal')">Close</button>
-      <button class="btn btn-amber" onclick="closeModal('howModal')">Get started &#8594;</button>
-    </div>
-  </div>
-</div>
 
 <!-- MANUAL TOKEN MODAL -->
 <div class="modal-bg hidden" id="manualModal">
@@ -627,7 +349,7 @@ System.debug('Done — SF Automation Switch ready');</pre>
     <p>Get your token from Workbench or <code style="font-family:var(--mono);font-size:11px;background:var(--s3);padding:1px 5px;border-radius:4px">sf org display</code> via SFDX.</p>
     <div class="field"><div class="field-label">Instance URL</div><input class="field-input" id="manualInst" placeholder="https://yourorg.my.salesforce.com"></div>
     <div class="field"><div class="field-label">Access Token</div><input class="field-input" id="manualTok" placeholder="00D…"></div>
-    <div class="field"><div class="field-label">Org nickname</div><input class="field-input" id="manualNick" placeholder="e.g. CAIS Production"></div>
+    <div class="field"><div class="field-label">Org nickname</div><input class="field-input" id="manualNick" placeholder="e.g. CAIS Sandbox"></div>
     <div class="modal-actions">
       <button class="btn" onclick="closeModal('manualModal')">Cancel</button>
       <button class="btn btn-amber" onclick="connectManual()">Connect</button>
@@ -635,15 +357,13 @@ System.debug('Done — SF Automation Switch ready');</pre>
   </div>
 </div>
 
-<!-- CONFIRM / PROGRESS MODAL -->
+<!-- CONFIRM/PROGRESS MODAL -->
 <div class="modal-bg hidden" id="confirmModal">
   <div class="modal">
     <h3 id="confirmTitle">Confirm</h3>
     <p id="confirmMsg"></p>
-    <div id="diffWrap" class="hidden">
-      <div style="max-height:180px;overflow-y:auto">
-        <table class="diff-table"><thead><tr><th>Automation</th><th>Object</th><th>Type</th><th>Change</th></tr></thead><tbody id="diffBody"></tbody></table>
-      </div>
+    <div id="diffWrap" class="hidden" style="max-height:200px;overflow-y:auto;margin:12px 0">
+      <table class="diff-table"><thead><tr><th>Automation</th><th>Object</th><th>Change</th></tr></thead><tbody id="diffBody"></tbody></table>
     </div>
     <div id="progressWrap" class="hidden">
       <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
@@ -656,1292 +376,856 @@ System.debug('Done — SF Automation Switch ready');</pre>
   </div>
 </div>
 
-<!-- UNDO MODAL -->
-<div class="modal-bg hidden" id="undoModal">
-  <div class="modal" style="max-width:560px">
-    <h3>&#8617; Session change history</h3>
-    <p>Every automation toggled this session. Select changes to undo, or undo all at once.</p>
-    <div id="undoListEl" style="max-height:280px;overflow-y:auto;margin:12px 0"></div>
-    <div class="modal-actions">
-      <button class="btn" onclick="closeModal('undoModal')">Close</button>
-      <button class="btn btn-red" onclick="undoSelectedChanges()">&#8617; Undo selected</button>
-      <button class="btn btn-amber" onclick="undoAllSession();closeModal('undoModal')">&#8617; Undo all</button>
-    </div>
-  </div>
-</div>
-
 <!-- SNAPSHOTS MODAL -->
 <div class="modal-bg hidden" id="snapshotsModal">
   <div class="modal" style="max-width:500px">
     <h3>📸 Snapshots</h3>
-    <p>Up to 5 named snapshots are saved. Each captures the exact active/inactive state of every automation.</p>
+    <p>Up to 5 named snapshots. Each captures exact active/inactive state of every automation.</p>
     <div id="snapListEl"></div>
-    <div style="margin-top:16px">
-      <div class="field"><div class="field-label">Save current state as new snapshot</div>
-        <div style="display:flex;gap:8px">
-          <input class="field-input" id="snapNameInput" placeholder="e.g. Before Q2 migration" style="flex:1">
-          <button class="btn btn-amber" onclick="saveNamedSnapshot()">Save</button>
-        </div>
+    <div class="field" style="margin-top:16px">
+      <div class="field-label">Save current state as new snapshot</div>
+      <div style="display:flex;gap:8px">
+        <input class="field-input" id="snapNameInput" placeholder="e.g. Before Q2 migration" style="flex:1">
+        <button class="btn btn-amber" onclick="saveNamedSnapshot()">Save</button>
       </div>
     </div>
     <div class="modal-actions"><button class="btn" onclick="closeModal('snapshotsModal')">Close</button></div>
   </div>
 </div>
 
+<!-- UNDO MODAL -->
+<div class="modal-bg hidden" id="undoModal">
+  <div class="modal" style="max-width:560px">
+    <h3>↩ Session changes</h3>
+    <p>Every automation toggled this session. Select to undo, or undo all.</p>
+    <div id="undoListEl" style="max-height:280px;overflow-y:auto;margin:12px 0"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('undoModal')">Close</button>
+      <button class="btn btn-red" onclick="undoSelected()">↩ Undo selected</button>
+      <button class="btn btn-amber" onclick="undoAll();closeModal('undoModal')">↩ Undo all</button>
+    </div>
+  </div>
+</div>
+
+<!-- ONBOARDING MODAL -->
+<div class="modal-bg hidden" id="onboardingModal">
+  <div class="modal" style="max-width:620px">
+    <div class="onb-tabs">
+      <button class="onb-tab active" onclick="switchTab('tab1',this)">⚠ Before you connect</button>
+      <button class="onb-tab" onclick="switchTab('tab2',this)">▶ How to use</button>
+      <button class="onb-tab" onclick="switchTab('tab3',this)">🔒 Permissions</button>
+      <button class="onb-tab" onclick="switchTab('tab4',this)">? FAQ</button>
+    </div>
+
+    <div id="tab1" class="onb-pane" style="max-height:65vh;overflow-y:auto">
+      <p style="font-size:13px;color:var(--tx2);margin-bottom:16px">Two settings required in <strong>each Salesforce org</strong> before connecting.</p>
+
+      <div style="background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:16px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <div style="width:24px;height:24px;border-radius:50%;background:var(--amber);color:#0a0c0f;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">1</div>
+          <div><div style="font-size:13px;font-weight:600">Add CORS allowlist entry</div><div style="font-size:11px;color:var(--tx3)">Allows browser API calls to Salesforce</div></div>
+          <span style="margin-left:auto;font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:10px;background:var(--red3);color:var(--red)">Required</span>
+        </div>
+        <div class="nav-path"><span class="nav-step">Setup</span><span class="nav-arr">›</span><span class="nav-step">Security</span><span class="nav-arr">›</span><span class="nav-step">CORS</span><span class="nav-arr">›</span><span class="nav-step">New</span></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--tx3);min-width:120px">Origin URL Pattern</span>
+          <code class="onb-code" id="corsCode">https://himadeepguduru.github.io</code>
+          <button class="onb-copy" onclick="copyText('corsCode')">📋 Copy</button>
+        </div>
+        <div class="onb-note" style="margin-top:10px">ℹ Without this, automations load but all toggles silently fail.</div>
+      </div>
+
+      <div style="background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:16px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <div style="width:24px;height:24px;border-radius:50%;background:var(--amber);color:#0a0c0f;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">2</div>
+          <div><div style="font-size:13px;font-weight:600">Add CSP Trusted Site</div><div style="font-size:11px;color:var(--tx3)">Required for Content Security Policy</div></div>
+          <span style="margin-left:auto;font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:10px;background:var(--red3);color:var(--red)">Required</span>
+        </div>
+        <div class="nav-path"><span class="nav-step">Setup</span><span class="nav-arr">›</span><span class="nav-step">Security</span><span class="nav-arr">›</span><span class="nav-step">CSP Trusted Sites</span><span class="nav-arr">›</span><span class="nav-step">New</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-family:var(--mono);font-size:10px;color:var(--tx3);min-width:120px">Trusted Site Name</span><code class="onb-code">SFAutomationSwitch</code></div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-family:var(--mono);font-size:10px;color:var(--tx3);min-width:120px">Trusted Site URL</span><code class="onb-code" id="cspCode">https://himadeepguduru.github.io</code><button class="onb-copy" onclick="copyText('cspCode')">📋 Copy</button></div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-family:var(--mono);font-size:10px;color:var(--tx3);min-width:120px">Context</span><code class="onb-code">✓ All (check all boxes)</code></div>
+        </div>
+      </div>
+
+      <div style="background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:16px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <div style="width:24px;height:24px;border-radius:50%;background:var(--amber);color:#0a0c0f;font-size:14px;display:flex;align-items:center;justify-content:center">⚡</div>
+          <div><div style="font-size:13px;font-weight:600">Quick setup — Anonymous Apex</div><div style="font-size:11px;color:var(--tx3)">Adds CORS + CSP automatically in 30 seconds</div></div>
+          <span style="margin-left:auto;font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:10px;background:var(--blue2);color:var(--blue)">Shortcut</span>
+        </div>
+        <div class="nav-path"><span class="nav-step">Setup</span><span class="nav-arr">›</span><span class="nav-step">Developer Console</span><span class="nav-arr">›</span><span class="nav-step">Debug</span><span class="nav-arr">›</span><span class="nav-step">Execute Anonymous Window</span></div>
+        <div class="onb-apex" id="apexCode" style="margin-top:10px">CorsWhitelistEntry cors = new CorsWhitelistEntry();
+cors.UrlPattern = 'https://himadeepguduru.github.io';
+insert cors;
+
+CspTrustedSite csp = new CspTrustedSite();
+csp.EndpointUrl = 'https://himadeepguduru.github.io';
+csp.EndpointName = 'SFAutomationSwitch';
+csp.Context = 'All';
+csp.IsActive = true;
+insert csp;
+
+System.debug('Done');</div>
+        <button class="onb-copy" onclick="copyText('apexCode')">📋 Copy Apex</button>
+      </div>
+    </div>
+
+    <div id="tab2" class="onb-pane hidden">
+      <p style="font-size:13px;color:var(--tx2);margin-bottom:16px">Recommended migration workflow.</p>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;gap:12px"><div style="width:22px;height:22px;border-radius:50%;background:var(--amber);color:#0a0c0f;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div><div style="font-size:13px;color:var(--tx2)"><strong>Connect</strong> — select Production or Sandbox, enter nickname, click Connect. You'll be taken to Salesforce to log in.</div></div>
+        <div style="display:flex;gap:12px"><div style="width:22px;height:22px;border-radius:50%;background:var(--amber);color:#0a0c0f;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div><div style="font-size:13px;color:var(--tx2)"><strong>Browse</strong> — click any type card (Validation Rules, Flows…) to see automations grouped by object.</div></div>
+        <div style="display:flex;gap:12px"><div style="width:22px;height:22px;border-radius:50%;background:var(--amber);color:#0a0c0f;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div><div style="font-size:13px;color:var(--tx2)"><strong>Save a snapshot</strong> (📸 Snapshots) before making changes. Survives browser close.</div></div>
+        <div style="display:flex;gap:12px"><div style="width:22px;height:22px;border-radius:50%;background:var(--amber);color:#0a0c0f;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">4</div><div style="font-size:13px;color:var(--tx2)"><strong>Migration Mode</strong> — auto-snapshots + disables all automations. Run your data import.</div></div>
+        <div style="display:flex;gap:12px"><div style="width:22px;height:22px;border-radius:50%;background:var(--amber);color:#0a0c0f;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">5</div><div style="font-size:13px;color:var(--tx2)"><strong>Revert</strong> — restores exact pre-migration state. Shows diff before confirming.</div></div>
+      </div>
+    </div>
+
+    <div id="tab3" class="onb-pane hidden">
+      <table class="onb-table">
+        <thead><tr><th>Type</th><th>Toggle requires</th><th>Cannot toggle if</th></tr></thead>
+        <tbody>
+          <tr><td>Validation Rules</td><td>Modify All Data</td><td>—</td></tr>
+          <tr><td>Flows</td><td>Manage Flow</td><td>Managed package</td></tr>
+          <tr><td>Process Builder</td><td>Manage Flow</td><td>Managed package</td></tr>
+          <tr><td>Apex Triggers</td><td>Author Apex</td><td>Managed package or no Author Apex</td></tr>
+          <tr><td>Workflow Rules</td><td>Modify All Data</td><td>Some org editions</td></tr>
+        </tbody>
+      </table>
+      <div class="onb-note" style="margin-top:12px">ℹ <strong>pkg</strong> badge = managed package. Cannot be modified via API. Disable through package settings.</div>
+      <div class="onb-note" style="margin-top:8px">ℹ Missing Author Apex? Setup › Users › Permission Sets › New › enable Author Apex › assign to your user.</div>
+    </div>
+
+    <div id="tab4" class="onb-pane hidden">
+      <div class="onb-faq-q">Is my password stored anywhere?</div>
+      <div class="onb-faq-a">No. You log in directly on Salesforce — credentials never pass through this tool. The access token lives only in your browser.</div>
+      <div class="onb-faq-q">What if I close the browser mid-migration?</div>
+      <div class="onb-faq-a">Your snapshot survives in localStorage. A "pending revert" alert appears when you return with a one-click Reconnect button.</div>
+      <div class="onb-faq-q">Do I need CORS and CSP in every org?</div>
+      <div class="onb-faq-a">Yes — once per org. Use the Anonymous Apex script on the first tab. Settings don't transfer between sandboxes and production.</div>
+      <div class="onb-faq-q">Workflow Rules show 0 — why?</div>
+      <div class="onb-faq-a">WorkflowRule is unavailable in the Tooling API on some org editions (notably Vlocity/Industries). Salesforce platform limitation.</div>
+    </div>
+
+    <div class="modal-actions" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--b1)">
+      <button class="btn btn-ghost" onclick="closeModal('onboardingModal')">Close</button>
+      <button class="btn btn-amber" onclick="closeModal('onboardingModal')">Get started →</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// ═══════════════ CONFIG ═══════════════
-const CLIENT_ID  = '3MVG9GCMQoQ6rpzTViwky6e4Z5H5nh_DA.l0ehIFzS0Ocakc_DGmq9dOc35ob2ADS0FcSxpLDwobPftNSB_Yz';
-const STORE_KEY  = 'sfas_v3';
-const PKCE_KEY   = 'sfas_pkce_v';  // stores verifier during PKCE handshake
-const API_FALLBACK = 'v62.0';
-let API_VER = API_FALLBACK;
-
-// ═══════════════ PKCE HELPERS ═══════════════
-function pkceRandom(len=64) {
-  const arr = new Uint8Array(len);
-  crypto.getRandomValues(arr);
-  return btoa(String.fromCharCode(...arr)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
-}
-async function pkceChallenge(verifier) {
-  const enc = new TextEncoder().encode(verifier);
-  const hash = await crypto.subtle.digest('SHA-256', enc);
-  return btoa(String.fromCharCode(...new Uint8Array(hash))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
-}
-
-// ═══════════════ SESSION HEALTH ═══════════════
-let _sessionTimer = null;
-let _tokenExpiry  = null;  // epoch ms
-
-function startSessionWatcher(expiresIn = 7200) {
-  clearSessionWatcher();
-  _tokenExpiry = Date.now() + expiresIn * 1000;
-  updateSessionHealth();
-  // Tick every 30 seconds
-  _sessionTimer = setInterval(updateSessionHealth, 30000);
-}
-
-function clearSessionWatcher() {
-  if (_sessionTimer) { clearInterval(_sessionTimer); _sessionTimer = null; }
-  _tokenExpiry = null;
-  const el = document.getElementById('sessionHealth');
-  if (el) el.classList.add('hidden');
-}
-
-function updateSessionHealth() {
-  const el = document.getElementById('sessionHealth');
-  const dot = document.getElementById('shDot');
-  const label = document.getElementById('shLabel');
-  if (!el || !_tokenExpiry) return;
-  el.classList.remove('hidden');
-  const remaining = Math.max(0, Math.floor((_tokenExpiry - Date.now()) / 1000));
-  const mins = Math.floor(remaining / 60);
-  const secs = remaining % 60;
-  const display = mins > 0 ? `${mins}m` : `${secs}s`;
-
-  if (remaining <= 0) {
-    el.className = 'session-health danger';
-    dot.className = 'sh-dot';
-    label.textContent = 'expired';
-    clearSessionWatcher();
-    handleSessionExpiry();
-  } else if (remaining <= 300) {
-    // Under 5 min — warn + auto-attempt refresh
-    el.className = 'session-health danger';
-    dot.className = 'sh-dot';
-    label.textContent = `${display} left`;
-    if (remaining <= 270) silentRefreshToken(); // try at 4.5 min mark
-  } else if (remaining <= 1800) {
-    // Under 30 min — amber warning
-    el.className = 'session-health warn';
-    dot.className = 'sh-dot';
-    label.textContent = `${display} left`;
-  } else {
-    el.className = 'session-health good';
-    dot.className = 'sh-dot';
-    label.textContent = `${display} left`;
-  }
-}
-
-let _refreshing = false;
-async function silentRefreshToken() {
-  if (_refreshing || !S.org) return;
-  _refreshing = true;
-  // Use silent iframe re-auth (implicit flow with prompt=none)
-  // This works without a refresh_token for browser-only apps
-  if (S.org.loginBase) {
-    startImplicitFlow(S.org.loginBase, S.org.name, true);
-    return;
-  }
-  const el = document.getElementById('sessionHealth');
-  const label = document.getElementById('shLabel');
-  const dot = document.getElementById('shDot');
-  if (el) { el.className = 'session-health refreshing'; dot.className = 'sh-dot spin'; }
-  if (label) label.textContent = 'refreshing…';
-  // silent refresh via implicit flow redirect not supported
-  _refreshing = false;
-
-async function manualRefreshToken() {
-  _refreshing = false; // reset lock
-  if (S.org?.refreshToken) {
-    await silentRefreshToken();
-    toast('Session refreshed', 'ok');
-  } else {
-    // No refresh token (implicit flow) — redirect to re-auth
-    toast('Refreshing session…', 'warn');
-    setTimeout(() => reconnectSameOrg(), 500);
-  }
-}
-
-function reconnectSameOrg() {
-  if (!S.org) return;
-  if (S.snapshot && Object.keys(S.snapshot.map||{}).length) S._autoRevert = true;
-  const env = S.org.loginBase || (S.org.instanceUrl.includes('sandbox') ? 'https://test.salesforce.com' : 'https://login.salesforce.com');
-  startImplicitFlow(env, S.org.name);
-}
-
-function checkPendingRevert() {
-  const alert = document.getElementById('pendingRevertAlert');
-  if (!alert) return;
-  if (!S.org || !S.snapshot || !Object.keys(S.snapshot.map||{}).length) {
-    alert.classList.add('hidden'); return;
-  }
-  const snapTotal = Object.keys(S.snapshot.map).length;
-  const ts = new Date(S.snapshot.ts).toLocaleString();
-  const snapName = S.snapshot.name || 'pre-migration snapshot';
-  document.getElementById('paOrgName').textContent = S.org.name + ' — ' + S.org.instanceUrl;
-  document.getElementById('paDetail').textContent = '"' + snapName + '" · ' + snapTotal + ' automations · saved ' + ts;
-  alert.classList.remove('hidden');
-}
-
-function quickReconnect() {
-  S._autoRevert = true;
-  reconnectSameOrg();
-}
-
-function dismissPendingAlert() {
-  document.getElementById('pendingRevertAlert')?.classList.add('hidden');
-}
-
-async function detectApiVersion() {
-  try {
-    const r = await fetch(`${S.org.instanceUrl}/services/data/`, {headers:{'Authorization':`Bearer ${S.org.accessToken}`}});
-    if (r.status === 401) {
-      // Token expired — trigger reconnect flow gracefully
-      audit('⚠ token expired during API version check (401)', 'warn');
-      handleSessionExpiry();
-      throw new Error('Token expired');
-    }
-    if (r.ok) {
-      const versions = await r.json();
-      const latest = versions.sort((a,b) => parseFloat(b.version)-parseFloat(a.version))[0];
-      if (latest?.version) { API_VER = `v${latest.version}`; audit(`API version: ${API_VER}`, 'info'); }
-    }
-  } catch(e) {
-    API_VER = API_FALLBACK;
-    if (e.message === 'Token expired') throw e; // re-throw to stop loadAutomations
-    // Network/CORS error — log but continue with fallback version
-    audit(`⚠ API version detection failed (${e.message.slice(0,40)}) — using ${API_FALLBACK}`, 'warn');
-  }
-}
+// ═══════ CONFIG ═══════
+const CLIENT_ID = '3MVG9GCMQoQ6rpzTViwky6e4Z5H5nh_DA.l0ehIFzS0Ocakc_DGmq9dOc35ob2ADS0FcSxpLDwobPftNSB_Yz';
+const STORE_KEY = 'sfas_v3';
 const TYPE_ORDER = ['Validation Rule','Flow','Process Builder','Apex Trigger','Workflow Rule'];
 const TYPE_CFG = {
-  'Validation Rule': {cls:'vr', label:'Validation Rules',   icon:'🛡️'},
-  'Flow':            {cls:'fl', label:'Flows',               icon:'🔀'},
-  'Process Builder': {cls:'pb', label:'Process Builder',     icon:'🏗️'},
-  'Apex Trigger':    {cls:'tr', label:'Apex Triggers',       icon:'⚡'},
-  'Workflow Rule':   {cls:'wf', label:'Workflow Rules',      icon:'↔️'},
+  'Validation Rule':{cls:'vr',label:'Validation Rules',icon:'🛡️'},
+  'Flow':{cls:'fl',label:'Flows',icon:'🔀'},
+  'Process Builder':{cls:'pb',label:'Process Builder',icon:'🏗️'},
+  'Apex Trigger':{cls:'tr',label:'Apex Triggers',icon:'⚡'},
+  'Workflow Rule':{cls:'wf',label:'Workflow Rules',icon:'↔️'},
 };
+const PT_MAP = {
+  'AutoLaunchedFlow':'Auto-launched','Flow':'Screen Flow','Workflow':'Process Builder',
+  'InvocableProcess':'Invocable','CustomEvent':'Platform Event','Orchestrator':'Orchestrator',
+  'ScheduledPath':'Scheduled','EvaluationFlow':'Evaluation',
+};
+let API_VER = 'v62.0';
 
-// ═══════════════ STATE ═══════════════
+// ═══════ STATE ═══════
 let S = {
-  org: null,
-  automations: [],
-  activeType: 'Validation Rule',
-  filter: 'all',
-  search: '',
-  snapshot: null,
-  snapshots: [],
-  migrationMode: false,
-  auditLog: [],
-  changeStack: [],  // session undo stack [{id, name, object, type, from, to, ts}] — cleared on disconnect
+  org:null, automations:[], activeType:'Validation Rule',
+  filter:'all', search:'',
+  snapshot:null, snapshots:[], migrationMode:false,
+  auditLog:[], changeStack:[],
 };
+function loadState() {
+  try { const d=localStorage.getItem(STORE_KEY); if(d){const p=JSON.parse(d);Object.assign(S,{org:p.org,snapshot:p.snapshot,snapshots:p.snapshots||[],auditLog:p.auditLog||[],migrationMode:p.migrationMode||false});} } catch(e){}
+}
+function saveState() {
+  try { localStorage.setItem(STORE_KEY,JSON.stringify({org:S.org,snapshot:S.snapshot,snapshots:S.snapshots,auditLog:S.auditLog.slice(0,500),migrationMode:S.migrationMode})); } catch(e){}
+}
+loadState();
 
-function loadStore() {
-  try {
-    const d = localStorage.getItem(STORE_KEY);
-    if (d) {
-      const p = JSON.parse(d);
-      S.org = p.org || null;
-      S.snapshot = p.snapshot || null;
-      S.snapshots = p.snapshots || [];
-      S.auditLog = p.auditLog || [];
-      S.migrationMode = p.migrationMode || false;
-    }
-  } catch(e){}
+// ═══════ AUDIT ═══════
+let auditOpen=false, auditCount=0;
+function audit(msg,type='info',meta={}) {
+  auditCount++;
+  document.getElementById('auditCount').textContent = auditCount+' event'+(auditCount!==1?'s':'');
+  S.auditLog.unshift({ts:new Date().toISOString(),msg,type,...meta});
+  if(S.auditLog.length>500) S.auditLog.pop();
+  saveState();
+  const inner=document.getElementById('auditInner');
+  const el=document.createElement('div'); el.className='audit-row';
+  el.innerHTML=`<span class="audit-ts">${new Date().toTimeString().slice(0,8)}</span><span class="log-${type}">${msg}</span>`;
+  inner.insertBefore(el,inner.firstChild);
+  if(inner.children.length>100) inner.removeChild(inner.lastChild);
 }
-function saveStore() {
-  try { localStorage.setItem(STORE_KEY, JSON.stringify({org:S.org, snapshot:S.snapshot, snapshots:S.snapshots, auditLog:S.auditLog.slice(0,500), migrationMode:S.migrationMode})); } catch(e){}
+function toggleAudit(){ auditOpen=!auditOpen; document.getElementById('auditBody').classList.toggle('open',auditOpen); }
+function exportAudit(){
+  if(!S.auditLog.length){toast('No events','warn');return;}
+  const rows=[['Timestamp','Message','Type','Org','Automation','Object','From','To','Trigger']];
+  S.auditLog.forEach(e=>rows.push([e.ts,e.msg||'',e.type||'',e.org||'',e.name||'',e.object||'',e.from!==undefined?(e.from?'ON':'OFF'):'',e.to!==undefined?(e.to?'ON':'OFF'):'',e.trigger||'']));
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download=`sf-audit-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  toast('Exported','ok');
 }
-loadStore();
+// Reload audit log from stored entries
+S.auditLog.slice(0,50).reverse().forEach(e=>{
+  auditCount++;
+  const inner=document.getElementById('auditInner');
+  const el=document.createElement('div'); el.className='audit-row';
+  el.innerHTML=`<span class="audit-ts">${new Date(e.ts).toTimeString().slice(0,8)}</span><span class="log-${e.type||'info'}">${e.msg||''}</span>`;
+  inner.appendChild(el);
+});
+document.getElementById('auditCount').textContent = S.auditLog.length+' events';
 
-// ═══════════════ AUDIT ═══════════════
-let auditOpen = false;
-function audit(msg, type='info', meta={}) {
-  const ts = new Date().toISOString();
-  S.auditLog.unshift({ts, msg, type, org: S.org?.name || '—', ...meta});
-  if (S.auditLog.length > 500) S.auditLog.pop();
-  saveStore();
-  renderAuditRow({ts, msg, type});
-  document.getElementById('auditCount').textContent = S.auditLog.length + ' event' + (S.auditLog.length !== 1 ? 's' : '');
-}
-function renderAuditRow(e) {
-  const inner = document.getElementById('auditInner');
-  const el = document.createElement('div');
-  el.className = 'audit-row';
-  const t = new Date(e.ts).toTimeString().slice(0,8);
-  el.innerHTML = `<span class="audit-ts">${t}</span><span class="audit-msg-${e.type}">${e.msg}</span>`;
-  inner.insertBefore(el, inner.firstChild);
-  if (inner.children.length > 100) inner.removeChild(inner.lastChild);
-}
-function toggleAudit() {
-  auditOpen = !auditOpen;
-  document.getElementById('auditBody').classList.toggle('open', auditOpen);
-}
-function exportAudit() {
-  if (!S.auditLog.length) { toast('No audit events to export', 'warn'); return; }
-  const rows = [['Timestamp','Org','Automation','Object','Type','From','To','Trigger','Message']];
-  S.auditLog.forEach(e => rows.push([
-    e.ts, e.org||'', e.name||'', e.object||'', e.type||'',
-    e.from!==undefined?(e.from?'ON':'OFF'):'',
-    e.to!==undefined?(e.to?'ON':'OFF'):'',
-    e.trigger||'', e.msg||''
-  ]));
-  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  // Safe filename — no colons (Windows-safe)
-  a.download = `sf-audit-${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-  toast('Audit log exported', 'ok');
-}
-
-// Init audit from stored log
-S.auditLog.slice(0,50).reverse().forEach(e => renderAuditRow(e));
-document.getElementById('auditCount').textContent = S.auditLog.length + ' events';
-
-// ═══════════════ TOAST ═══════════════
-function toast(msg, type='ok', dur=3000) {
-  const wrap = document.getElementById('toastWrap');
-  const el = document.createElement('div');
-  el.className = `toast ${type}`;
-  el.innerHTML = `<span>${type==='ok'?'✓':type==='err'?'✕':'⚠'}</span><span>${msg}</span>`;
+// ═══════ TOAST ═══════
+function toast(msg,type='ok',dur=3000){
+  const wrap=document.getElementById('toastWrap');
+  const el=document.createElement('div'); el.className=`toast ${type}`;
+  el.innerHTML=`<span>${type==='ok'?'✓':type==='err'?'✕':'⚠'}</span><span>${msg}</span>`;
   wrap.appendChild(el);
-  setTimeout(() => { el.style.opacity='0'; el.style.transform='translateX(16px)'; el.style.transition='all 0.3s'; setTimeout(()=>el.remove(),300); }, dur);
+  if(dur>0) setTimeout(()=>{el.style.opacity='0';el.style.transform='translateX(16px)';el.style.transition='all 0.3s';setTimeout(()=>el.remove(),300);},dur);
+  else el.addEventListener('click',()=>el.remove());
 }
 
-// ═══════════════ MODAL ═══════════════
-function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
-function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-document.querySelectorAll('.modal-bg').forEach(b => b.addEventListener('click', e => { if(e.target===b) b.classList.add('hidden'); }));
-
-// ═══════════════ OAUTH — PKCE FLOW ═══════════════
-let selEnv = 'https://login.salesforce.com';
-function setEnv(type, btn) {
-  selEnv = type === 'sandbox' ? 'https://test.salesforce.com' : 'https://login.salesforce.com';
-  document.querySelectorAll('.env-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+// ═══════ MODAL ═══════
+function showModal(id){document.getElementById(id).classList.remove('hidden');}
+function closeModal(id){document.getElementById(id).classList.add('hidden');}
+document.querySelectorAll('.modal-bg').forEach(b=>b.addEventListener('click',e=>{if(e.target===b)b.classList.add('hidden');}));
+function showOnboarding(){switchTab('tab1',document.querySelector('.onb-tab'));showModal('onboardingModal');}
+function switchTab(id,btn){
+  document.querySelectorAll('.onb-pane').forEach(p=>p.classList.add('hidden'));
+  document.querySelectorAll('.onb-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id)?.classList.remove('hidden');
+  if(btn) btn.classList.add('active');
+}
+function copyText(id){
+  const el=document.getElementById(id);
+  if(!el) return;
+  navigator.clipboard.writeText(el.textContent.trim()).then(()=>toast('Copied','ok',1500));
 }
 
-async function startOAuth() {
-  const nick = document.getElementById('orgNick').value.trim();
-  const envSel = document.getElementById('envSelect');
-  if (envSel) selEnv = envSel.value;
-  if (S.org) { S.org.accessToken = null; S.org.connectedAt = null; }
-  clearSessionWatcher();
-  const label = nick || (selEnv.includes('test') ? 'Sandbox' : 'Production');
-  startImplicitFlow(selEnv, label);
-}
-
-// OAuth: direct page redirect to Salesforce — no popup, no CORS issues
-// SF redirects back to this page with #access_token=... in the URL hash
-function startImplicitFlow(loginBase, nick, silent=false) {
-  if (silent) return; // silent refresh not supported without popup — skip
+// ═══════ OAUTH — DIRECT REDIRECT ═══════
+function doConnect(){
+  const env = document.getElementById('envSelect').value;
+  const nick = document.getElementById('orgNick').value.trim() || (env.includes('test')?'Sandbox':'Production');
   const cb = window.location.href.split('?')[0].split('#')[0];
-  sessionStorage.setItem(PKCE_KEY, JSON.stringify({nick, loginBase}));
+  sessionStorage.setItem('sfas_auth',JSON.stringify({nick,env}));
   const params = new URLSearchParams({
-    response_type: 'token',
-    client_id: CLIENT_ID,
-    redirect_uri: cb,
-    state: btoa(unescape(encodeURIComponent(JSON.stringify({nick, loginBase})))),
-    prompt: 'login',
+    response_type:'token',
+    client_id:CLIENT_ID,
+    redirect_uri:cb,
+    prompt:'login',
   });
-  window.location.href = `${loginBase}/services/oauth2/authorize?${params}`;
+  audit('Redirecting to Salesforce login…','info');
+  window.location.href = `${env}/services/oauth2/authorize?${params}`;
 }
 
+function reconnectForRevert(){
+  const env = S.org?.loginBase || 'https://login.salesforce.com';
+  const nick = S.org?.name || 'My Org';
+  const cb = window.location.href.split('?')[0].split('#')[0];
+  sessionStorage.setItem('sfas_auth',JSON.stringify({nick,env,autoRevert:true}));
+  const params = new URLSearchParams({response_type:'token',client_id:CLIENT_ID,redirect_uri:cb,prompt:'login'});
+  window.location.href = `${env}/services/oauth2/authorize?${params}`;
+}
 
-function handleImplicitResponse(url, isSilent=false) {
-  const hash = (url.includes('#') ? url.split('#')[1] : url.split('?')[1]) || '';
-  const p = Object.fromEntries(hash.split('&').map(x => { const [k,...v]=x.split('='); return [k, decodeURIComponent(v.join('='))]; }));
-  if (!p.access_token || !p.instance_url) { if (!isSilent) toast('OAuth failed — no token received', 'err'); return; }
-  let nick = S.org?.name || 'My Org';
-  let loginBase = selEnv;
-  try { const s = JSON.parse(atob(p.state||'')); nick = s.nick || nick; loginBase = s.loginBase || loginBase; } catch(e) {}
-  // Fallback: read from sessionStorage (set during full-page redirect)
-  try {
-    const sn = sessionStorage.getItem('_sfas_nick');
-    const sl = sessionStorage.getItem('_sfas_loginBase');
-    if (sn) { nick = sn; sessionStorage.removeItem('_sfas_nick'); }
-    if (sl) { loginBase = sl; sessionStorage.removeItem('_sfas_loginBase'); }
-  } catch(e) {}
-  const prevSnap = S.org?.instanceUrl === p.instance_url.replace(/\/$/,'') ? S.snapshot : null;
+// Handle redirect back with token in hash
+(function handleReturn(){
+  const hash = window.location.hash;
+  if(!hash || !hash.includes('access_token')) return;
+  history.replaceState(null,'',window.location.pathname);
+  const params = new URLSearchParams(hash.slice(1));
+  const token = params.get('access_token');
+  const instanceUrl = params.get('instance_url');
+  if(!token || !instanceUrl) { audit('OAuth failed — no token in response','err'); return; }
+  let stored = {};
+  try { stored = JSON.parse(sessionStorage.getItem('sfas_auth')||'{}'); sessionStorage.removeItem('sfas_auth'); } catch(e){}
+  const prevSnap = S.org?.instanceUrl === instanceUrl.replace(/\/$/,'') ? S.snapshot : null;
   S.org = {
-    accessToken: p.access_token,
-    instanceUrl: p.instance_url.replace(/\/$/,''),
-    name: nick,
-    loginBase,
-    connectedAt: Date.now(),
-    issuedAt: parseInt(p.issued_at || Date.now()),
+    accessToken:token,
+    instanceUrl:instanceUrl.replace(/\/$/,''),
+    name:stored.nick||'My Org',
+    loginBase:stored.env||'https://login.salesforce.com',
+    connectedAt:Date.now(),
   };
-  if (prevSnap) S.snapshot = prevSnap;
-  saveStore();
-  const expiry = parseInt(p.expires_in || '7200');
-  if (isSilent) {
-    audit('✓ session silently refreshed', 'ok');
-    _tokenExpiry = Date.now() + expiry * 1000;
-    _refreshing = false;
-    updateSessionHealth();
-  } else {
-    audit(`✓ connected: ${S.org.name}`, 'ok');
-    toast('Connected!', 'ok');
-    startSessionWatcher(expiry);
+  if(prevSnap) S.snapshot=prevSnap;
+  saveState();
+  audit(`✓ Connected: ${S.org.name}`,'ok');
+  toast('Connected!','ok');
+  startSessionWatcher(parseInt(params.get('expires_in')||'7200'));
+  if(stored.autoRevert && S.snapshot) {
     showDashboard();
-  }
-}
-
-// Handle implicit flow redirect back (both popup and full-page redirect)
-(function() {
-  const href = window.location.href;
-  if (href.includes('access_token')) {
-    // Restore nick/loginBase if this was a full-page redirect
-    try {
-      const stored = sessionStorage.getItem(PKCE_KEY);
-      if (stored) {
-        const {nick, loginBase} = JSON.parse(stored);
-        if (nick) sessionStorage.setItem('_sfas_nick', nick);
-        if (loginBase) sessionStorage.setItem('_sfas_loginBase', loginBase);
-      }
-    } catch(e) {}
-    handleImplicitResponse(href, false);
-    history.replaceState(null, '', window.location.pathname);
+    setTimeout(()=>{toast('Snapshot detected — opening revert…','warn',2000);setTimeout(showRevertModal,2000);},1000);
+  } else {
+    showDashboard();
   }
 })();
 
-function connectManual() {
-  const inst = document.getElementById('manualInst').value.trim().replace(/\/$/,'');
-  const tok  = document.getElementById('manualTok').value.trim();
-  const nick = document.getElementById('manualNick').value.trim();
-  if (!inst || !tok) { toast('Instance URL and token required', 'err'); return; }
-  if (!inst.startsWith('https://')) { toast('Instance URL must start with https://', 'err'); return; }
-  S.org = {instanceUrl: inst, accessToken: tok, name: nick || inst, connectedAt: Date.now()};
-  saveStore();
-  closeModal('manualModal');
-  audit(`manually connected: ${S.org.name}`, 'ok');
-  toast('Connected (manual — no auto-refresh)', 'warn');
-  startSessionWatcher(7200); // assume 2hr for manual tokens
-  showDashboard();
+function connectManual(){
+  const inst=document.getElementById('manualInst').value.trim().replace(/\/$/,'');
+  const tok=document.getElementById('manualTok').value.trim();
+  const nick=document.getElementById('manualNick').value.trim();
+  if(!inst||!tok){toast('Instance URL and token required','err');return;}
+  if(!inst.startsWith('https://')){toast('URL must start with https://','err');return;}
+  S.org={accessToken:tok,instanceUrl:inst,name:nick||inst,loginBase:'https://login.salesforce.com',connectedAt:Date.now()};
+  saveState(); closeModal('manualModal');
+  audit(`Manually connected: ${S.org.name}`,'ok'); toast('Connected!','ok');
+  startSessionWatcher(7200); showDashboard();
 }
 
-// ═══════════════ VIEWS ═══════════════
-async function showDashboard() {
+// ═══════ SESSION WATCHER ═══════
+let _sessionTimer=null, _tokenExpiry=null;
+function startSessionWatcher(expiresIn=7200){
+  clearSessionWatcher();
+  _tokenExpiry=Date.now()+expiresIn*1000;
+  updateSessionHealth();
+  _sessionTimer=setInterval(updateSessionHealth,30000);
+}
+function clearSessionWatcher(){
+  if(_sessionTimer){clearInterval(_sessionTimer);_sessionTimer=null;}
+  _tokenExpiry=null;
+  const el=document.getElementById('sessionHealth');
+  if(el) el.classList.add('hidden');
+}
+function updateSessionHealth(){
+  const el=document.getElementById('sessionHealth');
+  const label=document.getElementById('shLabel');
+  if(!el||!_tokenExpiry) return;
+  el.classList.remove('hidden');
+  const rem=Math.max(0,Math.floor((_tokenExpiry-Date.now())/1000));
+  const mins=Math.floor(rem/60);
+  const display=mins>0?`${mins}m`:`${rem%60}s`;
+  if(rem<=0){el.className='session-pill danger';label.textContent='expired';audit('⚠ Session expired','warn');clearSessionWatcher();}
+  else if(rem<=1800){el.className='session-pill warn';label.textContent=`${display} left`;}
+  else{el.className='session-pill good';label.textContent=`${display} left`;}
+}
+
+// ═══════ VIEWS ═══════
+async function showDashboard(){
   document.getElementById('landing').classList.add('hidden');
   document.getElementById('dashboard').classList.remove('hidden');
-  document.getElementById('reconnectBanner')?.classList.add('hidden');
-  document.getElementById('orgNameEl').textContent = S.org.name;
-  document.getElementById('orgUrlEl').textContent  = S.org.instanceUrl;
-  // Restore org dot to green
-  const dot = document.querySelector('.org-dot');
-  if (dot) { dot.style.background = ''; dot.style.boxShadow = ''; }
-  renderSnapBanner();
-  renderMigrationBanner();
+  document.getElementById('orgNameEl').textContent=S.org.name;
+  document.getElementById('orgUrlEl').textContent=S.org.instanceUrl;
+  renderSnapBanner(); renderMigBanner();
   try {
-    await detectApiVersion();
-  } catch(e) {
-    // Token expired during version check — handleSessionExpiry already called
-    if (e.message === 'Token expired') return;
-  }
-  if (!_tokenExpiry) startSessionWatcher(7200);
+    const r=await fetch(`${S.org.instanceUrl}/services/data/`,{headers:{'Authorization':`Bearer ${S.org.accessToken}`}});
+    if(r.status===401){handleSessionExpired();return;}
+    if(r.ok){const vs=await r.json();const latest=vs.sort((a,b)=>parseFloat(b.version)-parseFloat(a.version))[0];if(latest?.version)API_VER=`v${latest.version}`;}
+  } catch(e){}
+  audit(`API version: ${API_VER}`,'info');
   loadAutomations();
 }
-function disconnectOrg() {
-  if (!confirm('Disconnect from ' + (S.org?.name||'this org') + '? Your audit log and named snapshots will be kept.')) return;
-  S.org = null; S.automations = []; S.snapshot = null; S.migrationMode = false;
-  S.filter = 'all'; S.search = ''; S.changeStack = [];
-  clearSessionWatcher();
-  const si = document.getElementById('searchInput');
-  if (si) si.value = '';
-  saveStore();
+function handleSessionExpired(){
+  toast('Session expired — please reconnect','err',0);
+  audit('⚠ Session expired','err');
   document.getElementById('dashboard').classList.add('hidden');
   document.getElementById('landing').classList.remove('hidden');
   checkPendingRevert();
-  audit('disconnected', 'info');
+}
+function disconnectOrg(){
+  if(!confirm(`Disconnect from ${S.org?.name||'this org'}? Snapshots are kept.`)) return;
+  S.org=null;S.automations=[];S.snapshot=null;S.migrationMode=false;S.changeStack=[];
+  clearSessionWatcher(); saveState();
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('landing').classList.remove('hidden');
+  renderUndoBar(); checkPendingRevert();
+  audit('Disconnected','info');
 }
 
-// ═══════════════ SF API ═══════════════
-async function sfGet(path) {
-  const r = await fetch(`${S.org.instanceUrl}${path}`, {headers:{'Authorization':`Bearer ${S.org.accessToken}`,'Content-Type':'application/json'}});
-  if (r.status === 401) {
-    handleSessionExpiry();
-    throw new Error('Session expired — click Reconnect & Revert to restore your session');
-  }
-  if (!r.ok) { const t = await r.text(); throw new Error(`${r.status}: ${t.slice(0,200)}`); }
+// ═══════ SF API ═══════
+async function sfGet(path){
+  const r=await fetch(`${S.org.instanceUrl}${path}`,{headers:{'Authorization':`Bearer ${S.org.accessToken}`,'Content-Type':'application/json'}});
+  if(r.status===401){handleSessionExpired();throw new Error('Session expired');}
+  if(!r.ok){const t=await r.text();throw new Error(`${r.status}: ${t.slice(0,200)}`);}
   return r.json();
 }
-function handleSessionExpiry() {
-  toast('Session expired — snapshot is safe, click Reconnect', 'err', 0); // 0 = stays until dismissed
-  audit('⚠ Session expired — snapshot preserved, reconnect to revert', 'err');
-  // Show reconnect banner, keep snapshot intact
-  const rb = document.getElementById('reconnectBanner');
-  if (rb) {
-    rb.classList.remove('hidden');
-    const snapDetail = document.getElementById('reconnectSnapDetail');
-    if (snapDetail && S.snapshot) {
-      const snapTotal = Object.keys(S.snapshot.map||{}).length;
-      const ts = new Date(S.snapshot.ts).toLocaleString();
-      snapDetail.textContent = '\u00ab' + (S.snapshot.name||'snapshot') + '\u00bb \u00b7 ' + snapTotal + ' automations \u00b7 saved ' + ts;
-    }
-  }
-  // Turn org dot red
-  const dot = document.querySelector('.org-dot');
-  if (dot) { dot.style.background = 'var(--red)'; dot.style.boxShadow = '0 0 8px var(--red)'; }
-}
-async function sfPatch(path, body) {
-  const r = await fetch(`${S.org.instanceUrl}${path}`, {
-    method:'PATCH',
-    headers:{'Authorization':`Bearer ${S.org.accessToken}`,'Content-Type':'application/json'},
-    body:JSON.stringify(body)
-  });
-  if (r.status === 204) return true;
-  const t = await r.text();
-  let parsed; try { parsed = JSON.parse(t); } catch(e) { parsed = t; }
-  if (Array.isArray(parsed) && parsed[0]?.errorCode) throw new Error(`${parsed[0].errorCode}: ${parsed[0].message}`);
-  if (parsed?.errorCode) throw new Error(`${parsed.errorCode}: ${parsed.message}`);
-  if (!r.ok) throw new Error(`HTTP ${r.status}: ${String(t).slice(0,120)}`);
-  return parsed;
+async function sfPatch(path,body){
+  const r=await fetch(`${S.org.instanceUrl}${path}`,{method:'PATCH',headers:{'Authorization':`Bearer ${S.org.accessToken}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(r.status===204) return true;
+  const t=await r.text();
+  let p; try{p=JSON.parse(t);}catch(e){p=t;}
+  if(Array.isArray(p)&&p[0]?.errorCode) throw new Error(`${p[0].errorCode}: ${p[0].message}`);
+  if(p?.errorCode) throw new Error(`${p.errorCode}: ${p.message}`);
+  if(!r.ok) throw new Error(`HTTP ${r.status}: ${String(t).slice(0,120)}`);
+  return p;
 }
 
-// ═══════════════ LOAD ═══════════════
-async function loadAutomations() {
-  document.getElementById('btnRefresh').innerHTML = '<span class="spinner"></span>';
-  document.getElementById('objList').innerHTML = skeletons();
-  S.automations = []; S.changeStack = []; renderUndoBar(); // changeStack rebuilt after load from audit
-  try {
-    const [a,b,c,d] = await Promise.allSettled([fetchVR(), fetchFlows(), fetchTriggers(), fetchWF()]);
-    const get = (r,l) => { if (r.status==='fulfilled') return r.value; audit(`⚠ ${l}: ${r.reason?.message}`, 'warn'); return []; };
-    S.automations = [...get(a,'Validation Rules'), ...get(b,'Flows'), ...get(c,'Apex Triggers'), ...get(d,'Workflow Rules')];
-    audit(`✓ loaded ${S.automations.length} automations`, 'ok');
-    toast(`${S.automations.length} automations loaded`, 'ok');
-    renderTypeCards();
-    renderObjList();
-    // Rebuild changeStack from today's audit log (manual toggles only)
-    // This restores the undo bar after a page refresh within the same session
+// ═══════ LOAD AUTOMATIONS ═══════
+async function loadAutomations(){
+  document.getElementById('btnRefresh').innerHTML='<span class="spinner"></span>';
+  document.getElementById('objList').innerHTML=skeletons();
+  S.automations=[];S.changeStack=[];renderUndoBar();
+  try{
+    const [a,b,c,d]=await Promise.allSettled([fetchVR(),fetchFlows(),fetchTriggers(),fetchWF()]);
+    const get=(r,l)=>{if(r.status==='fulfilled')return r.value;audit(`⚠ ${l}: ${r.reason?.message}`,'warn');return[];};
+    S.automations=[...get(a,'Validation Rules'),...get(b,'Flows'),...get(c,'Apex Triggers'),...get(d,'Workflow Rules')];
+    audit(`✓ Loaded ${S.automations.length} automations`,'ok');
+    toast(`${S.automations.length} automations loaded`,'ok');
     rebuildChangeStackFromAudit();
-
-    // Auto-open revert modal if user came via Reconnect & Revert
-    if (S._autoRevert && S.snapshot) {
-      S._autoRevert = false;
-      setTimeout(() => { toast('Snapshot detected — opening revert…', 'warn', 2000); setTimeout(showRevertModal, 1800); }, 600);
-    }
-  } catch(err) {
-    audit(`load error: ${err.message}`, 'err');
-    toast('Failed to load', 'err');
-    document.getElementById('objList').innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><h4>Load failed</h4><p>${err.message}</p></div>`;
-  }
-  document.getElementById('btnRefresh').innerHTML = '↻ Refresh';
+    renderTypeCards(); renderObjList();
+    if(S._autoRevert&&S.snapshot){S._autoRevert=false;setTimeout(()=>{toast('Snapshot detected — opening revert…','warn',2000);setTimeout(showRevertModal,2000);},800);}
+  }catch(e){audit(`Load error: ${e.message}`,'err');toast('Failed to load','err');document.getElementById('objList').innerHTML=`<div class="empty"><div class="empty-icon">⚠️</div><h4>Load failed</h4><p>${e.message}</p></div>`;}
+  document.getElementById('btnRefresh').innerHTML='↻ Refresh';
 }
 
-async function fetchVR() {
-  const d = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent('SELECT Id,ValidationName,Active,EntityDefinitionId,Description FROM ValidationRule ORDER BY EntityDefinitionId,ValidationName LIMIT 2000')}`);
-  const records = d.records || [];
-  // Resolve EntityDefinitionId → QualifiedApiName via DurableId (EntityDefinitionId matches DurableId not Id)
-  const ids = [...new Set(records.map(r => r.EntityDefinitionId).filter(Boolean))];
-  const objMap = {};
-  if (ids.length) {
-    // Chunk into 100 to avoid SOQL length limits
-    const chunks = [];
-    for (let i = 0; i < ids.length; i += 100) chunks.push(ids.slice(i, i+100));
-    for (const chunk of chunks) {
-      try {
-        const ed = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent(`SELECT DurableId,QualifiedApiName FROM EntityDefinition WHERE DurableId IN (${chunk.map(x=>`'${x}'`).join(',')}) LIMIT 500`)}`);
-        (ed.records||[]).forEach(r => { objMap[r.DurableId] = r.QualifiedApiName; });
-      } catch(e) {
-        // fallback: try KeyPrefix-based resolution
-        audit('⚠ EntityDefinition lookup failed, trying KeyPrefix fallback', 'warn');
-      }
-    }
+async function fetchVR(){
+  const d=await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent('SELECT Id,ValidationName,Active,EntityDefinitionId,Description FROM ValidationRule ORDER BY EntityDefinitionId,ValidationName LIMIT 2000')}`);
+  const recs=d.records||[];
+  const ids=[...new Set(recs.map(r=>r.EntityDefinitionId).filter(Boolean))];
+  const objMap={};
+  if(ids.length){
+    const chunks=[];for(let i=0;i<ids.length;i+=100)chunks.push(ids.slice(i,i+100));
+    for(const chunk of chunks){try{const ed=await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent(`SELECT DurableId,QualifiedApiName FROM EntityDefinition WHERE DurableId IN (${chunk.map(x=>`'${x}'`).join(',')}) LIMIT 500`)}`);(ed.records||[]).forEach(r=>{objMap[r.DurableId]=r.QualifiedApiName;});}catch(e){}}
   }
-  return records.map(r => ({
-    id:r.Id, name:r.ValidationName, active:r.Active,
-    object: objMap[r.EntityDefinitionId] || r.EntityDefinitionId || 'Unknown',
-    type:'Validation Rule', description:r.Description||'', apiToggle:'vr'
-  }));
+  return recs.map(r=>({id:r.Id,name:r.ValidationName,active:r.Active,object:objMap[r.EntityDefinitionId]||r.EntityDefinitionId||'Unknown',type:'Validation Rule',description:r.Description||'',apiToggle:'vr'}));
 }
 
-async function fetchFlows() {
-  // READ via FlowDefinitionView (REST API, read-only view) — has all fields in one query
-  // WRITE via FlowDefinition (Tooling API) using DurableId == FlowDefinition.Id
-  // FlowDefinitionView has ActiveVersionId and LatestVersionId directly — no secondary query needed
-  // Reference: developer.salesforce.com/docs/atlas.en-us.object_reference.meta/object_reference/sforce_api_objects_flowdefinitionview.htm
-  const soql = 'SELECT Id,DurableId,ApiName,Label,IsActive,ProcessType,TriggerObjectOrEventLabel,TriggerType,ManageableState,ActiveVersionId,LatestVersionId FROM FlowDefinitionView ORDER BY Label LIMIT 2000';
-  const d = await sfGet(`/services/data/${API_VER}/query?q=${encodeURIComponent(soql)}`);
-
-  // Get VersionNumber for LatestVersionId — needed for Metadata.activeVersionNumber PATCH
-  // FlowVersionView has VersionNumber field
-  const latestIds = [...new Set((d.records||[]).map(r => r.LatestVersionId).filter(Boolean))];
-  const versionNumMap = {}; // LatestVersionId -> VersionNumber
-  if (latestIds.length) {
-    const chunks = [];
-    for (let i = 0; i < latestIds.length; i += 200) chunks.push(latestIds.slice(i, i+200));
-    for (const chunk of chunks) {
-      try {
-        // FlowVersionView is queryable via REST API, has VersionNumber
-        const vv = await sfGet(`/services/data/${API_VER}/query?q=${encodeURIComponent("SELECT DurableId,VersionNumber FROM FlowVersionView WHERE DurableId IN (" + chunk.map(x=>"'"+x+"'").join(',') + ") LIMIT 500")}`);
-        (vv.records||[]).forEach(r => { versionNumMap[r.DurableId] = r.VersionNumber; });
-      } catch(e) { /* skip — will query on demand during toggle */ }
-    }
+async function fetchFlows(){
+  const soql='SELECT Id,DurableId,ApiName,Label,IsActive,ProcessType,TriggerObjectOrEventLabel,TriggerType,ManageableState,ActiveVersionId,LatestVersionId FROM FlowDefinitionView ORDER BY Label LIMIT 2000';
+  const d=await sfGet(`/services/data/${API_VER}/query?q=${encodeURIComponent(soql)}`);
+  const latestIds=[...new Set((d.records||[]).map(r=>r.LatestVersionId).filter(Boolean))];
+  const verNumMap={};
+  if(latestIds.length){
+    const chunks=[];for(let i=0;i<latestIds.length;i+=200)chunks.push(latestIds.slice(i,i+200));
+    for(const chunk of chunks){try{const vv=await sfGet(`/services/data/${API_VER}/query?q=${encodeURIComponent(`SELECT DurableId,VersionNumber FROM FlowVersionView WHERE DurableId IN (${chunk.map(x=>`'${x}'`).join(',')}) LIMIT 500`)}`);(vv.records||[]).forEach(v=>{verNumMap[v.DurableId]=v.VersionNumber;});}catch(e){}}
   }
-
-  const ptMap = {
-    'AutoLaunchedFlow':        'Auto-launched',
-    'Flow':                    'Screen Flow',
-    'Workflow':                'Process Builder',
-    'InvocableProcess':        'Invocable Process',
-    'CustomEvent':             'Platform Event',
-    'CheckoutFlow':            'Checkout Flow',
-    'ContactRequestFlow':      'Contact Request',
-    'ActionPlan':              'Action Plan',
-    'FieldServiceWeb':         'Field Service',
-    'FieldServiceMobile':      'Field Service Mobile',
-    'Survey':                  'Survey',
-    'SurveyEnrich':            'Survey Enrich',
-    'Orchestrator':            'Orchestrator',
-    'EvaluationFlow':          'Evaluation Flow',
-    'ManagedContentFlow':      'CMS Flow',
-    'TransactionSecurityFlow': 'Transaction Security',
-    'UserProvisioningFlow':    'User Provisioning',
-    'RoutingFlow':             'Routing Flow',
-    'ScheduledPath':           'Scheduled',
-  };
-
-  return (d.records||[]).map(r => {
-    const isPB  = r.ProcessType === 'Workflow';
-    const type  = isPB ? 'Process Builder' : 'Flow';
-    // Object grouping: use TriggerObjectOrEventLabel when available (record-triggered flows)
-    // Otherwise fall back to ProcessType label for non-object flows (auto-launched, screen, etc.)
-    const obj   = (r.TriggerObjectOrEventLabel && r.TriggerObjectOrEventLabel.trim())
-                  ? r.TriggerObjectOrEventLabel
-                  : (ptMap[r.ProcessType] || r.ProcessType || 'Unclassified');
-    return {
-      id: r.DurableId || r.Id,  // DurableId == FlowDefinition.Id — use for Tooling API PATCH
-      viewId: r.Id,             // FlowDefinitionView.Id — use for read queries
-      name: r.ApiName || r.Label,
-      label: r.Label,
-      active: r.IsActive,
-      object: obj,
-      type,
-      description: r.ProcessType + (r.TriggerType ? ' · ' + r.TriggerType : ''),
-      apiToggle: 'flow',
-      manageable: r.ManageableState,
-      activeVersionId: r.ActiveVersionId || null,
-      latestVersionId: r.LatestVersionId || null,
-      latestVersionNumber: (r.LatestVersionId && versionNumMap[r.LatestVersionId]) || null,
-    };
+  return (d.records||[]).map(r=>{
+    const isPB=r.ProcessType==='Workflow';
+    const obj=(r.TriggerObjectOrEventLabel&&r.TriggerObjectOrEventLabel.trim())?r.TriggerObjectOrEventLabel:(PT_MAP[r.ProcessType]||r.ProcessType||'Unclassified');
+    return{id:r.DurableId||r.Id,viewId:r.Id,name:r.ApiName||r.Label,label:r.Label,active:r.IsActive,object:obj,type:isPB?'Process Builder':'Flow',description:r.ProcessType+(r.TriggerType?` · ${r.TriggerType}`:''),apiToggle:'flow',manageable:r.ManageableState,activeVersionId:r.ActiveVersionId||null,latestVersionId:r.LatestVersionId||null,latestVersionNumber:(r.LatestVersionId&&verNumMap[r.LatestVersionId])||null};
   });
 }
 
-async function fetchTriggers() {
-  const d = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent('SELECT Id,Name,Status,TableEnumOrId FROM ApexTrigger ORDER BY TableEnumOrId,Name LIMIT 2000')}`);
-  return (d.records||[]).map(r => ({id:r.Id, name:r.Name, active:r.Status==='Active', object:r.TableEnumOrId||'Unknown', type:'Apex Trigger', description:`Status: ${r.Status}`, apiToggle:'trigger'}));
+async function fetchTriggers(){
+  const d=await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent('SELECT Id,Name,Status,TableEnumOrId,NamespacePrefix FROM ApexTrigger ORDER BY TableEnumOrId,Name LIMIT 2000')}`);
+  return (d.records||[]).map(r=>({id:r.Id,name:r.Name,active:r.Status==='Active',object:r.TableEnumOrId||'Unknown',type:'Apex Trigger',description:`Status: ${r.Status}`,apiToggle:'trigger',namespacePfx:r.NamespacePrefix||null}));
 }
 
-async function fetchWF() {
-  // WorkflowRule not available in Tooling API on some orgs — use REST API Metadata query instead
-  try {
-    const d = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent('SELECT Id,Name,Active,TableEnumOrId FROM WorkflowRule ORDER BY TableEnumOrId,Name LIMIT 2000')}`);
-    return (d.records||[]).map(r => ({id:r.Id, name:r.Name, active:r.Active, object:r.TableEnumOrId||'Unknown', type:'Workflow Rule', description:'', apiToggle:'wf'}));
-  } catch(e) {
-    // Fallback: query via standard REST describe — WorkflowRule may not be in Tooling API on this org
-    audit('⚠ WorkflowRule Tooling API unavailable on this org — skipping', 'warn');
-    return [];
-  }
+async function fetchWF(){
+  try{
+    const d=await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent('SELECT Id,Name,Active,TableEnumOrId FROM WorkflowRule ORDER BY TableEnumOrId,Name LIMIT 2000')}`);
+    return (d.records||[]).map(r=>({id:r.Id,name:r.Name,active:r.Active,object:r.TableEnumOrId||'Unknown',type:'Workflow Rule',description:'',apiToggle:'wf'}));
+  }catch(e){audit('⚠ WorkflowRule unavailable on this org','warn');return[];}
 }
 
-// ═══════════════ TOGGLE ═══════════════
-async function doToggle(a, newActive) {
-  if (a.apiToggle === 'vr') {
-    // Per Salesforce Tooling API docs: GET full Metadata, mutate active only, PATCH entire Metadata back
-    // Must return ALL Metadata fields (including Vlocity custom ones) — filtering causes silent failure
-    const full = await sfGet(`/services/data/${API_VER}/tooling/sobjects/ValidationRule/${a.id}`);
-    if (!full || !full.Metadata) throw new Error('Could not read ValidationRule Metadata — ensure Modify All Data permission');
-    // Mutate only the active flag, preserve every other field exactly as SF returned it
-    const meta = Object.assign({}, full.Metadata, { active: newActive });
-    const resp = await sfPatch(`/services/data/${API_VER}/tooling/sobjects/ValidationRule/${a.id}`, { Metadata: meta });
-    audit(`VR PATCH response: ${JSON.stringify(resp)}`, 'info');
-
-  } else if (a.apiToggle === 'flow') {
-    // Per SF Tooling API docs (v44+): PATCH FlowDefinition with Metadata.activeVersionNumber
-    // To activate: {"Metadata": {"activeVersionNumber": N}} where N is the version number
-    // To deactivate: {"Metadata": {"activeVersionNumber": 0}}
-    // Reference: flosum.com/blog/fix-recordactiondeployment-flow-inactive-error-salesforce
-    //            gearset.com/en/articles/2439855-changes-to-flows-in-v44-of-the-metadata-api
-    if (a.manageable === 'installed' || a.manageable === 'installedEditable') {
-      throw new Error(`Managed package flow (${a.manageable}) — cannot modify`);
-    }
-    if (newActive) {
-      // Need the VersionNumber (integer) of the latest version, not the 18-char Id
-      let versionNum = a.latestVersionNumber;
-      if (!versionNum) {
-        // Fetch VersionNumber from FlowVersionView using LatestVersionId
-        const lvId = a.latestVersionId;
-        if (lvId) {
-          const vv = await sfGet(`/services/data/${API_VER}/query?q=${encodeURIComponent("SELECT VersionNumber FROM FlowVersionView WHERE DurableId='" + lvId + "' LIMIT 1")}`);
-          versionNum = vv.records?.[0]?.VersionNumber;
-        }
-        if (!versionNum) {
-          // Last resort: FlowDefinition Tooling API
-          const fd = await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent("SELECT LatestVersion.VersionNumber FROM FlowDefinition WHERE Id='" + a.id + "' LIMIT 1")}`);
-          versionNum = fd.records?.[0]?.LatestVersion?.VersionNumber;
-        }
-        if (versionNum) a.latestVersionNumber = versionNum;
-      }
-      if (!versionNum) throw new Error('No version number found — Flow may be in Draft state with no saved versions');
-      await sfPatch(`/services/data/${API_VER}/tooling/sobjects/FlowDefinition/${a.id}`, {Metadata:{activeVersionNumber: versionNum}});
+// ═══════ TOGGLE ═══════
+async function doToggle(a,newActive){
+  if(a.apiToggle==='vr'){
+    const full=await sfGet(`/services/data/${API_VER}/tooling/sobjects/ValidationRule/${a.id}`);
+    if(!full?.Metadata) throw new Error('Could not read ValidationRule Metadata — check Modify All Data permission');
+    await sfPatch(`/services/data/${API_VER}/tooling/sobjects/ValidationRule/${a.id}`,{Metadata:Object.assign({},full.Metadata,{active:newActive})});
+  } else if(a.apiToggle==='flow'){
+    if(a.manageable==='installed'||a.manageable==='installedEditable') throw new Error(`Managed package flow — cannot modify`);
+    if(newActive){
+      let vNum=a.latestVersionNumber;
+      if(!vNum){const fd=await sfGet(`/services/data/${API_VER}/tooling/query?q=${encodeURIComponent("SELECT LatestVersion.VersionNumber FROM FlowDefinition WHERE Id='"+a.id+"' LIMIT 1")}`);vNum=fd.records?.[0]?.LatestVersion?.VersionNumber;if(vNum)a.latestVersionNumber=vNum;}
+      if(!vNum) throw new Error('No version number found — flow may be in Draft state');
+      await sfPatch(`/services/data/${API_VER}/tooling/sobjects/FlowDefinition/${a.id}`,{Metadata:{activeVersionNumber:vNum}});
     } else {
-      // Deactivate: set activeVersionNumber to 0
-      await sfPatch(`/services/data/${API_VER}/tooling/sobjects/FlowDefinition/${a.id}`, {Metadata:{activeVersionNumber: 0}});
+      await sfPatch(`/services/data/${API_VER}/tooling/sobjects/FlowDefinition/${a.id}`,{Metadata:{activeVersionNumber:0}});
     }
-
-  } else if (a.apiToggle === 'trigger') {
-    // Tooling API can update ApexTrigger Status + Body together.
-    // Requirements: "Author Apex" permission OR "Modify All Data" permission in user profile.
-    // INSUFFICIENT_ACCESS_ON_CROSS_REFERENCE_ENTITY = missing "Author Apex" permission.
-    // Managed package triggers (NamespacePrefix set) cannot be modified via API.
-    const full = await sfGet(`/services/data/${API_VER}/tooling/sobjects/ApexTrigger/${a.id}`);
-    if (!full) throw new Error('Could not fetch ApexTrigger record');
-    if (full.NamespacePrefix) {
-      throw new Error(`Managed package trigger (${full.NamespacePrefix}) — cannot modify. Managed package automations must be disabled via the package settings.`);
-    }
-    if (!full.Body) {
-      throw new Error('Trigger body is empty — may be a managed package trigger. Cannot modify.');
-    }
-    try {
-      await sfPatch(`/services/data/${API_VER}/tooling/sobjects/ApexTrigger/${a.id}`, {
-        Status: newActive ? 'Active' : 'Inactive',
-        Body: full.Body
-      });
-    } catch(patchErr) {
-      if (patchErr.message.includes('INSUFFICIENT_ACCESS')) {
-        throw new Error('Requires "Author Apex" permission in your Salesforce profile. Ask your SF Admin to enable it.');
-      }
-      throw patchErr;
-    }
-
-  } else if (a.apiToggle === 'wf') {
-    // Same pattern: GET full Metadata, mutate active only, PATCH full Metadata back
-    const full = await sfGet(`/services/data/${API_VER}/tooling/sobjects/WorkflowRule/${a.id}`);
-    if (!full || !full.Metadata) throw new Error('Could not read WorkflowRule Metadata — ensure Modify All Data permission');
-    const meta = Object.assign({}, full.Metadata, { active: newActive });
-    await sfPatch(`/services/data/${API_VER}/tooling/sobjects/WorkflowRule/${a.id}`, { Metadata: meta });
+  } else if(a.apiToggle==='trigger'){
+    if(a.namespacePfx) throw new Error(`Managed package trigger (${a.namespacePfx}) — cannot modify`);
+    const full=await sfGet(`/services/data/${API_VER}/tooling/sobjects/ApexTrigger/${a.id}`);
+    if(!full?.Body) throw new Error('Trigger body empty — may be a managed package trigger');
+    try{await sfPatch(`/services/data/${API_VER}/tooling/sobjects/ApexTrigger/${a.id}`,{Status:newActive?'Active':'Inactive',Body:full.Body});}
+    catch(e){if(e.message.includes('INSUFFICIENT_ACCESS')) throw new Error('Requires "Author Apex" permission — ask your SF Admin to enable it');throw e;}
+  } else if(a.apiToggle==='wf'){
+    const full=await sfGet(`/services/data/${API_VER}/tooling/sobjects/WorkflowRule/${a.id}`);
+    if(!full?.Metadata) throw new Error('Could not read WorkflowRule Metadata');
+    await sfPatch(`/services/data/${API_VER}/tooling/sobjects/WorkflowRule/${a.id}`,{Metadata:Object.assign({},full.Metadata,{active:newActive})});
   }
 }
 
-// Verify SF actually applied the change
-async function verifyToggle(a, newActive) {
-  try {
-    await sleep(400); // brief pause for SF to commit
-    if (a.apiToggle === 'vr') {
-      const check = await sfGet(`/services/data/${API_VER}/tooling/sobjects/ValidationRule/${a.id}?fields=Active`);
-      return check.Active === newActive;
-    } else if (a.apiToggle === 'flow') {
-      // Verify using FlowDefinitionView DurableId (== FlowDefinition.Id stored in a.id)
-      const check = await sfGet(`/services/data/${API_VER}/query?q=${encodeURIComponent("SELECT IsActive FROM FlowDefinitionView WHERE DurableId='" + a.id + "' LIMIT 1")}`);
-      const isNowActive = check.records?.[0]?.IsActive === true;
-      return isNowActive === newActive;
-    } else if (a.apiToggle === 'trigger') {
-      const check = await sfGet(`/services/data/${API_VER}/tooling/sobjects/ApexTrigger/${a.id}?fields=Status`);
-      return (check.Status === 'Active') === newActive;
-    }
-    return true; // skip verification for types we can't easily check
-  } catch(e) {
-    return true; // don't block on verification failure
-  }
+async function verifyToggle(a,newActive){
+  try{
+    await sleep(400);
+    if(a.apiToggle==='vr'){const c=await sfGet(`/services/data/${API_VER}/tooling/sobjects/ValidationRule/${a.id}?fields=Active`);return c.Active===newActive;}
+    if(a.apiToggle==='flow'){const c=await sfGet(`/services/data/${API_VER}/query?q=${encodeURIComponent("SELECT IsActive FROM FlowDefinitionView WHERE DurableId='"+a.id+"' LIMIT 1")}`);return(c.records?.[0]?.IsActive===true)===newActive;}
+    if(a.apiToggle==='trigger'){const c=await sfGet(`/services/data/${API_VER}/tooling/sobjects/ApexTrigger/${a.id}?fields=Status`);return(c.Status==='Active')===newActive;}
+    return true;
+  }catch(e){return true;}
 }
 
-async function toggleAutomation(id, newActive) {
-  const a = S.automations.find(x => x.id === id);
-  if (!a) return;
-  const tEl = document.querySelector(`[data-tid="${id}"]`);
-  if (tEl) tEl.classList.add('loading');
-  try {
-    audit(`toggling ${a.name} (${a.type}) → ${newActive?'ON':'OFF'}…`, 'info');
-    await doToggle(a, newActive);
-    // Verify the change actually took effect in SF
-    const verified = await verifyToggle(a, newActive);
-    const prev = a.active;
-    a.active = newActive;
-    saveStore();
-    if (verified) {
-      audit(`✓ ${a.name} · ${a.object} · ${prev?'ON':'OFF'} → ${newActive?'ON':'OFF'} (verified)`, 'ok', {name:a.name, object:a.object, type:a.type, from:prev, to:newActive, trigger:'manual'});
-      // Push to session undo stack
-      S.changeStack.push({id:a.id, name:a.name, object:a.object, type:a.type, from:prev, to:newActive, ts:Date.now()});
+async function toggleAutomation(id,newActive){
+  const a=S.automations.find(x=>x.id===id);
+  if(!a) return;
+  const tEl=document.querySelector(`[data-tid="${id}"]`);
+  if(tEl) tEl.classList.add('loading');
+  try{
+    audit(`Toggling ${a.name} → ${newActive?'ON':'OFF'}…`,'info');
+    await doToggle(a,newActive);
+    const verified=await verifyToggle(a,newActive);
+    const prev=a.active; a.active=newActive; saveState();
+    if(verified){
+      audit(`✓ ${a.name} · ${a.object} · ${prev?'ON':'OFF'} → ${newActive?'ON':'OFF'} (verified)`,'ok',{id:a.id,name:a.name,object:a.object,type:a.type,from:prev,to:newActive,trigger:'manual'});
+      S.changeStack.push({id:a.id,name:a.name,object:a.object,type:a.type,from:prev,to:newActive,ts:Date.now()});
       renderUndoBar();
-      toast(`${a.name}: ${newActive?'enabled':'disabled'} ✓`, 'ok', 1800);
+      toast(`${a.name}: ${newActive?'enabled':'disabled'} ✓`,'ok',1800);
     } else {
-      audit(`⚠ ${a.name}: API accepted but SF state unchanged — check permissions`, 'warn');
-      toast(`${a.name}: SF may not have applied the change — check SF directly`, 'warn', 5000);
+      audit(`⚠ ${a.name}: API accepted but SF state unchanged — check permissions`,'warn');
+      toast(`${a.name}: SF may not have applied — verify in SF`,'warn',5000);
     }
-    updateRowState(id, newActive);
-    renderTypeCards();
-  } catch(err) {
-    audit(`✗ ${a.name}: ${err.message.slice(0,120)}`, 'err');
-    toast(`Failed: ${err.message.slice(0,80)}`, 'err', 6000);
-    const cb = document.querySelector(`input[data-cb="${id}"]`);
-    if (cb) cb.checked = a.active;
+    updateRowState(id,newActive); renderTypeCards();
+  }catch(err){
+    audit(`✗ ${a.name}: ${err.message.slice(0,120)}`,'err');
+    toast(`Failed: ${err.message.slice(0,80)}`,'err',6000);
+    const cb=document.querySelector(`input[data-cb="${id}"]`);
+    if(cb) cb.checked=a.active;
   }
-  if (tEl) tEl.classList.remove('loading');
+  if(tEl) tEl.classList.remove('loading');
 }
 
-async function bulkToggle(items, newActive, label, trigger='bulk') {
+async function bulkToggle(items,newActive,label,trigger='bulk'){
   closeModal('confirmModal');
-  document.getElementById('confirmModal').classList.remove('hidden');
+  showModal('confirmModal');
   document.getElementById('confirmActions').classList.add('hidden');
   document.getElementById('diffWrap').classList.add('hidden');
   document.getElementById('progressWrap').classList.remove('hidden');
-  document.getElementById('confirmTitle').textContent = `${label}…`;
-  document.getElementById('confirmMsg').textContent = `Processing ${items.length} automations.`;
-
-  let done = 0; const errors = [];
-  for (const a of items) {
-    document.getElementById('progressFill').style.width = `${Math.round(done/items.length*100)}%`;
-    document.getElementById('progressLabel').textContent = `${done}/${items.length} — ${a.name}`;
-    try {
-      await doToggle(a, newActive);
-      const prev = a.active;
-      a.active = newActive;
-      updateRowState(a.id, newActive);
-      audit(`${a.name} · ${prev?'ON':'OFF'} → ${newActive?'ON':'OFF'}`, 'ok', {name:a.name, object:a.object, type:a.type, from:prev, to:newActive, trigger});
-    } catch(err) {
-      errors.push(a.name);
-      audit(`✗ ${a.name}: ${err.message.slice(0,50)}`, 'err');
-    }
-    done++;
-    await sleep(120);
+  document.getElementById('confirmTitle').textContent=`${label}…`;
+  document.getElementById('confirmMsg').textContent=`Processing ${items.length} automations.`;
+  let done=0;const errors=[];
+  for(const a of items){
+    document.getElementById('progressFill').style.width=`${Math.round(done/items.length*100)}%`;
+    document.getElementById('progressLabel').textContent=`${done}/${items.length} — ${a.name}`;
+    try{await doToggle(a,newActive);const prev=a.active;a.active=newActive;updateRowState(a.id,newActive);audit(`${a.name} · ${prev?'ON':'OFF'} → ${newActive?'ON':'OFF'}`,'ok',{id:a.id,name:a.name,object:a.object,type:a.type,from:prev,to:newActive,trigger});}
+    catch(e){errors.push(a.name);audit(`✗ ${a.name}: ${e.message.slice(0,50)}`,'err');}
+    done++;await sleep(120);
   }
-  document.getElementById('progressFill').style.width = '100%';
-  document.getElementById('progressLabel').textContent = `Done — ${done-errors.length}/${items.length} succeeded`;
-  saveStore();
-  renderTypeCards();
-  renderSnapBanner();
-  renderMigrationBanner();
-  if (errors.length) { audit(`bulk complete with ${errors.length} error(s)`, 'warn'); toast(`Done with ${errors.length} error(s)`, 'warn'); }
-  else { audit(`✓ ${label} complete`, 'ok'); toast(`${label} complete!`, 'ok'); }
-  setTimeout(() => closeModal('confirmModal'), 1400);
+  document.getElementById('progressFill').style.width='100%';
+  document.getElementById('progressLabel').textContent=`Done — ${done-errors.length}/${items.length} succeeded`;
+  saveState();renderTypeCards();renderSnapBanner();renderMigBanner();
+  if(errors.length){toast(`Done with ${errors.length} error(s)`,'warn');}else{toast(`${label} complete!`,'ok');}
+  setTimeout(()=>closeModal('confirmModal'),1400);
 }
 
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 
-// ═══════════════ BULK ACTIONS ═══════════════
-function bulkToggleType(type, newActive, e) {
-  if (e) e.stopPropagation();
-  const items = S.automations.filter(a => a.type === type && a.active !== newActive);
-  if (!items.length) { toast(`All ${type}s already ${newActive?'active':'inactive'}`, 'warn'); return; }
-  confirmAction(`${newActive?'Enable':'Disable'} all ${type}s`, `This will ${newActive?'activate':'deactivate'} ${items.length} ${type}s.`, null, () => bulkToggle(items, newActive, `${newActive?'Enabling':'Disabling'} ${type}s`));
+// ═══════ BULK ACTIONS ═══════
+function bulkToggleType(type,newActive,e){
+  if(e)e.stopPropagation();
+  const items=S.automations.filter(a=>a.type===type&&a.active!==newActive);
+  if(!items.length){toast(`Already ${newActive?'active':'inactive'}`,'warn');return;}
+  bulkToggle(items,newActive,`${newActive?'Enabling':'Disabling'} ${type}s`);
 }
-function bulkToggleObj(btn, newActive) {
-  if (btn && btn.stopPropagation) btn.stopPropagation();
-  // Walk up to find the obj-header data
-  const header = btn?.closest?.('.obj-group')?.querySelector?.('.obj-header');
-  const obj = header?.querySelector?.('.obj-title')?.textContent || '';
-  const type = S.activeType;
-  if (!obj) { toast('Could not identify object', 'err'); return; }
-  const items = S.automations.filter(a => a.object === obj && a.type === type && a.active !== newActive);
-  if (!items.length) { toast('Already up to date', 'warn'); return; }
-  bulkToggle(items, newActive, `${newActive?'Enabling':'Disabling'} ${type}s on ${obj}`);
+function bulkToggleObj(btn,newActive){
+  if(btn?.stopPropagation) btn.stopPropagation();
+  const title=btn?.closest?.('.obj-group')?.querySelector?.('.obj-title')?.textContent||'';
+  const items=S.automations.filter(a=>a.object===title&&a.type===S.activeType&&a.active!==newActive);
+  if(!items.length){toast('Already up to date','warn');return;}
+  bulkToggle(items,newActive,`${newActive?'Enabling':'Disabling'} on ${title}`);
 }
 
-// ═══════════════ MIGRATION MODE ═══════════════
-async function enterMigrationMode() {
-  if (S.migrationMode) { toast('Migration mode already active', 'warn'); return; }
-  const active = S.automations.filter(a => a.active);
-  if (!active.length) { toast('All automations already inactive', 'warn'); return; }
-  confirmAction('🔴 Enter Migration Mode',
-    `This will:\n1. Save a snapshot of current state (${S.automations.length} automations)\n2. Disable all ${active.length} active automations\n\nYou can revert to exact prior state at any time.`,
-    null,
-    async () => {
-      if (!S.snapshot) {
-        S.snapshot = {ts:Date.now(), map:{}, name:'Auto: pre-migration'};
-        S.automations.forEach(a => S.snapshot.map[a.id] = a.active);
-        saveStore();
-        audit('📸 auto-snapshot taken before migration mode', 'warn');
-      }
-      // Set migrationMode AFTER bulk completes so banner only shows on full success
-      await bulkToggle(S.automations.filter(a => a.active), false, 'Disabling all', 'migration-mode');
-      S.migrationMode = true;
-      saveStore();
-      renderMigrationBanner();
-      renderSnapBanner();
+// ═══════ MIGRATION MODE ═══════
+async function enterMigrationMode(){
+  if(S.migrationMode){toast('Migration mode already active','warn');return;}
+  const active=S.automations.filter(a=>a.active);
+  if(!active.length){toast('All automations already inactive','warn');return;}
+  confirmAction('🔴 Enter Migration Mode',`Auto-snapshot + disable ${active.length} active automations.`,null,async()=>{
+    if(!S.snapshot){
+      S.snapshot={ts:Date.now(),map:{},name:'Auto: pre-migration'};
+      S.automations.forEach(a=>{S.snapshot.map[a.id]=a.active;});
+      audit('📸 Auto-snapshot taken','warn');
     }
-  );
+    await bulkToggle(S.automations.filter(a=>a.active),false,'Disabling all','migration-mode');
+    S.migrationMode=true;saveState();renderMigBanner();renderSnapBanner();
+  });
 }
 
-function showRevertModal() {
-  if (!S.snapshot) return;
-  const toChange = S.automations.filter(a => S.snapshot.map[a.id] !== undefined && S.snapshot.map[a.id] !== a.active);
-  const diffRows = toChange.map(a =>
-    `<tr><td>${esc(a.name)}</td><td style="color:var(--tx3)">${esc(a.object)}</td><td style="color:var(--tx3)">${a.type}</td><td>${a.active ? `<span class="diff-on">ON</span> → <span class="diff-off">OFF</span>` : `<span class="diff-off">OFF</span> → <span class="diff-on">ON</span>`}</td></tr>`
-  ).join('');
-  document.getElementById('diffBody').innerHTML = diffRows || '<tr><td colspan="4" style="color:var(--tx3);padding:8px">No changes needed — already matches snapshot</td></tr>';
+function showRevertModal(){
+  if(!S.snapshot) return;
+  const toChange=S.automations.filter(a=>S.snapshot.map[a.id]!==undefined&&S.snapshot.map[a.id]!==a.active);
+  document.getElementById('diffBody').innerHTML=toChange.map(a=>`<tr><td>${esc(a.name)}</td><td style="color:var(--tx3)">${esc(a.object)}</td><td>${a.active?'<span style="color:var(--green)">ON</span> → <span style="color:var(--red)">OFF</span>':'<span style="color:var(--red)">OFF</span> → <span style="color:var(--green)">ON</span>'}</td></tr>`).join('')||'<tr><td colspan="3" style="color:var(--tx3)">Already matches snapshot</td></tr>';
   document.getElementById('diffWrap').classList.remove('hidden');
   document.getElementById('progressWrap').classList.add('hidden');
-  document.getElementById('confirmTitle').textContent = '↩ Revert to snapshot';
-  document.getElementById('confirmMsg').textContent = `Taken ${new Date(S.snapshot.ts).toLocaleString()}. ${toChange.length} automation(s) will change.`;
+  document.getElementById('confirmTitle').textContent='↩ Revert to snapshot';
+  document.getElementById('confirmMsg').textContent=`Taken ${new Date(S.snapshot.ts).toLocaleString()}. ${toChange.length} change(s).`;
   document.getElementById('confirmActions').classList.remove('hidden');
-  document.getElementById('confirmOkBtn').onclick = async () => {
-    // Recompute at click time to catch any manual toggles since modal opened
-    const currentToChange = S.automations.filter(a => S.snapshot.map[a.id] !== undefined && S.snapshot.map[a.id] !== a.active);
-    if (!currentToChange.length) { clearSnap(); closeModal('confirmModal'); toast('Already matches snapshot', 'ok'); return; }
+  document.getElementById('confirmOkBtn').onclick=async()=>{
+    const current=S.automations.filter(a=>S.snapshot.map[a.id]!==undefined&&S.snapshot.map[a.id]!==a.active);
+    if(!current.length){clearSnap();closeModal('confirmModal');toast('Already matches snapshot','ok');return;}
+    const items=current.map(a=>({...a,_target:S.snapshot.map[a.id]}));
     document.getElementById('diffWrap').classList.add('hidden');
-    const items = currentToChange.map(a => ({...a, _target: S.snapshot.map[a.id]}));
     closeModal('confirmModal');
     document.getElementById('confirmModal').classList.remove('hidden');
     document.getElementById('confirmActions').classList.add('hidden');
     document.getElementById('progressWrap').classList.remove('hidden');
-    document.getElementById('confirmTitle').textContent = 'Reverting…';
-    document.getElementById('confirmMsg').textContent = `Restoring ${items.length} automations.`;
-    let done = 0; const errors = [];
-    for (const a of items) {
-      document.getElementById('progressFill').style.width = `${Math.round(done/items.length*100)}%`;
-      document.getElementById('progressLabel').textContent = `${done}/${items.length} — ${a.name}`;
-      try { await doToggle(a, a._target); const prev=a.active; a.active=a._target; updateRowState(a.id,a._target); audit(`↩ ${a.name} restored to ${a._target?'ON':'OFF'}`, 'ok', {name:a.name,object:a.object,type:a.type,from:prev,to:a._target,trigger:'revert'}); }
-      catch(err) { errors.push(a.name); audit(`✗ ${a.name}: ${err.message.slice(0,50)}`, 'err'); }
-      done++; await sleep(120);
+    document.getElementById('confirmTitle').textContent='Reverting…';
+    document.getElementById('confirmMsg').textContent=`Restoring ${items.length} automations.`;
+    let done=0;const errors=[];
+    for(const a of items){
+      document.getElementById('progressFill').style.width=`${Math.round(done/items.length*100)}%`;
+      document.getElementById('progressLabel').textContent=`${done}/${items.length} — ${a.name}`;
+      try{await doToggle(a,a._target);a.active=a._target;updateRowState(a.id,a._target);audit(`↩ ${a.name} restored to ${a._target?'ON':'OFF'}`,'ok',{id:a.id,name:a.name,object:a.object,type:a.type,from:!a._target,to:a._target,trigger:'revert'});}
+      catch(e){errors.push(a.name);audit(`✗ ${a.name}: ${e.message.slice(0,50)}`,'err');}
+      done++;await sleep(120);
     }
-    document.getElementById('progressFill').style.width = '100%';
-    document.getElementById('progressLabel').textContent = `Done — ${done-errors.length}/${items.length} restored`;
-    S.migrationMode = false; clearSnap(); saveStore();
-    renderTypeCards(); renderMigrationBanner(); renderSnapBanner();
-    toast('Reverted!', 'ok');
-    setTimeout(() => closeModal('confirmModal'), 1400);
+    document.getElementById('progressFill').style.width='100%';
+    document.getElementById('progressLabel').textContent=`Done — ${done-errors.length}/${items.length} restored`;
+    S.migrationMode=false;clearSnap();saveState();
+    renderTypeCards();renderMigBanner();renderSnapBanner();
+    if(errors.length)toast(`Done with ${errors.length} error(s)`,'warn');else toast('Reverted!','ok');
+    setTimeout(()=>closeModal('confirmModal'),1400);
   };
   showModal('confirmModal');
 }
 
-function clearSnap() {
-  S.snapshot = null; S.migrationMode = false;
-  saveStore(); renderSnapBanner(); renderMigrationBanner();
-}
+function clearSnap(){S.snapshot=null;S.migrationMode=false;saveState();renderSnapBanner();renderMigBanner();}
 
-// ═══════════════ NAMED SNAPSHOTS ═══════════════
-function showSnapshotsModal() {
-  renderSnapList();
-  showModal('snapshotsModal');
+// ═══════ NAMED SNAPSHOTS ═══════
+function showSnapshotsModal(){
+  renderSnapList();showModal('snapshotsModal');
 }
-function renderSnapList() {
-  const el = document.getElementById('snapListEl');
-  if (!S.snapshots.length) { el.innerHTML = '<p style="font-size:13px;color:var(--tx3)">No saved snapshots yet.</p>'; return; }
-  el.innerHTML = S.snapshots.map((s,i) => {
-    const on = Object.values(s.map).filter(Boolean).length;
-    const total = Object.values(s.map).length;
-    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--b1);font-size:12px">
-      <div style="flex:1">
-        <div style="font-weight:500">${esc(s.name)}</div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--tx3);margin-top:2px">${new Date(s.ts).toLocaleString()} · ${on}/${total} active</div>
-      </div>
-      <button class="btn btn-ghost" style="font-size:11px" onclick="loadNamedSnapshot(${i})">↩ Revert</button>
-      <button class="btn btn-ghost" style="font-size:11px;color:var(--red)" onclick="deleteSnapshot(${i})">✕</button>
-    </div>`;
+function renderSnapList(){
+  const el=document.getElementById('snapListEl');
+  if(!S.snapshots.length){el.innerHTML='<p style="font-size:13px;color:var(--tx3)">No saved snapshots yet.</p>';return;}
+  el.innerHTML=S.snapshots.map((s,i)=>{
+    const on=Object.values(s.map).filter(Boolean).length;
+    const total=Object.values(s.map).length;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--b1);font-size:12px"><div style="flex:1"><div style="font-weight:500">${esc(s.name)}</div><div style="font-family:var(--mono);font-size:10px;color:var(--tx3);margin-top:2px">${new Date(s.ts).toLocaleString()} · ${on}/${total} active</div></div><button class="btn btn-ghost" style="font-size:11px" onclick="revertToNamed(${i})">↩ Revert</button><button class="btn btn-ghost" style="font-size:11px;color:var(--red)" onclick="deleteSnapshot(${i})">✕</button></div>`;
   }).join('');
 }
-function saveNamedSnapshot() {
-  const name = document.getElementById('snapNameInput').value.trim();
-  if (!name) { toast('Enter a name', 'warn'); return; }
-  if (!S.automations.length) { toast('Load automations first before saving a snapshot', 'warn'); return; }
-  if (S.snapshots.length >= 5) S.snapshots.pop();
-  const map = {};
-  S.automations.forEach(a => map[a.id] = a.active);
-  S.snapshots.unshift({ts:Date.now(), map, name});
-  saveStore();
-  document.getElementById('snapNameInput').value = '';
-  renderSnapList();
-  audit(`📸 snapshot saved: "${name}"`, 'ok');
-  toast(`Snapshot "${name}" saved`, 'ok');
+function saveNamedSnapshot(){
+  const name=document.getElementById('snapNameInput').value.trim();
+  if(!name){toast('Enter a name','warn');return;}
+  if(!S.automations.length){toast('Load automations first','warn');return;}
+  if(S.snapshots.length>=5) S.snapshots.pop();
+  const map={};S.automations.forEach(a=>{map[a.id]=a.active;});
+  S.snapshots.unshift({ts:Date.now(),map,name});
+  saveState();document.getElementById('snapNameInput').value='';renderSnapList();
+  audit(`📸 Snapshot saved: "${name}"`,'ok');toast(`Snapshot "${name}" saved`,'ok');
 }
-function deleteSnapshot(i) {
-  const name = S.snapshots[i]?.name;
-  S.snapshots.splice(i,1);
-  saveStore(); renderSnapList();
-  audit(`snapshot deleted: "${name}"`, 'info');
-}
-async function loadNamedSnapshot(i) {
-  const snap = S.snapshots[i];
-  if (!snap) return;
-  S.snapshot = snap;
-  closeModal('snapshotsModal');
-  showRevertModal();
-}
+function deleteSnapshot(i){S.snapshots.splice(i,1);saveState();renderSnapList();}
+function revertToNamed(i){const s=S.snapshots[i];if(!s)return;S.snapshot=s;closeModal('snapshotsModal');showRevertModal();}
 
-// ═══════════════ ONBOARDING ═══════════════
-function switchTab(tabId, btn) {
-  document.querySelectorAll('.onb-pane').forEach(p => p.classList.add('hidden'));
-  document.querySelectorAll('.onb-tab').forEach(b => b.classList.remove('active'));
-  document.getElementById(tabId)?.classList.remove('hidden');
-  btn.classList.add('active');
-}
-function copyOnbCode(elId) {
-  const el = document.getElementById(elId);
-  if (!el) return;
-  navigator.clipboard.writeText(el.textContent).then(() => {
-    toast('Copied to clipboard', 'ok', 1500);
-  });
-}
-function showOnboarding() {
-  // Reset to first tab
-  switchTab('tab-prereq', document.querySelector('.onb-tab'));
-  showModal('howModal');
-}
-
-// ═══════════════ UNDO / SESSION ROLLBACK ═══════════════
-function rebuildChangeStackFromAudit() {
-  // Rebuild from audit entries made today with trigger='manual'
-  // so undo bar survives page refresh within same day
-  const today = new Date().toDateString();
-  const recentManual = S.auditLog.filter(e =>
-    e.trigger === 'manual' &&
-    e.from !== undefined &&
-    e.to !== undefined &&
-    new Date(e.ts).toDateString() === today
-  );
-  if (!recentManual.length) return;
-
-  // Only add entries for automations that still match the logged state
-  // (don't add if already reverted)
-  const rebuilt = [];
-  recentManual.reverse().forEach(e => { // oldest first
-    const a = S.automations.find(x => x.id === e.id || (x.name === e.name && x.object === e.object));
-    if (a) {
-      // Only track if automation's current state matches what we changed it TO
-      // (meaning the change hasn't already been undone)
-      const alreadyInStack = rebuilt.find(c => c.id === a.id);
-      if (!alreadyInStack) {
-        rebuilt.push({id:a.id, name:e.name, object:e.object||'', type:e.type||a.type, from:e.from, to:e.to, ts:new Date(e.ts).getTime()});
-      }
-    }
-  });
-  if (rebuilt.length) {
-    S.changeStack = rebuilt;
-    renderUndoBar();
-    audit(`↩ restored ${rebuilt.length} undoable change(s) from today's session`, 'info');
-  }
-}
-
-
-function renderUndoBar() {
-  const bar = document.getElementById('undoBar');
-  const label = document.getElementById('undoLabel');
-  if (!bar) return;
-  if (!S.changeStack.length) { bar.classList.add('hidden'); return; }
+// ═══════ UNDO ═══════
+function renderUndoBar(){
+  const bar=document.getElementById('undoBar');
+  const label=document.getElementById('undoLabel');
+  if(!bar) return;
+  if(!S.changeStack.length){bar.classList.add('hidden');return;}
   bar.classList.remove('hidden');
-  const n = S.changeStack.length;
-  label.textContent = `${n} change${n!==1?'s':''} this session`;
+  label.textContent=`${S.changeStack.length} change${S.changeStack.length!==1?'s':''} this session`;
 }
-
-function clearChangeStack() {
-  S.changeStack = [];
-  renderUndoBar();
-}
-
-function showUndoModal() {
-  renderUndoList();
+function clearChangeStack(){S.changeStack=[];renderUndoBar();}
+function showUndoModal(){
+  const el=document.getElementById('undoListEl');
+  if(!S.changeStack.length){el.innerHTML='<p style="font-size:13px;color:var(--tx3)">No changes to undo.</p>';showModal('undoModal');return;}
+  el.innerHTML=[...S.changeStack].reverse().map((c,ri)=>{
+    const i=S.changeStack.length-1-ri;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--b1);font-size:12px"><input type="checkbox" class="undo-chk" data-idx="${i}" checked style="width:14px;height:14px;cursor:pointer"><div style="flex:1"><div style="font-weight:500">${esc(c.name)}</div><div style="font-family:var(--mono);font-size:10px;color:var(--tx3)">${esc(c.object)} · ${c.type} · ${new Date(c.ts).toLocaleTimeString()}</div></div><span style="font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:6px;background:${c.from?'var(--green3)':'var(--red3)'};color:${c.from?'var(--green)':'var(--red)'}">${c.from?'ON':'OFF'} → ${c.to?'ON':'OFF'}</span></div>`;
+  }).join('');
   showModal('undoModal');
 }
-
-function renderUndoList() {
-  const el = document.getElementById('undoListEl');
-  if (!S.changeStack.length) { el.innerHTML = '<p style="font-size:13px;color:var(--tx3)">No session changes to undo.</p>'; return; }
-  // Show newest first
-  el.innerHTML = [...S.changeStack].reverse().map((c, ri) => {
-    const i = S.changeStack.length - 1 - ri; // real index in stack
-    const ts = new Date(c.ts).toLocaleTimeString();
-    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--b1);font-size:12px">
-      <input type="checkbox" class="undo-chk" data-idx="${i}" style="width:14px;height:14px;cursor:pointer" checked>
-      <div style="flex:1">
-        <div style="font-weight:500">${esc(c.name)}</div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--tx3)">${esc(c.object)} · ${c.type} · ${ts}</div>
-      </div>
-      <span style="font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:6px;background:${c.from?'var(--green3)':'var(--red3)'};color:${c.from?'var(--green)':'var(--red)'}">
-        ${c.from?'ON':'OFF'} → ${c.to?'ON':'OFF'}
-      </span>
-      <span style="font-family:var(--mono);font-size:11px;color:var(--amber)">undo: ${c.to?'ON':'OFF'}→${c.from?'ON':'OFF'}</span>
-    </div>`;
-  }).join('');
-}
-
-async function undoSelectedChanges() {
-  const checked = [...document.querySelectorAll('.undo-chk:checked')];
-  if (!checked.length) { toast('No changes selected', 'warn'); return; }
-  const indices = checked.map(c => parseInt(c.dataset.idx));
-  const items = indices.map(i => S.changeStack[i]).filter(Boolean);
+async function undoSelected(){
+  const checked=[...document.querySelectorAll('.undo-chk:checked')];
+  if(!checked.length){toast('No changes selected','warn');return;}
+  const indices=checked.map(c=>parseInt(c.dataset.idx));
+  const items=indices.map(i=>S.changeStack[i]).filter(Boolean);
   closeModal('undoModal');
-  await undoChanges(items, indices);
+  await undoItems(items,indices);
 }
-
-async function undoAllSession() {
-  if (!S.changeStack.length) { toast('No session changes to undo', 'warn'); return; }
-  const items = [...S.changeStack];
-  const indices = items.map((_, i) => i);
-  await undoChanges(items, indices);
+async function undoAll(){
+  if(!S.changeStack.length){toast('No changes to undo','warn');return;}
+  const items=[...S.changeStack];const indices=items.map((_,i)=>i);
+  await undoItems(items,indices);
 }
-
-async function undoChanges(items, indices) {
-  // Undo in reverse order (last change first)
-  const toUndo = items.map(c => ({...c, _undoTo: c.from}));
-  toUndo.reverse();
-
-  document.getElementById('confirmModal').classList.remove('hidden');
+async function undoItems(items,indices){
+  const toUndo=[...items].reverse().map(c=>({...c,_target:c.from}));
+  showModal('confirmModal');
   document.getElementById('confirmActions').classList.add('hidden');
   document.getElementById('diffWrap').classList.add('hidden');
   document.getElementById('progressWrap').classList.remove('hidden');
-  document.getElementById('confirmTitle').textContent = 'Rolling back…';
-  document.getElementById('confirmMsg').textContent = `Undoing ${toUndo.length} change${toUndo.length!==1?'s':''}.`;
-
-  let done = 0; const errors = [];
-  for (const c of toUndo) {
-    document.getElementById('progressFill').style.width = `${Math.round(done/toUndo.length*100)}%`;
-    document.getElementById('progressLabel').textContent = `${done}/${toUndo.length} — ${c.name}`;
-    const a = S.automations.find(x => x.id === c.id);
-    if (a) {
-      try {
-        await doToggle(a, c._undoTo);
-        a.active = c._undoTo;
-        updateRowState(a.id, c._undoTo);
-        audit(`↩ undone: ${c.name} → ${c._undoTo?'ON':'OFF'}`, 'ok', {name:c.name, object:c.object, type:c.type, from:c.to, to:c._undoTo, trigger:'undo'});
-      } catch(err) {
-        errors.push(c.name);
-        audit(`✗ undo failed: ${c.name}: ${err.message.slice(0,50)}`, 'err');
-      }
-    }
-    done++; await sleep(120);
+  document.getElementById('confirmTitle').textContent='Rolling back…';
+  document.getElementById('confirmMsg').textContent=`Undoing ${toUndo.length} change(s).`;
+  let done=0;const errors=[];
+  for(const c of toUndo){
+    document.getElementById('progressFill').style.width=`${Math.round(done/toUndo.length*100)}%`;
+    document.getElementById('progressLabel').textContent=`${done}/${toUndo.length} — ${c.name}`;
+    const a=S.automations.find(x=>x.id===c.id);
+    if(a){try{await doToggle(a,c._target);a.active=c._target;updateRowState(a.id,c._target);audit(`↩ Undone: ${c.name} → ${c._target?'ON':'OFF'}`,'ok',{id:c.id,name:c.name,object:c.object,type:c.type,from:c.to,to:c._target,trigger:'undo'});}catch(e){errors.push(c.name);audit(`✗ Undo failed: ${c.name}: ${e.message.slice(0,50)}`,'err');}}
+    done++;await sleep(120);
   }
-
-  // Remove undone items from stack (by original indices, highest first to avoid shift issues)
-  [...indices].sort((a,b)=>b-a).forEach(i => S.changeStack.splice(i,1));
-
-  document.getElementById('progressFill').style.width = '100%';
-  document.getElementById('progressLabel').textContent = `Done — ${done-errors.length}/${toUndo.length} rolled back`;
-  saveStore(); renderTypeCards(); renderUndoBar();
-  if (errors.length) toast(`Rollback done with ${errors.length} error(s)`, 'warn');
-  else toast(`Rolled back ${toUndo.length} change${toUndo.length!==1?'s':''}!`, 'ok');
-  setTimeout(() => closeModal('confirmModal'), 1400);
+  [...indices].sort((a,b)=>b-a).forEach(i=>S.changeStack.splice(i,1));
+  document.getElementById('progressFill').style.width='100%';
+  document.getElementById('progressLabel').textContent=`Done — ${done-errors.length}/${toUndo.length} rolled back`;
+  saveState();renderTypeCards();renderUndoBar();
+  if(errors.length)toast(`Done with ${errors.length} error(s)`,'warn');else toast(`Rolled back ${toUndo.length} change(s)!`,'ok');
+  setTimeout(()=>closeModal('confirmModal'),1400);
+}
+function rebuildChangeStackFromAudit(){
+  const today=new Date().toDateString();
+  const recent=S.auditLog.filter(e=>e.trigger==='manual'&&e.from!==undefined&&e.to!==undefined&&new Date(e.ts).toDateString()===today);
+  if(!recent.length) return;
+  const rebuilt=[];
+  [...recent].reverse().forEach(e=>{
+    const a=S.automations.find(x=>x.id===e.id||(x.name===e.name&&x.object===e.object));
+    if(a&&!rebuilt.find(c=>c.id===a.id)) rebuilt.push({id:a.id,name:e.name,object:e.object||'',type:e.type||a.type,from:e.from,to:e.to,ts:new Date(e.ts).getTime()});
+  });
+  if(rebuilt.length){S.changeStack=rebuilt;renderUndoBar();audit(`↩ Restored ${rebuilt.length} undoable change(s) from today's session`,'info');}
 }
 
-// ═══════════════ CONFIRM HELPER ═══════════════
-function confirmAction(title, msg, diff, onOk) {
-  document.getElementById('confirmTitle').textContent = title;
-  document.getElementById('confirmMsg').textContent = msg;
+// ═══════ CONFIRM HELPER ═══════
+function confirmAction(title,msg,diff,onOk){
+  document.getElementById('confirmTitle').textContent=title;
+  document.getElementById('confirmMsg').textContent=msg;
   document.getElementById('diffWrap').classList.add('hidden');
   document.getElementById('progressWrap').classList.add('hidden');
   document.getElementById('confirmActions').classList.remove('hidden');
-  document.getElementById('confirmOkBtn').onclick = onOk;
+  document.getElementById('confirmOkBtn').onclick=onOk;
   showModal('confirmModal');
 }
 
-// ═══════════════ FILTERS ═══════════════
-function setFilter(f, btn) {
-  S.filter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderObjList();
+// ═══════ FILTERS ═══════
+function setFilter(f,btn){
+  S.filter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');renderObjList();
 }
-function applyFilters() {
-  S.search = document.getElementById('searchInput').value.toLowerCase();
-  renderObjList();
-}
-function getFiltered(type) {
-  return S.automations.filter(a => {
-    if (a.type !== type) return false;
-    if (S.filter === 'active' && !a.active) return false;
-    if (S.filter === 'inactive' && a.active) return false;
-    if (S.search && !a.name.toLowerCase().includes(S.search) && !a.object.toLowerCase().includes(S.search)) return false;
+function applyFilters(){S.search=document.getElementById('searchInput').value.toLowerCase();renderObjList();}
+function getFiltered(type){
+  return S.automations.filter(a=>{
+    if(a.type!==type) return false;
+    if(S.filter==='active'&&!a.active) return false;
+    if(S.filter==='inactive'&&a.active) return false;
+    if(S.search&&!a.name.toLowerCase().includes(S.search)&&!a.object.toLowerCase().includes(S.search)) return false;
     return true;
   });
 }
 
-// ═══════════════ RENDER TYPE CARDS ═══════════════
-function renderTypeCards() {
-  const container = document.getElementById('typeCards');
-  container.innerHTML = TYPE_ORDER.map(type => {
-    const all    = S.automations.filter(a => a.type === type);
-    const active = all.filter(a => a.active).length;
-    const cfg    = TYPE_CFG[type];
-    const pillCls = active === all.length ? 'pill-all' : active === 0 ? 'pill-none' : 'pill-mix';
-    const isActive = type === S.activeType;
-    return `
-      <div class="type-card ${cfg.cls}${isActive?' active':''}" onclick="selectType('${type}')">
-        <div style="font-size:20px">${cfg.icon}</div>
-        <div class="tc-num">${all.length}</div>
-        <div class="tc-label">${cfg.label}</div>
-        <div class="tc-pill ${pillCls}">${active}/${all.length} active</div>
-        <div class="tc-bulks">
-          <button class="tc-bulk" onclick="event.stopPropagation();bulkToggleType('${type}',true,event)">all on</button>
-          <button class="tc-bulk" onclick="event.stopPropagation();bulkToggleType('${type}',false,event)">all off</button>
-        </div>
-      </div>`;
-  }).join('');
-}
-
-function selectType(type) {
-  S.activeType = type;
-  renderTypeCards();
-  renderObjList();
-  document.getElementById('objList').scrollIntoView({behavior:'smooth', block:'start'});
-}
-
-// ═══════════════ RENDER OBJ LIST ═══════════════
-function renderObjList() {
-  const filtered = getFiltered(S.activeType);
-  const container = document.getElementById('objList');
-
-  if (!filtered.length) {
-    container.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><h4>No results</h4><p>Try adjusting your search or filter, or select a different automation type above.</p></div>`;
-    return;
-  }
-
-  const byObj = {};
-  filtered.forEach(a => { if (!byObj[a.object]) byObj[a.object] = []; byObj[a.object].push(a); });
-  const objects = Object.keys(byObj).sort();
-
-  container.innerHTML = objects.map(obj => {
-    const items = byObj[obj];
-    const activeN = items.filter(a => a.active).length;
-    const pillCls = activeN === items.length ? 'pill-green' : activeN === 0 ? 'pill-red' : 'pill-amber';
-    const rows = items.map(a => renderAutoRow(a)).join('');
-    return `
-      <div class="obj-group">
-        <div class="obj-header" onclick="toggleObj(this)">
-          <span class="obj-chevron open">▾</span>
-          <span class="obj-title">${esc(obj)}</span>
-          <span class="obj-count">${items.length}</span>
-          <span class="pill ${pillCls}">${activeN}/${items.length} active</span>
-          <div class="obj-bulks">
-            <button class="obj-bulk" onclick="bulkToggleObj(this,true)">all on</button>
-            <button class="obj-bulk" onclick="bulkToggleObj(this,false)">all off</button>
-          </div>
-        </div>
-        <div class="obj-body">${rows}</div>
-      </div>`;
-  }).join('');
-}
-
-function toggleObj(header) {
-  const chev = header.querySelector('.obj-chevron');
-  const body = header.nextElementSibling;
-  if (!body) return;
-  const isOpen = body.style.display !== 'none';
-  body.style.display = isOpen ? 'none' : '';
-  if (chev) { chev.classList.toggle('open', !isOpen); chev.classList.toggle('closed', isOpen); }
-}
-
-function renderAutoRow(a) {
-  const snap = S.snapshot ? S.snapshot.map[a.id] : undefined;
-  const snapBadge = snap !== undefined
-    ? `<span class="snap-was ${snap?'snap-was-on':'snap-was-off'}">${snap?'● was on':'○ was off'}</span>`
-    : '';
-  const isManaged = a.manageable === 'installed' || (a.apiToggle === 'trigger' && a.namespacePfx);
-  const managedBadge = isManaged
-    ? `<span style="font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:5px;background:var(--s3);color:var(--tx3);flex-shrink:0" title="Managed package — cannot toggle">pkg</span>`
-    : '';
-  return `
-    <div class="auto-row ${a.active?'active':'inactive'}" id="row-${a.id}">
-      <div class="auto-status-dot"></div>
-      <div style="flex:1;min-width:0">
-        <div class="auto-name">${esc(a.label||a.name)}</div>
-        ${a.description ? `<div class="auto-meta">${esc(a.description)}</div>` : ''}
+// ═══════ RENDER ═══════
+function renderTypeCards(){
+  const container=document.getElementById('typeCards');
+  container.innerHTML=TYPE_ORDER.map(type=>{
+    const all=S.automations.filter(a=>a.type===type);
+    const active=all.filter(a=>a.active).length;
+    const cfg=TYPE_CFG[type];
+    const pillCls=active===all.length?'all':active===0?'none':'mix';
+    const isActive=type===S.activeType;
+    return `<div class="type-card ${cfg.cls}${isActive?' active':''}" onclick="selectType('${type}')">
+      <div style="font-size:20px">${cfg.icon}</div>
+      <div class="tc-num">${all.length}</div>
+      <div class="tc-label">${cfg.label}</div>
+      <div class="tc-pill ${pillCls}">${active}/${all.length} active</div>
+      <div class="tc-bulks">
+        <button class="tc-bulk" onclick="event.stopPropagation();bulkToggleType('${type}',true,event)">all on</button>
+        <button class="tc-bulk" onclick="event.stopPropagation();bulkToggleType('${type}',false,event)">all off</button>
       </div>
-      ${snapBadge}
-      ${managedBadge}
-      <label class="toggle ${isManaged?'disabled':''}" data-tid="${a.id}" aria-label="Toggle ${esc(a.name)}" ${isManaged?'title="Managed package — cannot be toggled via API"':''}>
-        <input type="checkbox" data-cb="${a.id}" ${a.active?'checked':''} ${isManaged?'disabled':''} onchange="toggleAutomation('${a.id}',this.checked)">
-        <span class="tslider"></span>
-      </label>
     </div>`;
+  }).join('');
+}
+function selectType(type){S.activeType=type;renderTypeCards();renderObjList();}
+
+function renderObjList(){
+  const filtered=getFiltered(S.activeType);
+  const container=document.getElementById('objList');
+  if(!filtered.length){container.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><h4>No results</h4><p>Try adjusting your search or filter.</p></div>`;return;}
+  const byObj={};
+  filtered.forEach(a=>{if(!byObj[a.object])byObj[a.object]=[];byObj[a.object].push(a);});
+  container.innerHTML=Object.keys(byObj).sort().map(obj=>{
+    const items=byObj[obj];
+    const activeN=items.filter(a=>a.active).length;
+    const pillCls=activeN===items.length?'pill-green':activeN===0?'pill-red':'pill-amber';
+    return `<div class="obj-group">
+      <div class="obj-header" onclick="toggleObj(this)">
+        <span class="obj-chev">▾</span>
+        <span class="obj-title">${esc(obj)}</span>
+        <span class="obj-count">${items.length}</span>
+        <span class="pill ${pillCls}">${activeN}/${items.length} active</span>
+        <div class="obj-bulks">
+          <button class="obj-bulk" onclick="bulkToggleObj(this,true)">all on</button>
+          <button class="obj-bulk" onclick="bulkToggleObj(this,false)">all off</button>
+        </div>
+      </div>
+      <div class="obj-body">${items.map(a=>renderRow(a)).join('')}</div>
+    </div>`;
+  }).join('');
+}
+function toggleObj(header){
+  const chev=header.querySelector('.obj-chev');
+  const body=header.nextElementSibling;
+  if(!body) return;
+  const isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'';
+  if(chev)chev.classList.toggle('closed',isOpen);
+}
+function renderRow(a){
+  const snap=S.snapshot?S.snapshot.map[a.id]:undefined;
+  const snapBadge=snap!==undefined?`<span class="snap-was ${snap?'snap-was-on':'snap-was-off'}">${snap?'● was on':'○ was off'}</span>`:'';
+  const isManaged=a.manageable==='installed'||(a.apiToggle==='trigger'&&a.namespacePfx);
+  const pkgBadge=isManaged?`<span class="pkg-badge">pkg</span>`:'';
+  return `<div class="auto-row ${a.active?'active':'inactive'}" id="row-${a.id}">
+    <div class="auto-dot"></div>
+    <div style="flex:1;min-width:0">
+      <div class="auto-name">${esc(a.label||a.name)}</div>
+      ${a.description?`<div class="auto-meta">${esc(a.description)}</div>`:''}
+    </div>
+    ${snapBadge}${pkgBadge}
+    <label class="toggle${isManaged?' disabled':''}" data-tid="${a.id}">
+      <input type="checkbox" data-cb="${a.id}" ${a.active?'checked':''} ${isManaged?'disabled':''} onchange="toggleAutomation('${a.id}',this.checked)">
+      <span class="tslider"></span>
+    </label>
+  </div>`;
+}
+function updateRowState(id,active){
+  const row=document.getElementById(`row-${id}`);
+  if(!row) return;
+  row.className=`auto-row ${active?'active':'inactive'}`;
+  const cb=row.querySelector(`input[data-cb="${id}"]`);
+  if(cb) cb.checked=active;
 }
 
-function updateRowState(id, active) {
-  const row = document.getElementById(`row-${id}`);
-  if (!row) return;
-  row.className = `auto-row ${active?'active':'inactive'}`;
-  const cb = row.querySelector(`input[data-cb="${id}"]`);
-  if (cb) cb.checked = active;
+// ═══════ BANNERS ═══════
+function renderSnapBanner(){
+  const b=document.getElementById('snapBanner');
+  if(!S.snapshot||S.migrationMode){b.classList.add('hidden');return;}
+  b.classList.remove('hidden');
+  document.getElementById('snapTs').textContent=new Date(S.snapshot.ts).toLocaleString();
+}
+function renderMigBanner(){document.getElementById('migBanner').classList.toggle('hidden',!S.migrationMode);}
+
+function checkPendingRevert(){
+  const alert=document.getElementById('pendingAlert');
+  if(!alert) return;
+  if(!S.org||!S.snapshot||!Object.keys(S.snapshot.map||{}).length){alert.classList.add('hidden');return;}
+  const total=Object.keys(S.snapshot.map).length;
+  const ts=new Date(S.snapshot.ts).toLocaleString();
+  document.getElementById('pendingDetail').textContent=`"${S.snapshot.name||'snapshot'}" · ${total} automations · ${ts}`;
+  alert.style.display='flex';alert.classList.remove('hidden');
 }
 
-// ═══════════════ BANNERS ═══════════════
-function renderSnapBanner() {
-  const banner = document.getElementById('snapBanner');
-  if (!S.snapshot || S.migrationMode) { banner.classList.add('hidden'); return; }
-  banner.classList.remove('hidden');
-  document.getElementById('snapTs').textContent = new Date(S.snapshot.ts).toLocaleString();
-}
-function renderMigrationBanner() {
-  const banner = document.getElementById('migrationBanner');
-  banner.classList.toggle('hidden', !S.migrationMode);
+// ═══════ SKELETONS ═══════
+function skeletons(){
+  return Array(5).fill(0).map(()=>`<div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);padding:14px 18px;margin-bottom:6px;display:flex;gap:12px;align-items:center"><div class="skeleton" style="width:50%"></div><div class="skeleton" style="width:60px;margin-left:auto"></div><div class="skeleton" style="width:40px;height:22px;border-radius:11px"></div></div>`).join('');
 }
 
-// ═══════════════ SKELETONS ═══════════════
-function skeletons() {
-  return Array(5).fill(0).map(() => `
-    <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);padding:14px 18px;margin-bottom:6px;display:flex;gap:12px;align-items:center">
-      <div class="skeleton" style="width:50%"></div>
-      <div class="skeleton" style="width:60px;margin-left:auto"></div>
-      <div class="skeleton" style="width:40px;height:22px;border-radius:11px"></div>
-    </div>`).join('');
-}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-// ═══════════════ INIT ═══════════════
-// Show onboarding automatically on first visit (no stored org)
-if (!S.org && !localStorage.getItem('sfas_seen_onboarding')) {
-  // Wait for full DOM render before showing modal
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      showOnboarding();
-      localStorage.setItem('sfas_seen_onboarding', '1');
-    }, 400);
-  });
-}
-
-if (S.org?.accessToken) {
-  // Validate token age before auto-loading dashboard
-  // Implicit flow tokens last 2h (7200s); if older, show reconnect instead of failing
-  const elapsed = S.org.connectedAt ? Math.floor((Date.now() - S.org.connectedAt) / 1000) : 9999;
-  const tokenAge = elapsed;
-  if (tokenAge > 7000) {
-    // Token likely expired — go to landing with reconnect prompt
+// ═══════ INIT ═══════
+if(S.org?.accessToken){
+  const elapsed=S.org.connectedAt?Math.floor((Date.now()-S.org.connectedAt)/1000):9999;
+  if(elapsed>7000){
     document.getElementById('landing').classList.remove('hidden');
     checkPendingRevert();
-    // Show a soft reconnect notice
-    setTimeout(() => {
-      toast('Previous session expired — please reconnect', 'warn', 5000);
-      audit('⚠ stored session expired, showing reconnect', 'warn');
-    }, 500);
+    setTimeout(()=>toast('Previous session expired — please reconnect','warn',5000),500);
   } else {
+    document.getElementById('landing').classList.add('hidden');
     showDashboard();
-    const remaining = Math.max(0, 7200 - tokenAge);
-    startSessionWatcher(remaining);
+    startSessionWatcher(Math.max(0,7200-elapsed));
   }
 } else {
-  // Landing is visible by default, just check for pending revert
+  document.getElementById('landing').classList.remove('hidden');
   checkPendingRevert();
-}
+  if(!localStorage.getItem('sfas_seen_onboarding')){
+    window.addEventListener('load',()=>{setTimeout(()=>{showOnboarding();localStorage.setItem('sfas_seen_onboarding','1');},500);});
+  }
 }
 </script>
 </body>
