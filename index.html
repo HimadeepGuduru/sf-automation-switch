@@ -114,6 +114,9 @@ body{font-family:var(--body);background:var(--bg);color:var(--tx);min-height:100
 @keyframes pulse-b{0%,100%{border-color:rgba(244,63,94,0.25)}50%{border-color:rgba(244,63,94,0.5)}}
 .banner-blue{background:var(--blue2);border:1px solid rgba(59,130,246,0.25);color:var(--blue)}
 
+/* CORS BANNER APEX BLOCK */
+.cors-apex{font-family:var(--mono);font-size:11px;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);padding:10px 12px;white-space:pre;overflow-x:auto;line-height:1.7;color:var(--tx);position:relative;margin:0}
+
 /* OBJ LIST */
 .obj-list{display:flex;flex-direction:column;gap:6px}
 .obj-group{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);overflow:hidden}
@@ -311,6 +314,33 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
       <button class="btn" style="font-size:11px" onclick="showUndoModal()">↩ Undo changes</button>
       <button class="btn btn-ghost" style="font-size:11px" onclick="clearChangeStack()">✕</button>
     </div>
+  </div>
+
+  <!-- P0-1: CORS SETUP BANNER — shown when all counts are 0 after load with no active filter/search -->
+  <div id="corsBanner" class="banner banner-amber hidden" style="flex-direction:column;align-items:flex-start;gap:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+      <div style="display:flex;align-items:center;gap:8px;font-weight:600">
+        <span>⚠️</span> Getting 0 results? This usually means CORS isn't configured in this org.
+      </div>
+      <button class="btn btn-ghost" style="font-size:11px;flex-shrink:0" onclick="dismissCorsBanner()">✕ Dismiss</button>
+    </div>
+    <div style="font-size:12px;color:var(--amber);opacity:0.85">Run this in <strong>Anonymous Apex</strong> (Setup → Developer Console → Debug → Execute Anonymous), then click Refresh:</div>
+    <div style="position:relative;width:100%">
+      <pre id="corsApexSnippet" class="cors-apex">CorsWhitelistEntry cors = new CorsWhitelistEntry();
+cors.UrlPattern = 'https://himadeepguduru.github.io';
+insert cors;
+
+CspTrustedSite csp = new CspTrustedSite();
+csp.EndpointUrl = 'https://himadeepguduru.github.io';
+csp.EndpointName = 'SFAutomationSwitch';
+csp.Context = 'All';
+csp.IsActive = true;
+insert csp;
+
+System.debug('Done');</pre>
+      <button class="btn" style="position:absolute;top:6px;right:6px;font-size:10px;padding:3px 10px" onclick="copyCorsApex(this)">📋 Copy</button>
+    </div>
+    <div style="font-size:11px;color:var(--tx3)">Settings are per-org — run once in each org you connect to. Or open <button class="btn btn-ghost" style="font-size:11px;padding:2px 6px;display:inline-flex" onclick="showOnboarding()">📚 Setup guide</button> for step-by-step UI instructions.</div>
   </div>
 
   <div class="type-cards" id="typeCards"></div>
@@ -757,7 +787,10 @@ async function sfPatch(path,body){
 }
 
 // ═══════ LOAD AUTOMATIONS ═══════
+let _corsBannerDismissed = false;  // reset on each loadAutomations call
+
 async function loadAutomations(){
+  _corsBannerDismissed = false;  // re-show banner on each refresh so user sees it if still needed
   document.getElementById('btnRefresh').innerHTML='<span class="spinner"></span>';
   document.getElementById('objList').innerHTML=skeletons();
   S.automations=[];S.changeStack=[];renderUndoBar();
@@ -768,7 +801,7 @@ async function loadAutomations(){
     audit(`✓ Loaded ${S.automations.length} automations`,'ok');
     toast(`${S.automations.length} automations loaded`,'ok');
     rebuildChangeStackFromAudit();
-    renderTypeCards(); renderObjList();
+    renderTypeCards(); renderObjList(); renderCorsBanner();
     if(S._autoRevert&&S.snapshot){S._autoRevert=false;setTimeout(()=>{toast('Snapshot detected — opening revert…','warn',2000);setTimeout(showRevertModal,2000);},800);}
   }catch(e){audit(`Load error: ${e.message}`,'err');toast('Failed to load','err');document.getElementById('objList').innerHTML=`<div class="empty"><div class="empty-icon">⚠️</div><h4>Load failed</h4><p>${e.message}</p></div>`;}
   document.getElementById('btnRefresh').innerHTML='↻ Refresh';
@@ -1086,9 +1119,9 @@ function confirmAction(title,msg,diff,onOk){
 function setFilter(f,btn){
   S.filter=f;
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');renderObjList();
+  btn.classList.add('active');renderObjList();renderCorsBanner();
 }
-function applyFilters(){S.search=document.getElementById('searchInput').value.toLowerCase();renderObjList();}
+function applyFilters(){S.search=document.getElementById('searchInput').value.toLowerCase();renderObjList();renderCorsBanner();}
 function getFiltered(type){
   return S.automations.filter(a=>{
     if(a.type!==type) return false;
@@ -1189,6 +1222,31 @@ function renderSnapBanner(){
   document.getElementById('snapTs').textContent=new Date(S.snapshot.ts).toLocaleString();
 }
 function renderMigBanner(){document.getElementById('migBanner').classList.toggle('hidden',!S.migrationMode);}
+
+// P0-1: CORS banner — shown when load returns 0 automations with no active filter/search
+function renderCorsBanner(){
+  const el=document.getElementById('corsBanner');
+  if(!el) return;
+  // Only show when: not dismissed, 0 automations loaded, no filter/search active that could explain 0
+  const shouldShow = !_corsBannerDismissed
+    && S.automations.length === 0
+    && S.search === ''
+    && S.filter === 'all';
+  el.classList.toggle('hidden', !shouldShow);
+}
+function dismissCorsBanner(){
+  _corsBannerDismissed = true;
+  const el=document.getElementById('corsBanner');
+  if(el) el.classList.add('hidden');
+}
+function copyCorsApex(btn){
+  const text=document.getElementById('corsApexSnippet').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const orig=btn.textContent;
+    btn.textContent='✓ Copied';
+    setTimeout(()=>{btn.textContent=orig;},2000);
+  }).catch(()=>toast('Copy failed — select and copy manually','warn'));
+}
 
 function checkPendingRevert(){
   const alert=document.getElementById('pendingAlert');
