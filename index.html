@@ -240,6 +240,7 @@ input:checked~.tslider::before{transform:translateX(18px);background:var(--green
 <body>
 
 <nav class="topbar">
+  <a href="/" style="font-size:11px;color:var(--tx3);text-decoration:none;margin-right:4px;white-space:nowrap;display:flex;align-items:center;gap:3px" onmouseover="this.style.color='var(--tx2)'" onmouseout="this.style.color='var(--tx3)'">← OrgKit</a>
   <div class="logo">
     <div class="logo-mark">⚡</div>
     <span class="logo-name">SF Automation Switch</span>
@@ -689,6 +690,8 @@ function reconnectForRevert(){
     loginBase:stored.env||'https://login.salesforce.com',
     connectedAt:Date.now(),
   };
+  // OrgKit: write shared session for cross-tool access
+  try{localStorage.setItem('orgkit_v1',JSON.stringify({accessToken:S.org.accessToken,instanceUrl:S.org.instanceUrl,name:S.org.name,loginBase:S.org.loginBase,connectedAt:S.org.connectedAt}));}catch(e){}
   if(prevSnap) S.snapshot=prevSnap;
   saveState();
   audit(`✓ Connected: ${S.org.name}`,'ok');
@@ -709,6 +712,7 @@ function connectManual(){
   if(!inst||!tok){toast('Instance URL and token required','err');return;}
   if(!inst.startsWith('https://')){toast('URL must start with https://','err');return;}
   S.org={accessToken:tok,instanceUrl:inst,name:nick||inst,loginBase:'https://login.salesforce.com',connectedAt:Date.now()};
+  try{localStorage.setItem('orgkit_v1',JSON.stringify({accessToken:S.org.accessToken,instanceUrl:S.org.instanceUrl,name:S.org.name,loginBase:S.org.loginBase,connectedAt:S.org.connectedAt}));}catch(e){}
   saveState(); closeModal('manualModal');
   audit(`Manually connected: ${S.org.name}`,'ok'); toast('Connected!','ok');
   startSessionWatcher(7200); showDashboard();
